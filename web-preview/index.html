@@ -355,6 +355,20 @@ header.nav{
   margin-left:auto;border:1px solid var(--line);border-radius:var(--r-pill);padding:5px 9px;font:inherit;font-size:12px;
   color:var(--muted);background:#fff;
 }
+/* 拖拽换天 */
+.drag-handle{
+  flex:0 0 14px;text-align:center;color:var(--muted-2);font-size:13px;line-height:1;cursor:grab;
+  touch-action:none;user-select:none;-webkit-user-select:none;border-radius:6px;padding:4px 0;
+}
+.drag-handle:hover{color:var(--brand);background:var(--brand-soft)}
+.item.dragging{opacity:.3}
+body.dragging-active{cursor:grabbing}
+body.dragging-active .item,body.dragging-active .day-card{user-select:none}
+.day-card.drop-target{border-color:var(--brand);box-shadow:0 0 0 2px rgba(107,91,246,.28),var(--shadow-2)}
+.drag-ghost{
+  position:fixed;z-index:2000;pointer-events:none;transform:translate(-50%,-50%) rotate(1.2deg);
+  background:#fff;border:1px solid var(--line);border-radius:var(--r-md);box-shadow:0 18px 38px rgba(23,26,46,.24);opacity:.96;
+}
 .leg{
   display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);
   padding:5px 0 5px 62px;
@@ -1171,6 +1185,7 @@ const I18N={
   dayHeader:(n)=>`Day ${n} · 示例日期 `,concertDayBadge:"演唱会日",
   whyTitle:"为什么这样排：",connectLabel:"衔接：",
   aiWhyTitle:"AI 推荐（基于证据）：",aiWhySource:"来源：",
+  dragHint:"拖到其他天",
   legTransit:"实际路线",legWalk:"步行",legEstimate:"估算",legMinutes:(n)=>`${n} 分钟`,transfers:(n)=>` · 换乘 ${n} 次`,
   locked:"已锁定",moveTo:(n)=>`移到 Day ${n}`,onTheWay:"顺路",
   stayReasonSame:"全程同一家：离全程地点综合最近，并优先多线地铁。",
@@ -1262,6 +1277,7 @@ const I18N={
   dayHeader:(n)=>`Day ${n} · sample date `,concertDayBadge:"Concert day",
   whyTitle:"Why this order: ",connectLabel:"Connections: ",
   aiWhyTitle:"AI recommendation (evidence-based): ",aiWhySource:"Source: ",
+  dragHint:"Drag to another day",
   legTransit:"real route",legWalk:"walk",legEstimate:"estimate",legMinutes:(n)=>`${n} min`,transfers:(n)=>` · ${n} transfer${n>1?"s":""}`,
   locked:"locked",moveTo:(n)=>`Move to Day ${n}`,onTheWay:"on the way",
   stayReasonSame:"Same hotel throughout: closest to all places overall, with a preference for multi-line subway stations.",
@@ -1537,6 +1553,61 @@ function chooseHotel(points,{prevHotel,isConcertDay,isNightBefore,concertPoint,m
   });
   return best||STAYS[0];
 }
+/* ---------- 拖拽换天：把某天的一个地点拖到另一天 ---------- */
+let dragState=null;
+function clearDrag(){
+  if(!dragState)return;
+  if(dragState.ghost&&dragState.ghost.parentNode)dragState.ghost.parentNode.removeChild(dragState.ghost);
+  if(dragState.el)dragState.el.classList.remove("dragging");
+  document.querySelectorAll(".day-card.drop-target").forEach(c=>c.classList.remove("drop-target"));
+  document.body.classList.remove("dragging-active");
+  dragState=null;
+}
+function wireDrag(el){
+  el.addEventListener("pointerdown",ev=>{
+    if(ev.button!==undefined&&ev.button!==0)return;
+    if(ev.target.closest&&ev.target.closest("select"))return;
+    const isTouch=ev.pointerType==="touch";
+    const fromHandle=!!(ev.target.closest&&ev.target.closest(".drag-handle"));
+    if(isTouch&&!fromHandle)return;
+    dragState={el,key:el.dataset.item,id:ev.pointerId,startX:ev.clientX,startY:ev.clientY,active:false,ghost:null,targetDay:null};
+    try{el.setPointerCapture(ev.pointerId);}catch(_){}
+    if(fromHandle)ev.preventDefault();
+  });
+  el.addEventListener("pointermove",ev=>{
+    const st=dragState;if(!st||st.id!==ev.pointerId)return;
+    if(!st.active){
+      if(Math.hypot(ev.clientX-st.startX,ev.clientY-st.startY)<5)return;
+      st.active=true;document.body.classList.add("dragging-active");
+      const r=st.el.getBoundingClientRect();
+      const g=st.el.cloneNode(true);g.classList.add("drag-ghost");g.classList.remove("dragging");
+      g.style.width=r.width+"px";g.style.left=ev.clientX+"px";g.style.top=ev.clientY+"px";
+      document.body.appendChild(g);st.ghost=g;st.el.classList.add("dragging");
+    }
+    ev.preventDefault();
+    if(st.ghost){st.ghost.style.left=ev.clientX+"px";st.ghost.style.top=ev.clientY+"px";}
+    const under=document.elementFromPoint(ev.clientX,ev.clientY);
+    const card=under&&under.closest?under.closest(".day-card[data-daycard]"):null;
+    document.querySelectorAll(".day-card.drop-target").forEach(c=>c.classList.remove("drop-target"));
+    st.targetDay=null;
+    if(card){card.classList.add("drop-target");const n=Number(card.dataset.daycard);if(!Number.isNaN(n))st.targetDay=n;}
+  });
+  const end=ev=>{
+    const st=dragState;if(!st||st.id!==ev.pointerId)return;
+    const wasActive=st.active,to=st.targetDay,key=st.key;
+    clearDrag();
+    if(wasActive&&to!==null){
+      const [from,idx]=key.split(":").map(Number);
+      if(to!==from&&state.lastPlan&&state.lastPlan.buckets[from]){
+        const it=state.lastPlan.buckets[from].splice(idx,1)[0];
+        if(it){state.lastPlan.buckets[to].push(it);renderPlan(false);}
+      }
+    }
+  };
+  el.addEventListener("pointerup",end);
+  el.addEventListener("pointercancel",end);
+}
+
 function renderPlan(resetHotels){
   const {days,buckets,concertDay,overflow}=state.lastPlan;
   buckets.forEach(b=>b.sort((a,c)=>(a.time||"").localeCompare(c.time||"")));
@@ -1556,7 +1627,7 @@ function renderPlan(resetHotels){
     const sLines=stayField(chosen,"lines").map(lineName);
     const stationInfo=stayField(chosen,"station")?` · ${stayField(chosen,"station")}${sLines.length?"（"+sLines.join("/")+"）":""}`:"";
     const reason=t(mode==="same"?"stayReasonSame":mode==="concert"?"stayReasonConcert":"stayReasonNearby");
-    html+=`<div class="day-card"><h3>${t("dayHeader",d+1)}${d===concertDay?`<span class='badge high'>${t("concertDayBadge")}</span>`:""}</h3>`;
+    html+=`<div class="day-card" data-daycard="${d}"><h3>${t("dayHeader",d+1)}${d===concertDay?`<span class='badge high'>${t("concertDayBadge")}</span>`:""}</h3>`;
     const whyParts=items.filter(x=>x.place&&!x.locked).slice(0,2).map(x=>pAnswer(x.place));
     let routeWhy="";
     for(let i=0;i<items.length-1;i++){const a=items[i].place,b=items[i+1].place;if(a&&b&&!items[i+1].locked){const src=roughMinSource(a,b);const tag=t(src==="transit"?"legTransit":src==="walk-estimate"?"legWalk":"legEstimate");routeWhy+=t("routeLeg",dname(a.district),dname(b.district),roughMin(a,b),tag);}}
@@ -1569,7 +1640,8 @@ function renderPlan(resetHotels){
       const lowRisk=p.pool==="fan"&&p.conf==="low"?`<div class="risk-note">${t("riskLow")}</div>`:"";
       const img=PLACE_IMAGES[p.id];
       const thumb=`<span class="thumb">${img?`<img src="${img}" alt="" loading="lazy" onerror="this.style.display='none';this.parentNode.textContent='${TYPE_EMOJI[p.type]||"📍"}'">`:(TYPE_EMOJI[p.type]||"📍")}</span>`;
-      html+=`<div class="item">${thumb}<span class="item-main"><b style="font-weight:600">${esc(pname(p))}</b> ${tag}${x.locked?` <span class='badge dark'>${t("locked")}</span>`:""}<span class="time" style="margin-left:8px">${x.time}</span></span>`;
+      const canDrag=!x.locked&&days>1;
+      html+=`<div class="item${canDrag?" draggable":""}"${canDrag?` data-item="${d}:${i}"`:""}>${canDrag?`<span class="drag-handle" aria-hidden="true" title="${esc(t("dragHint"))}">⠿</span>`:""}${thumb}<span class="item-main"><b style="font-weight:600">${esc(pname(p))}</b> ${tag}${x.locked?` <span class='badge dark'>${t("locked")}</span>`:""}<span class="time" style="margin-left:8px">${x.time}</span></span>`;
       if(!x.locked&&days>1)html+=`<select data-move="${d}:${i}">${Array.from({length:days},(_,k)=>`<option value="${k}" ${k===d?"selected":""}>${t("moveTo",k+1)}</option>`).join("")}</select>`;
       html+=`</div>${lowRisk}`;
       const nx=items[i+1];
@@ -1600,6 +1672,7 @@ function renderPlan(resetHotels){
     const [from,idx]=sel.dataset.move.split(":").map(Number),to=Number(sel.value);if(to===from)return;
     const item=buckets[from].splice(idx,1)[0];buckets[to].push(item);renderPlan(false);
   }));
+  document.querySelectorAll(".item.draggable").forEach(wireDrag);
   setTimeout(()=>renderMap(),80);
 }
 
