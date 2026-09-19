@@ -1555,7 +1555,36 @@ function chooseHotel(points,{prevHotel,isConcertDay,isNightBefore,concertPoint,m
 }
 /* ---------- 拖拽换天：把某天的一个地点拖到另一天 ---------- */
 let dragState=null;
+let dragScrollRaf=0;
+function stopDragScroll(){if(dragScrollRaf){cancelAnimationFrame(dragScrollRaf);dragScrollRaf=0;}}
+function dragHighlight(x,y){
+  const st=dragState;if(!st)return;
+  const under=document.elementFromPoint(x,y);
+  const card=under&&under.closest?under.closest(".day-card[data-daycard]"):null;
+  document.querySelectorAll(".day-card.drop-target").forEach(c=>c.classList.remove("drop-target"));
+  st.targetDay=null;
+  if(card){card.classList.add("drop-target");const n=Number(card.dataset.daycard);if(!Number.isNaN(n))st.targetDay=n;}
+}
+/* 拖到窗口上/下边缘时自动滚动，方便把地点丢到看不见的那一天 */
+function startDragScroll(){
+  stopDragScroll();
+  const EDGE=90,MAX=16;
+  const step=()=>{
+    const st=dragState;
+    if(!st||!st.active){stopDragScroll();return;}
+    const h=window.innerHeight,y=st.lastY;
+    let dy=0;
+    if(typeof y==="number"){
+      if(y<EDGE)dy=-Math.ceil(MAX*(1-Math.max(0,y)/EDGE));
+      else if(y>h-EDGE)dy=Math.ceil(MAX*(1-Math.max(0,h-y)/EDGE));
+    }
+    if(dy){window.scrollBy(0,dy);dragHighlight(st.lastX,st.lastY);}
+    dragScrollRaf=requestAnimationFrame(step);
+  };
+  dragScrollRaf=requestAnimationFrame(step);
+}
 function clearDrag(){
+  stopDragScroll();
   if(!dragState)return;
   if(dragState.ghost&&dragState.ghost.parentNode)dragState.ghost.parentNode.removeChild(dragState.ghost);
   if(dragState.el)dragState.el.classList.remove("dragging");
@@ -1570,7 +1599,7 @@ function wireDrag(el){
     const isTouch=ev.pointerType==="touch";
     const fromHandle=!!(ev.target.closest&&ev.target.closest(".drag-handle"));
     if(isTouch&&!fromHandle)return;
-    dragState={el,key:el.dataset.item,id:ev.pointerId,startX:ev.clientX,startY:ev.clientY,active:false,ghost:null,targetDay:null};
+    dragState={el,key:el.dataset.item,id:ev.pointerId,startX:ev.clientX,startY:ev.clientY,lastX:ev.clientX,lastY:ev.clientY,active:false,ghost:null,targetDay:null};
     try{el.setPointerCapture(ev.pointerId);}catch(_){}
     if(fromHandle)ev.preventDefault();
   });
@@ -1583,14 +1612,12 @@ function wireDrag(el){
       const g=st.el.cloneNode(true);g.classList.add("drag-ghost");g.classList.remove("dragging");
       g.style.width=r.width+"px";g.style.left=ev.clientX+"px";g.style.top=ev.clientY+"px";
       document.body.appendChild(g);st.ghost=g;st.el.classList.add("dragging");
+      startDragScroll();
     }
     ev.preventDefault();
+    st.lastX=ev.clientX;st.lastY=ev.clientY;
     if(st.ghost){st.ghost.style.left=ev.clientX+"px";st.ghost.style.top=ev.clientY+"px";}
-    const under=document.elementFromPoint(ev.clientX,ev.clientY);
-    const card=under&&under.closest?under.closest(".day-card[data-daycard]"):null;
-    document.querySelectorAll(".day-card.drop-target").forEach(c=>c.classList.remove("drop-target"));
-    st.targetDay=null;
-    if(card){card.classList.add("drop-target");const n=Number(card.dataset.daycard);if(!Number.isNaN(n))st.targetDay=n;}
+    dragHighlight(ev.clientX,ev.clientY);
   });
   const end=ev=>{
     const st=dragState;if(!st||st.id!==ev.pointerId)return;
