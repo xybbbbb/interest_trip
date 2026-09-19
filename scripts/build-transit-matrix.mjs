@@ -22,7 +22,7 @@ import { fileURLToPath } from "node:url";
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, "..");
 const PREVIEW = path.join(ROOT, "web-preview", "index.html");
-const OUT = path.join(ROOT, "data", "transit-matrix.json");
+let OUT = path.join(ROOT, "data", "transit-matrix.json");
 
 const args = process.argv.slice(2);
 const FORCE = args.includes("--force");
@@ -32,13 +32,30 @@ const K = (() => {
 })();
 
 // 工作日上午 10 点（首尔时间）作为代表性时刻
-const QUERY_TIME = "2026-09-16T10:00:00+09:00";
-const TIME_LABEL = "weekday-10am";
+let QUERY_TIME = "2026-09-16T10:00:00+09:00";
+let TIME_LABEL = "weekday-10am";
+
+// 可选参数：换城市 / 换垂直线时，从 JSON 读地点、结果写到另一个文件
+const optVal = (name) => {
+  const i = args.indexOf(name);
+  return i >= 0 ? args[i + 1] : null;
+};
+const PLACES_FILE = optVal("--places");
+const ANCHOR_ID = optVal("--anchor");
+const DEMAND_FILE = optVal("--demand") || path.join(ROOT, "data", "transit-missing-pairs.json");
+if (optVal("--out")) OUT = optVal("--out");
+if (optVal("--time")) QUERY_TIME = optVal("--time");
+if (optVal("--time-label")) TIME_LABEL = optVal("--time-label");
 const UA =
   "InterestTravelPrototype/0.1 (personal travel planning prototype; https://github.com/xybbbbb)";
 
 /** 从 index.html 里读出 PLACES 数组 */
 async function readPlaces() {
+  if (PLACES_FILE) {
+    const raw = JSON.parse(await fs.readFile(PLACES_FILE, "utf8"));
+    const list = Array.isArray(raw) ? raw : raw.places;
+    return list.filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng));
+  }
   const html = await fs.readFile(PREVIEW, "utf8");
   const start = html.indexOf("const PLACES = [");
   if (start < 0) throw new Error("在 index.html 里找不到 const PLACES = [");
@@ -101,8 +118,10 @@ function pickPairs(places, k) {
     for (const { q } of nearest) add(p, q);
   }
 
-  // 2) 演唱会场馆 <-> 所有地点（P0 锚点）
-  const venue = places.find((p) => p.type === "venue");
+  // 2) 锚点（已预约、不可改的那个点）<-> 所有地点
+  const venue = ANCHOR_ID
+    ? places.find((p) => p.id === ANCHOR_ID)
+    : places.find((p) => p.type === "venue");
   if (venue) for (const p of places) add(venue, p);
 
   return pairs;
@@ -179,7 +198,7 @@ let pairs = pickPairs(places, K);
 // 按需补全（可选）：基准测试跑出来的"实际用到但没覆盖"的组合
 let demandAdded = 0;
 try {
-  const demand = JSON.parse(await fs.readFile(path.join(ROOT, "data", "transit-missing-pairs.json"), "utf8"));
+  const demand = JSON.parse(await fs.readFile(DEMAND_FILE, "utf8"));
   const merged = appendDemandPairs(pairs, places, demand);
   pairs = merged.pairs;
   demandAdded = merged.added;
@@ -202,12 +221,13 @@ console.log(`时间基准：${QUERY_TIME}（${TIME_LABEL}）\n`);
 const out = {
   ...existing,
   generatedAt: new Date().toISOString(),
-  source: "Transitous (MOTIS) — data: KTDB, Korail",
+  source: optVal("--source") || "Transitous (MOTIS) — data: KTDB, Korail",
   sourceUrl: "https://transitous.org/sources/",
   queryTime: QUERY_TIME,
   timeLabel: TIME_LABEL,
-  note:
-    "耗时来自 Transitous 免费公益接口；韩国数据源 KTDB 最后更新于 2025-05，个别线路时刻可能有偏差。",
+  note: PLACES_FILE
+    ? "耗时来自 Transitous 免费公益接口（MOTIS）。时刻取工作日 10:00 一次采样，个别线路可能有偏差。"
+    : "耗时来自 Transitous 免费公益接口；韩国数据源 KTDB 最后更新于 2025-05，个别线路时刻可能有偏差。",
   pairs: { ...existing.pairs },
 };
 
