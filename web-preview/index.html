@@ -1,0 +1,1799 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>兴趣旅行助手 · CORTIS × Seoul 流程原型</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--ink:#20221f;--muted:#6b7068;--line:#e5e1d8;--brand:#2f6f4f;--brand-soft:#e6f0e9;--high:#2f8f5b;--high-bg:#e4f4ea;--medium:#c07f12;--medium-bg:#fbf0d9;--low:#c2472f;--low-bg:#fbe8e2;--plain:#4a6fa5;--plain-bg:#e8eff9;--radius:16px;--shadow:0 8px 28px rgba(30,34,28,.08)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif;line-height:1.6}
+header{position:sticky;top:0;z-index:1000;background:rgba(246,244,239,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 20px;display:flex;align-items:center;gap:10px}
+.logo{width:32px;height:32px;border-radius:10px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700}
+.demo-badge{margin-left:auto;font-size:12px;color:var(--muted);border:1px solid var(--line);background:#fff;border-radius:999px;padding:2px 10px}
+main{max-width:1000px;margin:0 auto;padding:22px 16px 70px}
+.card-panel{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow);margin-top:18px}
+.card-panel h1{margin:0 0 6px;font-size:23px}
+.hint{color:var(--muted);font-size:14px;margin:0 0 14px}
+textarea{width:100%;min-height:92px;border:1px solid var(--line);border-radius:14px;padding:12px;font:inherit;resize:vertical}
+.btn-row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;align-items:center}
+.primary-btn{border:none;background:var(--brand);color:#fff;font-weight:600;padding:11px 20px;border-radius:13px;cursor:pointer;font-size:15px}
+.primary-btn:disabled{opacity:.55;cursor:not-allowed}
+.ghost-btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 15px;border-radius:12px;cursor:pointer;font-size:14px}
+.chip-btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 13px;cursor:pointer;font-size:13px}
+.chip-btn.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.bubbles{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+.bubble{max-width:90%;border-radius:16px;padding:11px 14px;font-size:14px;white-space:pre-line}
+.bubble.user{align-self:flex-end;background:var(--brand);color:#fff;border-bottom-right-radius:4px}
+.bubble.ai{align-self:flex-start;background:#efede6;border-bottom-left-radius:4px}
+.step-label{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;margin-bottom:8px}
+.green{background:var(--brand-soft);color:var(--brand)}
+.orange{background:var(--medium-bg);color:var(--medium)}
+.blue{background:var(--plain-bg);color:var(--plain)}
+.red{background:var(--low-bg);color:var(--low)}
+.pool{margin-top:22px}
+.pool-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.pool-title{font-size:17px;font-weight:700;margin:0 0 2px}
+.pool-sub{color:var(--muted);font-size:13px;margin:0 0 12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);position:relative;cursor:pointer}
+.card h3{margin:0 0 3px;font-size:15px}
+.tag{font-size:12px;color:var(--muted)}
+.meta{margin-top:8px;font-size:12px;color:var(--muted)}
+.badge{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;margin-left:3px}
+.badge.high{background:var(--high-bg);color:var(--high)}
+.badge.medium{background:var(--medium-bg);color:var(--medium)}
+.badge.low{background:var(--low-bg);color:var(--low)}
+.badge.plain{background:var(--plain-bg);color:var(--plain)}
+.badge.dark{background:#3c403a;color:#fff}
+.card-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.mini-btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:4px 10px;font-size:12px;cursor:pointer;white-space:nowrap}
+.mini-btn.must.on{background:#c2472f;border-color:#c2472f;color:#fff}
+.mini-btn.opt.on{background:var(--medium);border-color:var(--medium);color:#fff}
+.mini-btn.added{background:var(--brand);border-color:var(--brand);color:#fff}
+.q-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0}
+.q-field label{display:block;font-size:13px;font-weight:600;margin-bottom:5px}
+select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:11px;background:#fff;font:inherit}
+.lock-note{background:var(--high-bg);border-radius:12px;padding:9px 12px;font-size:13px;color:#1f5b3c;margin-bottom:8px}
+.plan{margin-top:8px}
+.day-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:14px;box-shadow:var(--shadow)}
+.day-card h3{margin:0 0 6px}
+.why{font-size:13px;color:var(--muted);background:#f4f1e9;border-radius:11px;padding:9px 12px;margin:6px 0 10px}
+.stay{border-radius:13px;padding:11px 13px;margin:10px 0;font-size:14px;background:var(--brand-soft)}
+.stay select{margin-top:6px}
+.stay b{color:var(--brand)}
+.items{display:grid;gap:6px}
+.item{display:flex;align-items:center;gap:8px;border-top:1px dashed var(--line);padding:8px 0;font-size:14px}
+.item:first-child{border-top:none}
+.item .time{color:var(--muted);font-variant-numeric:tabular-nums;min-width:46px}
+.item select{width:auto;padding:3px 7px;font-size:12px}
+.risk-note{font-size:12px;color:var(--low);margin-top:4px}
+.leg{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);background:#f7f5ef;border-left:3px solid var(--brand);border-radius:0 8px 8px 0;padding:4px 10px;margin:2px 0 2px 6px}
+.leg b{color:var(--brand);font-size:13px}
+.leg .src{background:var(--brand-soft);color:var(--brand);border-radius:8px;padding:1px 7px;font-size:11px;white-space:nowrap}
+.leg .lines{opacity:.8}
+.rest-note{font-size:13px;color:var(--muted);background:var(--plain-bg);border-radius:11px;padding:8px 12px;margin-top:8px}
+#map{height:420px;width:100%;border-radius:18px;border:1px solid var(--line);margin-top:14px;z-index:1}
+.map-tools{display:flex;gap:8px;margin:10px 0 0;flex-wrap:wrap}
+.map-tools .chip-btn.on{background:#3c403a;border-color:#3c403a;color:#fff}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.note{font-size:12px;color:var(--muted);margin-top:14px}
+.drawer-mask{position:fixed;inset:0;background:rgba(30,34,28,.35);z-index:900;display:none}
+.drawer{position:fixed;top:0;right:0;width:min(450px,94vw);height:100%;background:#fff;z-index:950;padding:26px 22px;overflow-y:auto;transform:translateX(105%);transition:transform .2s ease;border-left:1px solid var(--line)}
+.drawer.open{transform:translateX(0)}
+.drawer .close{position:absolute;top:14px;right:14px;border:1px solid var(--line);background:#fff;border-radius:999px;width:32px;height:32px;cursor:pointer;font-size:16px}
+.ev{border:1px solid var(--line);border-radius:13px;padding:12px;margin-top:10px;font-size:13px}
+.ev .src{font-weight:600}
+.ev .row{color:var(--muted);margin-top:4px;word-break:break-all}
+.ev .row b{color:var(--ink)}
+footer{max-width:1000px;margin:0 auto;padding:0 16px 30px;font-size:12px;color:var(--muted)}
+@media(max-width:640px){.card-actions{margin-top:8px}}
+</style>
+<!-- ============================================================
+     InterestTrip · Design System v2（UI 重做）
+     这一层叠在上面的旧样式之上：旧样式负责保底，v2 负责视觉。
+     配色取自参考图实测：#F6F7FE 底色 / #EEF0FF 淡紫面 / #6B5BF6 靛紫 / #3D8BFF 蓝 /
+     #2EC5A0 薄荷 / #F2A33C 琥珀 / #171A2E 深藏青文字。
+     ============================================================ -->
+<style id="design-v2">
+:root{
+  --bg:#F5F6FD; --bg-soft:#EEF0FF; --surface:#FFFFFF; --surface-2:#F8F9FE;
+  --ink:#171A2E; --ink-2:#3B4060; --muted:#767C99; --muted-2:#9AA0BB;
+  --line:rgba(23,26,46,.08); --line-2:rgba(23,26,46,.14);
+  --brand:#6B5BF6; --brand-2:#8C7CFF; --brand-soft:#EEF0FF; --brand-ink:#4B3FD1;
+  --blue:#3D8BFF; --cyan:#22C3D6; --mint:#2EC5A0; --amber:#F2A33C; --rose:#F2688C;
+  --high:#1E9E6A; --high-bg:#E6F7EF; --medium:#C4831A; --medium-bg:#FDF3E2; --low:#D3564B; --low-bg:#FDECEA;
+  --plain:#4A6FA5; --plain-bg:#EDF3FC;
+  --r-xl:28px; --r-lg:24px; --r-md:18px; --r-sm:12px; --r-pill:999px; --radius:20px;
+  --shadow-1:0 1px 2px rgba(23,26,46,.04), 0 10px 30px rgba(23,26,46,.06);
+  --shadow-2:0 2px 8px rgba(23,26,46,.06), 0 24px 60px rgba(23,26,46,.12);
+  --maxw:1160px;
+}
+html{scroll-behavior:smooth}
+body{
+  background:
+    radial-gradient(1100px 620px at 12% -8%, #EFE9FF 0%, rgba(239,233,255,0) 60%),
+    radial-gradient(900px 520px at 92% 4%, #E4F1FF 0%, rgba(228,241,255,0) 62%),
+    var(--bg);
+  color:var(--ink);
+  font-family:"Inter","Plus Jakarta Sans","Manrope",-apple-system,"Segoe UI",system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.62; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{letter-spacing:-0.015em;color:var(--ink);font-weight:700}
+p{margin:0 0 10px}
+a{color:var(--brand-ink);text-decoration:none}
+main{max-width:var(--maxw);margin:0 auto;padding:0 20px 40px}
+
+/* ---------- 导航 ---------- */
+header.nav{
+  position:sticky;top:0;z-index:1000;display:block;padding:0;
+  background:rgba(255,255,255,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
+}
+.nav-inner{max-width:var(--maxw);margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;color:var(--ink);letter-spacing:-0.02em}
+.brand-mark{
+  width:30px;height:30px;border-radius:10px;display:grid;place-items:center;color:#fff;font-size:15px;font-weight:700;
+  background:linear-gradient(140deg,var(--brand) 0%,var(--blue) 100%);box-shadow:0 6px 16px rgba(107,91,246,.32);
+}
+.brand-mark.has-logo{background:none;box-shadow:none;border-radius:0;width:auto;height:30px}
+.brand-mark img{height:30px;width:auto;max-width:132px;object-fit:contain;display:block}
+.brand-sub{font-size:11px;color:var(--muted);font-weight:500;margin-left:2px;letter-spacing:0}
+.nav-links{display:flex;gap:4px;margin-left:10px}
+.nav-links a{
+  padding:8px 13px;border-radius:var(--r-pill);font-size:14px;color:var(--ink-2);font-weight:500;
+  transition:background .18s ease,color .18s ease;
+}
+.nav-links a:hover{background:var(--brand-soft);color:var(--brand-ink)}
+.nav-links a.active{background:var(--brand-soft);color:var(--brand-ink);font-weight:600}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.icon-btn{
+  width:36px;height:36px;border-radius:var(--r-pill);border:1px solid var(--line);background:#fff;color:var(--ink-2);
+  display:grid;place-items:center;cursor:pointer;font-size:15px;transition:box-shadow .18s ease,transform .18s ease;
+}
+.icon-btn:hover{box-shadow:var(--shadow-1);transform:translateY(-1px)}
+
+/* ---------- Hero ---------- */
+.hero{
+  display:grid;grid-template-columns:1.05fr .95fr;gap:34px;align-items:center;
+  padding:54px 0 34px;
+}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;letter-spacing:.02em;
+  color:var(--brand-ink);background:var(--brand-soft);border-radius:var(--r-pill);padding:6px 13px;margin-bottom:16px;
+}
+.hero h1{font-size:clamp(30px,4.6vw,54px);line-height:1.06;margin:0 0 14px;font-weight:800}
+.hero h1 em{font-style:normal;background:linear-gradient(120deg,var(--brand) 10%,var(--blue) 90%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-sub{font-size:16px;color:var(--ink-2);max-width:560px;margin-bottom:22px}
+.search-box{
+  display:block;background:#fff;border:1px solid var(--line-2);border-radius:var(--r-lg);
+  padding:16px 16px 14px;box-shadow:var(--shadow-1);max-width:640px;
+}
+.search-box:focus-within{border-color:rgba(107,91,246,.45);box-shadow:0 0 0 4px rgba(107,91,246,.10),var(--shadow-1)}
+.search-box textarea{
+  border:0;outline:0;width:100%;font:inherit;font-size:15px;line-height:1.55;color:var(--ink);background:transparent;
+  min-height:78px;resize:vertical;display:block;
+}
+.search-box textarea::placeholder{color:var(--muted-2)}
+.search-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;flex-wrap:wrap}
+.search-hint{font-size:12.5px;color:var(--muted-2)}
+#send-btn.primary-btn{
+  border-radius:var(--r-pill);padding:13px 22px;white-space:nowrap;
+  background:linear-gradient(120deg,var(--brand) 0%,var(--blue) 100%);
+  box-shadow:0 10px 24px rgba(107,91,246,.28);
+}
+.cat-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.cat{
+  display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;color:var(--ink-2);
+  border-radius:var(--r-md);padding:9px 14px;font-size:13.5px;font-weight:500;cursor:pointer;
+  transition:transform .16s ease,box-shadow .16s ease,background .16s ease,border-color .16s ease;
+}
+.cat:hover{transform:translateY(-2px);box-shadow:var(--shadow-1)}
+.cat.on{background:var(--brand-soft);border-color:rgba(107,91,246,.32);color:var(--brand-ink);font-weight:600;box-shadow:0 10px 24px rgba(107,91,246,.16)}
+.hero-media{
+  position:relative;border-radius:var(--r-xl);overflow:hidden;min-height:340px;box-shadow:var(--shadow-2);
+  background:linear-gradient(150deg,#2A2350 0%,#3B4C8F 45%,#6B5BF6 100%);
+}
+.hero-media img{width:100%;height:100%;object-fit:cover;display:block;min-height:340px;opacity:.92}
+.hero-media::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(23,26,46,.05) 0%,rgba(23,26,46,.55) 100%);
+}
+.hero-badge{
+  position:absolute;left:18px;bottom:18px;right:18px;z-index:2;color:#fff;
+  background:rgba(17,19,38,.42);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.22);
+  border-radius:var(--r-md);padding:12px 15px;font-size:13px;
+}
+.hero-badge b{display:block;font-size:14.5px;margin-bottom:2px}
+
+/* ---------- 通用 section ---------- */
+.section{padding:40px 0 8px;scroll-margin-top:78px}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px}
+.section-title{font-size:clamp(22px,2.6vw,28px);margin:0}
+.section-sub{color:var(--muted);font-size:14px;margin:6px 0 0}
+
+/* ---------- Featured trips ---------- */
+.trip-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.trip-card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;
+  box-shadow:var(--shadow-1);cursor:pointer;transition:transform .2s ease,box-shadow .2s ease;display:flex;flex-direction:column;
+}
+.trip-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-2)}
+.trip-media{position:relative;height:150px;background:linear-gradient(140deg,#E9E6FF,#DCEEFF)}
+.trip-media img{width:100%;height:100%;object-fit:cover;display:block}
+.trip-media .trip-mark{
+  position:absolute;left:12px;top:12px;background:rgba(255,255,255,.92);border-radius:var(--r-pill);
+  padding:4px 11px;font-size:12px;font-weight:600;color:var(--brand-ink);
+}
+.trip-body{padding:16px 17px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
+.trip-body h3{margin:0;font-size:17.5px}
+.trip-body p{margin:0;color:var(--muted);font-size:13.5px;flex:1}
+.trip-foot{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.trip-tags{display:flex;gap:6px;flex-wrap:wrap}
+.trip-go{color:var(--brand);font-weight:600;font-size:13px;white-space:nowrap}
+
+/* ---------- 流程（沿用原有结构，换皮） ---------- */
+.card-panel,.pool,.day-card,.trip-card,.place-card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-1);
+}
+.card-panel{padding:24px;margin-bottom:18px}
+.card-panel h2{font-size:20px;margin:2px 0 10px}
+.hint{color:var(--muted);font-size:14px}
+/* #intent-input 是 hero 搜索框里的多行输入，样式见上面 .search-box textarea */
+.btn-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.primary-btn{
+  border:0;border-radius:var(--r-pill);padding:12px 20px;font:inherit;font-weight:600;font-size:14.5px;color:#fff;cursor:pointer;
+  background:linear-gradient(120deg,var(--brand) 0%,var(--blue) 100%);box-shadow:0 10px 24px rgba(107,91,246,.24);
+  transition:transform .16s ease,box-shadow .16s ease;
+}
+.primary-btn:hover{transform:translateY(-1px);box-shadow:0 14px 30px rgba(107,91,246,.30)}
+.primary-btn:disabled{opacity:.55;cursor:default;transform:none;box-shadow:none}
+.ghost-btn{
+  border:1px solid var(--line-2);background:#fff;color:var(--ink-2);border-radius:var(--r-pill);padding:12px 18px;
+  font:inherit;font-size:14.5px;font-weight:500;cursor:pointer;transition:background .16s ease;
+}
+.ghost-btn:hover{background:var(--surface-2)}
+.chip-btn{
+  border:1px solid var(--line);background:#fff;color:var(--ink-2);border-radius:var(--r-pill);
+  padding:7px 13px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:background .16s ease,color .16s ease;
+}
+.chip-btn:hover{background:var(--brand-soft);color:var(--brand-ink)}
+.chip-btn.on{background:var(--brand-soft);border-color:rgba(107,91,246,.32);color:var(--brand-ink);font-weight:600}
+.bubbles{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.bubble{
+  border-radius:var(--r-md);padding:13px 16px;font-size:14px;white-space:pre-line;max-width:min(90%,720px);
+}
+.bubble.user{align-self:flex-end;background:linear-gradient(120deg,var(--brand) 0%,var(--blue) 100%);color:#fff;border-bottom-right-radius:6px;box-shadow:0 10px 24px rgba(107,91,246,.22)}
+.bubble.ai{align-self:flex-start;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);border-bottom-left-radius:6px}
+.step-label{
+  display:inline-block;font-size:12px;font-weight:600;letter-spacing:.02em;border-radius:var(--r-pill);padding:5px 12px;
+  background:var(--brand-soft);color:var(--brand-ink);
+}
+.step-label.green{background:var(--high-bg);color:var(--high)}
+.step-label.orange{background:var(--medium-bg);color:var(--medium)}
+.step-label.blue{background:var(--plain-bg);color:var(--plain)}
+.pool{padding:22px;margin-bottom:18px}
+.pool-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.pool-sub{color:var(--muted);font-size:13.5px;margin:6px 0 0;max-width:760px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:6px}
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:15px 16px;cursor:pointer;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;display:flex;flex-direction:column;gap:7px;
+}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-2);border-color:rgba(107,91,246,.22)}
+.card h3{margin:0;font-size:16px}
+.card .tag{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.card .meta{font-size:12.5px;color:var(--muted-2)}
+.badge{
+  display:inline-flex;align-items:center;gap:4px;border-radius:var(--r-pill);padding:2px 9px;font-size:11.5px;font-weight:600;
+  background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line);
+}
+.badge.high{background:var(--high-bg);color:var(--high);border-color:transparent}
+.badge.medium{background:var(--medium-bg);color:var(--medium);border-color:transparent}
+.badge.low{background:var(--low-bg);color:var(--low);border-color:transparent}
+.badge.plain{background:var(--plain-bg);color:var(--plain);border-color:transparent}
+.badge.dark{background:var(--ink);color:#fff;border-color:transparent}
+.card-actions{display:flex;gap:7px;margin-top:auto;padding-top:6px}
+.mini-btn{
+  border:1px solid var(--line-2);background:#fff;color:var(--ink-2);border-radius:var(--r-pill);
+  padding:6px 13px;font:inherit;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .15s ease;
+}
+.mini-btn:hover{border-color:rgba(107,91,246,.4);color:var(--brand-ink)}
+.mini-btn.on{background:var(--brand-soft);border-color:rgba(107,91,246,.35);color:var(--brand-ink);font-weight:600}
+.mini-btn.added.on{background:var(--high-bg);border-color:transparent;color:var(--high)}
+.risk-note{
+  background:var(--medium-bg);color:var(--medium);border-radius:var(--r-sm);padding:7px 10px;font-size:12px;line-height:1.5;
+}
+.q-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:16px 0 18px}
+.q-field{display:flex;flex-direction:column;gap:6px}
+.q-field label{font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.q-field select{
+  border:1px solid var(--line-2);border-radius:var(--r-sm);padding:11px 12px;font:inherit;font-size:14px;
+  background:#fff;color:var(--ink);outline:0;
+}
+.q-field select:focus{border-color:rgba(107,91,246,.45);box-shadow:0 0 0 4px rgba(107,91,246,.09)}
+
+/* ---------- 行程 ---------- */
+.plan{scroll-margin-top:78px}
+.plan-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.plan-title{font-size:clamp(22px,2.6vw,28px);margin:0 0 6px}
+.plan-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:13px}
+.plan-actions{display:flex;gap:8px}
+.lock-note{
+  margin-top:14px;background:var(--brand-soft);border:1px solid rgba(107,91,246,.18);color:var(--brand-ink);
+  border-radius:var(--r-md);padding:11px 15px;font-size:13.5px;font-weight:500;
+}
+.day-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0 16px}
+.day-tab{
+  border:1px solid var(--line);background:#fff;border-radius:var(--r-pill);padding:8px 16px;font:inherit;font-size:13.5px;
+  font-weight:500;color:var(--ink-2);cursor:pointer;transition:all .16s ease;
+}
+.day-tab:hover{border-color:rgba(107,91,246,.3)}
+.day-tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.day-card{padding:20px 22px;margin-bottom:16px}
+.day-card h3{font-size:17px;margin:0 0 4px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.why{background:var(--surface-2);border-radius:var(--r-md);padding:11px 14px;font-size:13px;color:var(--muted);margin-top:10px}
+.stay{
+  display:block;margin:14px 0 6px;padding:13px 15px;border:1px solid var(--line);border-radius:var(--r-md);
+  background:linear-gradient(120deg,#FBFAFF 0%,#F4F7FF 100%);font-size:13.5px;
+}
+.stay select{
+  margin-top:9px;width:100%;border:1px solid var(--line-2);border-radius:var(--r-sm);padding:9px 11px;
+  font:inherit;font-size:13px;background:#fff;color:var(--ink);
+}
+.items{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.item{
+  display:flex;align-items:center;gap:12px;padding:10px 2px;border-bottom:1px dashed var(--line);
+}
+.item:last-child{border-bottom:0}
+.item .time{
+  font-variant-numeric:tabular-nums;font-weight:600;font-size:13.5px;color:var(--brand-ink);
+  background:var(--brand-soft);border-radius:var(--r-sm);padding:3px 9px;min-width:58px;text-align:center;
+}
+.item select{
+  margin-left:auto;border:1px solid var(--line);border-radius:var(--r-pill);padding:5px 9px;font:inherit;font-size:12px;
+  color:var(--muted);background:#fff;
+}
+.leg{
+  display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);
+  padding:5px 0 5px 62px;
+}
+.leg b{color:var(--ink-2)}
+.leg .src{background:var(--brand-soft);color:var(--brand-ink);border-radius:var(--r-pill);padding:1px 8px;font-size:11px;font-weight:600}
+.leg .lines{color:var(--muted-2);word-break:break-word}
+.rest-note{
+  margin-top:12px;background:var(--brand-soft);color:var(--brand-ink);border-radius:var(--r-md);
+  padding:11px 14px;font-size:13px;
+}
+.map-tools{display:flex;gap:8px;margin:18px 0 10px}
+#map{height:420px;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow-1)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:12px 0 0}
+.legend .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px}
+.place-card{
+  position:absolute;z-index:600;width:250px;overflow:hidden;display:none;box-shadow:var(--shadow-2);
+}
+.place-card.show{display:block;animation:pop .18s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.place-card img{width:100%;height:96px;object-fit:cover;display:block;background:linear-gradient(140deg,#E9E6FF,#DCEEFF)}
+.place-card .pc-body{padding:12px 13px}
+.place-card .pc-body h4{margin:0 0 3px;font-size:14.5px}
+.place-card .pc-body p{margin:6px 0 0;font-size:12.5px;color:var(--muted)}
+.place-card .pc-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);z-index:1500;
+  background:var(--ink);color:#fff;border-radius:var(--r-pill);padding:10px 18px;font-size:13.5px;
+  opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;box-shadow:var(--shadow-2);
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.item .thumb{
+  width:38px;height:38px;border-radius:12px;flex:0 0 38px;overflow:hidden;display:grid;place-items:center;
+  background:linear-gradient(140deg,#E9E6FF,#DCEEFF);font-size:16px;
+}
+.item .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.item .item-main{flex:1;min-width:0}
+.note{color:var(--muted);font-size:12.5px;line-height:1.7;margin-top:14px}
+
+/* ---------- 抽屉 ---------- */
+.drawer{
+  position:fixed;top:0;right:0;height:100%;width:min(440px,92vw);background:#fff;z-index:1200;
+  transform:translateX(102%);transition:transform .26s cubic-bezier(.22,.8,.3,1);overflow-y:auto;
+  box-shadow:-24px 0 60px rgba(23,26,46,.16);padding:22px 22px 40px;border-left:1px solid var(--line);
+}
+.drawer.open{transform:none}
+.drawer .close{
+  position:absolute;right:14px;top:12px;border:0;background:var(--surface-2);color:var(--ink-2);
+  width:32px;height:32px;border-radius:var(--r-pill);font-size:17px;cursor:pointer;
+}
+.drawer-mask{position:fixed;inset:0;background:rgba(23,26,46,.32);backdrop-filter:blur(2px);z-index:1100;display:none}
+.ev{border:1px solid var(--line);border-radius:var(--r-md);padding:13px 14px;margin-top:10px;background:var(--surface-2)}
+.ev .src{font-size:12px;font-weight:600;color:var(--brand-ink);margin-bottom:6px}
+.ev .row{font-size:12.5px;color:var(--muted);margin-top:5px;word-break:break-word}
+.ev .row b{color:var(--ink-2)}
+footer#site-footer{max-width:var(--maxw);margin:0 auto;padding:34px 20px 46px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)}
+
+/* ---------- 响应式 ---------- */
+@media(max-width:980px){
+  .hero{grid-template-columns:1fr;gap:24px;padding-top:34px}
+  .hero-media{min-height:240px;order:-1}
+  .hero-media img{min-height:240px}
+  .trip-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:760px){
+  .nav-links{display:none}
+  .nav-inner{padding:10px 14px}
+  main{padding:0 14px 30px}
+  .search-box{padding:6px 6px 6px 16px}
+  #send-btn.primary-btn{padding:12px 16px;font-size:13.5px}
+  .trip-grid{grid-template-columns:1fr}
+  .cards{grid-template-columns:1fr}
+  .q-grid{grid-template-columns:1fr}
+  .day-card{padding:16px}
+  .leg{padding-left:0}
+  .item{flex-wrap:wrap}
+  .item select{margin-left:0}
+  #map{height:320px}
+  .section{padding:28px 0 4px}
+  .card-panel{padding:18px}
+  .place-card{position:fixed;left:14px;right:14px;width:auto;bottom:16px;top:auto}
+}
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#home"><span class="brand-mark has-logo"><img id="brand-logo" alt="InterestTrip" src="data:image/png;base64,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"></span>InterestTrip<span class="brand-sub" data-i18n="appName">兴趣旅行助手</span></a>
+    <nav class="nav-links">
+      <a href="#home" class="active" data-i18n="navHome">首页</a>
+      <a href="#explore" data-i18n="navExplore">灵感</a>
+      <a href="#create" data-i18n="navCreate">创建行程</a>
+      <a href="#about" data-i18n="navAbout">关于</a>
+    </nav>
+    <div class="nav-right">
+      <button class="icon-btn" id="nav-search" title="Search" data-i18n-title="navSearch">🔍</button>
+      <button class="icon-btn" id="nav-saved" title="Saved places" data-i18n-title="navSaved">♡</button>
+      <button class="chip-btn" id="lang-toggle">EN</button>
+    </div>
+  </div>
+</header>
+<main>
+  <!-- ===== Hero ===== -->
+  <section class="hero" id="home">
+    <div class="hero-copy">
+      <span class="eyebrow" data-i18n="heroEyebrow">✦ AI travel assistant</span>
+      <h1><span data-i18n="heroTitleA">Turn what you love</span> <em data-i18n="heroTitleB">into where you go.</em></h1>
+      <p class="hero-sub" data-i18n="heroSub">An AI travel assistant that plans meaningful trips around your interests — an artist, a film, a café, an outdoor route — and still leaves room for an ordinary holiday.</p>
+      <div class="search-box">
+        <textarea id="intent-input" rows="3" data-i18n-ph="intentPlaceholder" placeholder="What are you interested in?"></textarea>
+        <div class="search-actions">
+          <span class="search-hint" data-i18n="searchHint">可以写一整句话，比如“我想去看演唱会，也想去他们去过的地方”</span>
+          <button class="primary-btn" id="send-btn" data-i18n="send">发送给 AI</button>
+        </div>
+      </div>
+      <div class="cat-row" id="cat-row">
+        <button class="cat on" data-cat="fandom">⭐ <span data-i18n="catFandom">粉丝 / 演出</span></button>
+        <button class="cat" data-cat="film">🎬 <span data-i18n="catFilm">影视取景</span></button>
+        <button class="cat" data-cat="food">🍴 <span data-i18n="catFood">美食</span></button>
+        <button class="cat" data-cat="cafe">☕ <span data-i18n="catCafe">咖啡馆</span></button>
+        <button class="cat" data-cat="hike">⛰ <span data-i18n="catHike">徒步 / 户外</span></button>
+        <button class="cat" data-cat="more">＋ <span data-i18n="catMore">更多</span></button>
+      </div>
+      <p class="note" id="cat-note" data-i18n="catNote">演示数据目前只有 CORTIS × Seoul 这条垂直线；其他兴趣会走同一套流程（发现 → 选点 → 生成）。</p>
+      <div id="restore-bar" style="display:none;margin-top:10px"></div>
+      <div class="btn-row"><button class="ghost-btn" id="reset-btn" data-i18n="reset">重新开始</button></div>
+      <div class="bubbles" id="bubbles"></div>
+    </div>
+    <div class="hero-media">
+      <img id="hero-img" alt="Seoul at night" loading="lazy"
+           src="https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&amp;parentSn=72614&amp;fileTy=MEDIA&amp;fileNo=1&amp;thumbTy=M" />
+      <div class="hero-badge">
+        <b data-i18n="heroBadgeTitle">CORTIS × Seoul · 首个垂直线</b>
+        <span data-i18n="heroBadgeText">演唱会 + 同款地点 + 普通首尔观光，排进同一份可行行程</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Featured trips ===== -->
+  <section class="section" id="explore">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title" data-i18n="featuredTitle">Featured Trips</h2>
+        <p class="section-sub" data-i18n="featuredSub">同一个引擎可以做很多种“为兴趣而旅行”——下面是第一个完成品和两个方向示例。</p>
+      </div>
+    </div>
+    <div class="trip-grid">
+      <article class="trip-card" data-trip="cortis">
+        <div class="trip-media">
+          <img alt="Namsan Seoul Tower" loading="lazy"
+               src="https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&amp;parentSn=68273&amp;fileTy=MEDIA&amp;fileNo=3&amp;thumbTy=M" />
+          <span class="trip-mark" data-i18n="tripTagLive">可体验</span>
+        </div>
+        <div class="trip-body">
+          <h3>CORTIS × Seoul</h3>
+          <p data-i18n="trip1Desc">演唱会 + 成员同款地点 + 普通首尔观光，按真实公交耗时排进一份 2–7 天行程。</p>
+          <div class="trip-foot">
+            <div class="trip-tags"><span class="badge plain" data-i18n="catFandomShort">粉丝</span><span class="badge plain">Seoul</span><span class="badge plain">Concert</span></div>
+            <span class="trip-go" data-i18n="tripGo">开始 →</span>
+          </div>
+        </div>
+      </article>
+      <article class="trip-card" data-trip="film">
+        <div class="trip-media" style="display:grid;place-items:center;font-size:34px;background:linear-gradient(140deg,#E9E6FF,#DCEEFF)">🎬</div>
+        <div class="trip-body">
+          <h3 data-i18n="trip2Title">《繁花》上海取景路线</h3>
+          <p data-i18n="trip2Desc">同样的流程换一个兴趣：影视取景地 + 城市漫步，行程逻辑完全复用。</p>
+          <div class="trip-foot">
+            <div class="trip-tags"><span class="badge plain" data-i18n="catFilmShort">影视</span><span class="badge plain">Shanghai</span></div>
+            <span class="trip-go" data-i18n="tripConcept">方向示例</span>
+          </div>
+        </div>
+      </article>
+      <article class="trip-card" data-trip="hike">
+        <div class="trip-media" style="display:grid;place-items:center;font-size:34px;background:linear-gradient(140deg,#E4F7EF,#E6F4FF)">⛰</div>
+        <div class="trip-body">
+          <h3 data-i18n="trip3Title">济州岛徒步之旅</h3>
+          <p data-i18n="trip3Desc">把“兴趣”换成户外路线：徒步段、休息点与住宿推荐用同一套约束求解。</p>
+          <div class="trip-foot">
+            <div class="trip-tags"><span class="badge plain" data-i18n="catHikeShort">徒步</span><span class="badge plain">Jeju</span></div>
+            <span class="trip-go" data-i18n="tripConcept">方向示例</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===== Create trip ===== -->
+  <section class="section" id="create">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title" data-i18n="createTitle">Create Your Trip</h2>
+        <p class="section-sub" data-i18n="createSub">告诉我们你的兴趣和目的地，我们把“兴趣相关的地点”和“普通旅行”揉成一份能真的走完的行程。</p>
+      </div>
+    </div>
+
+  <section id="reasoning" style="display:none">
+    <div class="card-panel">
+      <span class="step-label green" data-i18n="reasonLabel">AI 已理解 · 处理优先级</span>
+      <h2 style="margin:4px 0 12px" data-i18n="reasonTitle">系统按这个顺序规划</h2>
+      <div style="display:grid;gap:8px">
+        <div style="background:var(--high-bg);border-radius:13px;padding:10px 13px;font-size:14px"><b data-i18n="p0Title">P0 · 演唱会（已锁定）</b><br/><span style="color:var(--muted);font-size:13px" data-i18n="p0Desc">演出日晚上不再排行程，前后留出交通、吃饭与休息。</span></div>
+        <div style="background:var(--medium-bg);border-radius:13px;padding:10px 13px;font-size:14px"><b data-i18n="p1Title">P1 · CORTIS 相关地点</b><br/><span style="color:var(--muted);font-size:13px" data-i18n="p1Desc">从社交媒体/粉丝社区收集，每条带来源与可信度；低置信度会提示“顺路再去”。</span></div>
+        <div style="background:var(--plain-bg);border-radius:13px;padding:10px 13px;font-size:14px"><b data-i18n="p2Title">P2 · 首尔观光</b><br/><span style="color:var(--muted);font-size:13px" data-i18n="p2Desc">官方观光点用于调剂，不让旅行变成纯打卡。</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pools" style="display:none">
+    <div class="pool">
+      <div class="pool-head">
+        <div><span class="step-label orange" data-i18n="poolFanLabel">P1 · CORTIS 相关地点（候选）</span>
+        <p class="pool-sub" data-i18n="poolFanSub">10 条真实 CORTIS 同款地点（来自你整理的资料，含来源链接）；点卡片查看证据链，再给地点标“必去”或“顺路再去”。</p></div>
+        <button class="chip-btn" id="filter-low">隐藏低置信度：关</button>
+      </div>
+      <div class="cards" id="fan-cards"></div>
+    </div>
+    <div class="pool">
+      <span class="step-label blue" data-i18n="poolSightLabel">P2 · 首尔观光（可选）</span>
+      <p class="pool-sub" data-i18n="poolSightSub">来自 VisitSeoul 官方 API 的真实地点；此处精选 14 处（明洞 / 东大门 / 梨泰院 / 弘大 / 汉江夜景等），完整数据已存入项目文件。</p>
+      <div class="cards" id="sight-cards"></div>
+    </div>
+  </section>
+
+  <section class="card-panel" id="questions" style="display:none">
+    <span class="step-label green" data-i18n="qLabel">确认约束</span>
+    <h2 style="margin:4px 0 2px" data-i18n="qTitle">告诉我日期、预算与住宿偏好</h2>
+    <p class="hint" data-i18n="qHint">这些是“硬约束”，路线会围着它们排（演示中日期为示例）。</p>
+    <div class="q-grid">
+      <div class="q-field"><label data-i18n="lblDays">玩几天</label><select id="days-select"><option value="2" data-i18n="days2">2 天</option><option value="3" selected data-i18n="days3">3 天</option><option value="4" data-i18n="days4">4 天</option><option value="5" data-i18n="days5">5 天</option><option value="6" data-i18n="days6">6 天</option><option value="7" data-i18n="days7">7 天</option></select></div>
+      <div class="q-field"><label data-i18n="lblConcertDay">演唱会第几天</label><select id="concert-select"><option value="0" data-i18n="dayOption1">第 1 天</option><option value="1" selected data-i18n="dayOption2">第 2 天</option><option value="2" data-i18n="dayOption3">第 3 天</option></select></div>
+      <div class="q-field"><label data-i18n="lblPace">节奏</label><select id="pace-select"><option value="relaxed" data-i18n="paceRelaxed">宽松</option><option value="normal" selected data-i18n="paceNormal">适中</option><option value="busy" data-i18n="paceBusy">紧凑</option></select></div>
+      <div class="q-field"><label data-i18n="lblBudget">预算档位</label><select id="budget-select"><option value="budget" data-i18n="budgetLow">经济</option><option value="comfort" selected data-i18n="budgetMid">舒适</option><option value="premium" data-i18n="budgetHigh">高品质</option></select></div>
+      <div class="q-field"><label data-i18n="lblArrival">第一天到达</label><select id="arrival-select"><option value="morning" data-i18n="arrMorning">上午</option><option value="noon" selected data-i18n="arrNoon">中午</option><option value="afternoon" data-i18n="arrAfternoon">下午</option><option value="evening" data-i18n="arrEvening">晚上</option></select></div>
+      <div class="q-field"><label data-i18n="lblDeparture">最后一天离开</label><select id="departure-select"><option value="morning" data-i18n="depMorning">早上</option><option value="noon" selected data-i18n="depNoon">中午</option><option value="afternoon" data-i18n="depAfternoon">下午</option><option value="evening" data-i18n="depEvening">晚上</option></select></div>
+      <div class="q-field"><label data-i18n="lblStay">住宿策略</label><select id="stay-mode"><option value="nearby" selected data-i18n="stayNearby">每晚就近换（含演唱会就近）</option><option value="same" data-i18n="staySame">全程同一家（省心）</option><option value="concert" data-i18n="stayConcert">演唱会周边优先</option></select></div>
+    </div>
+    <button class="primary-btn" id="plan-btn" data-i18n="planBtn">生成路线与住宿推荐</button>
+  </section>
+
+  <!-- ===== Itinerary ===== -->
+  <section class="section plan" id="itinerary">
+  <section class="card-panel plan" id="plan" style="display:none">
+    <div class="plan-head">
+      <div>
+        <h2 class="plan-title" data-i18n="planTitle">你的首尔兴趣之旅</h2>
+        <div class="plan-meta">
+          <span id="plan-dates" data-i18n="planDates">示例日期 · 3 天</span>
+          <span class="badge plain" data-i18n="planTagFandom">粉丝 + 旅行</span>
+          <span class="badge plain">CORTIS × Seoul</span>
+          <span class="badge plain" data-i18n="planTagEvidence">带证据与置信度</span>
+        </div>
+      </div>
+      <div class="plan-actions">
+        <button class="chip-btn" id="plan-edit" data-i18n="planEdit">编辑</button>
+        <button class="chip-btn" id="plan-save" data-i18n="planSave">保存</button>
+        <button class="chip-btn" id="plan-share" data-i18n="planShare">分享</button>
+      </div>
+    </div>
+    <p class="pool-sub" data-i18n="planSub">路线默认显示全部行程总览（深色连贯线）；可切换“按天分开”看每天不同颜色。紫色图钉是可选酒店，红点粉丝、蓝点观光，低置信度用⚠标出。</p>
+    <div id="constraint-summary" class="lock-note"></div>
+    <div class="day-tabs" id="day-tabs"></div>
+    <div id="plan-days"></div>
+    <div class="section-head" style="margin:26px 0 0">
+      <div>
+        <h3 class="section-title" style="font-size:20px" data-i18n="mapTitle">你的兴趣地图</h3>
+        <p class="section-sub" data-i18n="mapSub">点任意图钉查看地点卡片：来源、置信度、为什么推荐；地图可以按天拆分查看。</p>
+      </div>
+    </div>
+    <div class="map-tools">
+      <button class="chip-btn on" id="mode-all">全部行程总览</button>
+      <button class="chip-btn" id="mode-day">按天分开</button>
+    </div>
+    <div style="position:relative">
+      <div id="map"></div>
+      <div class="place-card" id="place-card"></div>
+    </div>
+    <div class="legend"><span><span class="dot" style="background:#c2472f"></span>粉丝地点</span><span><span class="dot" style="background:#4a6fa5"></span>观光点</span><span><span class="dot" style="background:#6d3fa5"></span>酒店</span><span>虚线为当日示意连线</span></div>
+    <p class="note" id="plan-note">路线由确定性排程引擎生成：地理聚类分天 + 最近邻排序 + 2-opt 优化，同一区域尽量放在同一天。住宿评分 = 当天路线总通勤 + 地铁线路数 + 换酒店打车距离（25 分钟内优先）；<b>次日有演唱会时，优先住场馆附近为最高优先级</b>。P1 粉丝地点已接入真实调研数据（部分坐标为区域/站点级，待人工核验）；<b>“多久到”来自 Transitous 的真实公共交通路线</b>（未覆盖的组合会标注为“估算”）；酒店仍为演示数据；P2 观光点为 VisitSeoul 官方真实数据（2026-09-10 抓取）。</p>
+  </section>
+  </section>
+</main>
+<section class="section" id="about" style="max-width:var(--maxw);margin:0 auto;padding:34px 20px 10px;scroll-margin-top:78px">
+  <div class="section-head">
+    <div>
+      <h2 class="section-title" data-i18n="aboutTitle">How it works</h2>
+      <p class="section-sub" data-i18n="aboutSub">从兴趣出发，而不是从目的地出发——这是这个产品的核心。</p>
+    </div>
+  </div>
+  <div class="trip-grid">
+    <article class="trip-card" style="cursor:default">
+      <div class="trip-body">
+        <h3 data-i18n="about1Title">① 兴趣 → 地点</h3>
+        <p data-i18n="about1Desc">从一个兴趣（艺人、影视、美食、徒步）出发，找到与之相关的地点，每条都带来源与置信度。</p>
+      </div>
+    </article>
+    <article class="trip-card" style="cursor:default">
+      <div class="trip-body">
+        <h3 data-i18n="about2Title">② 我来选，系统来排</h3>
+        <p data-i18n="about2Desc">你只负责"想去哪些"，排程交给确定性引擎：地理聚类分天、最近邻 + 2-opt 排序、真实公交耗时与硬约束。</p>
+      </div>
+    </article>
+    <article class="trip-card" style="cursor:default">
+      <div class="trip-body">
+        <h3 data-i18n="about3Title">③ 兴趣 + 普通旅行</h3>
+        <p data-i18n="about3Desc">官方观光点与粉丝地点混排，行程里既有同款打卡，也有正常的城市漫步——兴趣是加分项，不是全部。</p>
+      </div>
+    </article>
+    <article class="trip-card" style="cursor:default">
+      <div class="trip-body">
+        <h3 data-i18n="about4Title">④ 说得清的数据来源</h3>
+        <p data-i18n="about4Desc">观光点来自 VisitSeoul 官方 API（含官方英文名）；耗时来自 Transitous 真实公交；粉丝地点取自公开资料并保留原始链接。</p>
+      </div>
+    </article>
+  </div>
+</section>
+<div class="drawer-mask" id="drawer-mask"></div>
+<aside class="drawer" id="drawer"><button class="close" id="drawer-close">×</button><div id="drawer-body"></div></aside>
+<footer id="site-footer">© 2026 Interest-Driven Travel Assistant · P1 粉丝地点来自用户整理的真实资料（含来源链接，部分坐标待核验）；P2 观光点来自 VisitSeoul 官方 API；站点间耗时来自 <a href="https://transitous.org/sources/" target="_blank" rel="noreferrer">Transitous</a>（源数据 KTDB / OpenStreetMap）；酒店仍为演示数据。</footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/**
+ * 确定性排程引擎（原型版）：
+ *   1. k-means 地理聚类：把地点按位置分到不同天，避免东跑西跑
+ *   2. 最近邻 + 2-opt：给每天的点排序，尽量减少路程
+ *   3. 演唱会日约束：P0 锁定 19:00，超出时间的点自动移到其他天
+ *   4. 酒店推荐：选离当天行程总距离最近的住宿区域
+ *
+ * 所有计算都是确定性规则，不依赖 AI 生成，方便测试和解释。
+ *
+ * 站点间耗时：优先读取下方 TRANSIT_MATRIX（由 scripts/build-transit-matrix.mjs 生成，
+ * 数据来自 Transitous 免费公益接口，源数据 KTDB / OpenStreetMap）；矩阵里没有的组合
+ * 才退回"直线距离 × 系数"的粗略估算。矩阵由 scripts/apply-transit-to-preview.mjs 注入。
+ */
+// >>> TRANSIT_MATRIX
+const TRANSIT_MATRIX = {"generatedAt":"2026-09-14T05:04:37.417Z","queryTime":"2026-09-16T10:00:00+09:00","source":"Transitous (MOTIS) — data: KTDB, Korail","sourceUrl":"https://transitous.org/sources/","note":"耗时来自 Transitous 免费公益接口；韩国数据源 KTDB 最后更新于 2025-05，个别线路时刻可能有偏差。","pairs":{"demo-concert-001|vs-CNP016328":{"ok":true,"minutes":29,"transfers":1,"mode":"transit","modes":["TRAM:30-5","TRAM:333"]},"cortis-003|demo-concert-001":{"ok":true,"minutes":37,"transfers":1,"mode":"transit","modes":["TRAM:3216","TRAM:3411"]},"cortis-004|demo-concert-001":{"ok":true,"minutes":28,"transfers":1,"mode":"transit","modes":["SUBWAY:서울9호선","TRAM:30-5"]},"cortis-001|cortis-006":{"ok":true,"minutes":20,"transfers":0,"mode":"transit","modes":["TRAM:100"]},"cortis-001|cortis-008":{"ok":true,"minutes":20,"transfers":0,"mode":"transit","modes":["TRAM:100"]},"cortis-001|vs-CNP002220":{"ok":true,"minutes":28,"transfers":0,"mode":"transit","modes":["TRAM:3012"]},"cortis-002|vs-CNP2ts0gq":{"ok":true,"minutes":14,"transfers":0,"mode":"transit","modes":["TRAM:273"]},"cortis-002|vs-CNP012993":{"ok":true,"minutes":19,"transfers":2,"mode":"transit","modes":["TRAM:3400","SUBWAY:서울6호선","SUBWAY:서울5호선"]},"cortis-002|cortis-008":{"ok":true,"minutes":25,"transfers":2,"mode":"transit","modes":["TRAM:3400","SUBWAY:서울6호선","TRAM:150"]},"cortis-003|cortis-007":{"ok":true,"minutes":18,"transfers":0,"mode":"transit","modes":["TRAM:2016"]},"cortis-003|vs-CNPouf85a":{"ok":true,"minutes":26,"transfers":2,"mode":"transit","modes":["SUBWAY:서울7호선","SUBWAY:서울2호선","TRAM:2413"]},"cortis-003|cortis-004":{"ok":true,"minutes":19,"transfers":1,"mode":"transit","modes":["SUBWAY:서울7호선","TRAM:301"]},"cortis-004|vs-CNPnj8f9x":{"ok":true,"minutes":5,"transfers":0,"mode":"walk-estimate","modes":["WALK"]},"cortis-004|vs-CNPouf85a":{"ok":true,"minutes":24,"transfers":2,"mode":"transit","modes":["SUBWAY:서울9호선","SUBWAY:수인분당선","TRAM:2014"]},"cortis-004|vs-CNP016328":{"ok":true,"minutes":21,"transfers":1,"mode":"transit","modes":["TRAM:2415","TRAM:333"]},"cortis-005|cortis-009":{"ok":true,"minutes":16,"transfers":1,"mode":"transit","modes":["SUBWAY:서울3호선","SUBWAY:경의중앙선"]},"cortis-005|vs-CNP002077":{"ok":true,"minutes":18,"transfers":1,"mode":"transit","modes":["SUBWAY:서울3호선","SUBWAY:서울6호선"]},"cortis-005|vs-CNPouf85a":{"ok":true,"minutes":24,"transfers":0,"mode":"transit","modes":["TRAM:148"]},"cortis-006|cortis-008":{"ok":true,"minutes":3,"transfers":0,"mode":"walk-estimate","modes":["WALK"]},"cortis-006|vs-CNP002220":{"ok":true,"minutes":20,"transfers":0,"mode":"transit","modes":["TRAM:502"]},"cortis-007|vs-CNPouf85a":{"ok":true,"minutes":18,"transfers":0,"mode":"transit","modes":["TRAM:2224"]},"cortis-004|cortis-007":{"ok":true,"minutes":27,"transfers":0,"mode":"transit","modes":["TRAM:2413"]},"cortis-008|vs-CNP002220":{"ok":true,"minutes":17,"transfers":0,"mode":"transit","modes":["TRAM:502"]},"cortis-009|vs-CNP002077":{"ok":true,"minutes":16,"transfers":0,"mode":"transit","modes":["TRAM:421"]},"cortis-009|vs-CNPouf85a":{"ok":true,"minutes":29,"transfers":2,"mode":"transit","modes":["SUBWAY:경의중앙선","SUBWAY:수인분당선","TRAM:2224"]},"cortis-010|vs-CNP2ts0gq":{"ok":true,"minutes":46,"transfers":1,"mode":"transit","modes":["SUBWAY:김포도시철도","SUBWAY:공항철도"]},"cortis-002|cortis-010":{"ok":true,"minutes":37,"transfers":1,"mode":"transit","modes":["TRAM:5714","TRAM:G6005"]},"cortis-010|vs-CNP012993":{"ok":true,"minutes":42,"transfers":2,"mode":"transit","modes":["SUBWAY:김포도시철도","SUBWAY:공항철도","SUBWAY:서울5호선"]},"vs-CNP000067|vs-CNP015338":{"ok":true,"minutes":3,"transfers":0,"mode":"walk-estimate","modes":["WALK"]},"vs-CNP000036|vs-CNP000067":{"ok":true,"minutes":23,"transfers":1,"mode":"transit","modes":["TRAM:02","TRAM:105"]},"vs-CNP000067|vs-CNP037008":{"ok":true,"minutes":15,"transfers":1,"mode":"transit","modes":["SUBWAY:서울4호선","SUBWAY:서울3호선"]},"vs-CNP015338|vs-CNP037008":{"ok":true,"minutes":14,"transfers":0,"mode":"transit","modes":["TRAM:140"]},"vs-CNP000286|vs-CNP015338":{"ok":true,"minutes":13,"transfers":1,"mode":"transit","modes":["TRAM:173","TRAM:G8110"]},"vs-CNP000061|vs-CNP024679":{"ok":true,"minutes":3,"transfers":0,"mode":"walk-estimate","modes":["WALK"]},"vs-CNP000061|vs-CNP000286":{"ok":true,"minutes":13,"transfers":0,"mode":"transit","modes":["TRAM:261"]},"vs-CNP000061|vs-CNP037008":{"ok":true,"minutes":15,"transfers":1,"mode":"transit","modes":["TRAM:01A","SUBWAY:서울3호선"]},"vs-CNP000286|vs-CNP024679":{"ok":true,"minutes":11,"transfers":0,"mode":"transit","modes":["TRAM:04"]},"vs-CNP024679|vs-CNP037008":{"ok":true,"minutes":16,"transfers":1,"mode":"transit","modes":["SUBWAY:서울2호선","SUBWAY:서울3호선"]},"vs-CNP000036|vs-CNP002077":{"ok":true,"minutes":27,"transfers":3,"mode":"transit","modes":["TRAM:04","TRAM:402","TRAM:용산02","SUBWAY:서울6호선"]},"cortis-008|vs-CNP002077":{"ok":true,"minutes":13,"transfers":1,"mode":"transit","modes":["TRAM:504","SUBWAY:서울6호선"]},"vs-CNP012993|vs-CNP2ts0gq":{"ok":true,"minutes":17,"transfers":1,"mode":"transit","modes":["TRAM:5713","SUBWAY:서울6호선"]},"cortis-008|vs-CNP2ts0gq":{"ok":true,"minutes":25,"transfers":1,"mode":"transit","modes":["TRAM:150","SUBWAY:서울6호선"]},"vs-CNP000286|vs-CNP037008":{"ok":true,"minutes":13,"transfers":0,"mode":"transit","modes":["TRAM:종로12"]},"vs-CNPnj8f9x|vs-CNPouf85a":{"ok":true,"minutes":29,"transfers":3,"mode":"transit","modes":["TRAM:9407","SUBWAY:서울2호선","SUBWAY:수인분당선","TRAM:2014"]},"vs-CNP016328|vs-CNPnj8f9x":{"ok":true,"minutes":25,"transfers":1,"mode":"transit","modes":["TRAM:3422","TRAM:강남06"]},"cortis-006|vs-CNP012993":{"ok":true,"minutes":20,"transfers":1,"mode":"transit","modes":["TRAM:5012","SUBWAY:서울5호선"]},"cortis-008|vs-CNP012993":{"ok":true,"minutes":18,"transfers":1,"mode":"transit","modes":["TRAM:5012","SUBWAY:서울5호선"]},"vs-CNP000036|vs-CNP015338":{"ok":true,"minutes":26,"transfers":2,"mode":"transit","modes":["TRAM:04","TRAM:405","TRAM:5007"]},"cortis-001|demo-concert-001":{"ok":true,"minutes":68,"transfers":4,"mode":"transit","modes":["TRAM:100","TRAM:151","SUBWAY:서울9호선","SUBWAY:서울9호선","TRAM:35"]},"cortis-002|demo-concert-001":{"ok":true,"minutes":63,"transfers":1,"mode":"transit","modes":["SUBWAY:서울2호선","TRAM:3318"]},"cortis-005|demo-concert-001":{"ok":true,"minutes":45,"transfers":2,"mode":"transit","modes":["TRAM:4212","SUBWAY:서울9호선","TRAM:3413"]},"cortis-006|demo-concert-001":{"ok":true,"minutes":58,"transfers":3,"mode":"transit","modes":["TRAM:400","SUBWAY:서울4호선","SUBWAY:서울9호선","TRAM:35"]},"cortis-007|demo-concert-001":{"ok":true,"minutes":45,"transfers":2,"mode":"transit","modes":["TRAM:2016","SUBWAY:서울2호선","TRAM:30-3"]},"cortis-008|demo-concert-001":{"ok":true,"minutes":55,"transfers":3,"mode":"transit","modes":["TRAM:400","SUBWAY:서울4호선","SUBWAY:서울9호선","TRAM:35"]},"cortis-009|demo-concert-001":{"ok":true,"minutes":50,"transfers":2,"mode":"transit","modes":["SUBWAY:경의중앙선","SUBWAY:서울5호선","TRAM:3413"]},"cortis-010|demo-concert-001":{"ok":true,"minutes":82,"transfers":2,"mode":"transit","modes":["SUBWAY:김포도시철도","SUBWAY:서울9호선","TRAM:30-5"]},"demo-concert-001|vs-CNP000067":{"ok":true,"minutes":56,"transfers":2,"mode":"transit","modes":["TRAM:30-3","SUBWAY:서울2호선","SUBWAY:서울4호선"]},"demo-concert-001|vs-CNP015338":{"ok":true,"minutes":57,"transfers":2,"mode":"transit","modes":["TRAM:30-5","SUBWAY:서울2호선","TRAM:100"]},"demo-concert-001|vs-CNP000061":{"ok":true,"minutes":51,"transfers":1,"mode":"transit","modes":["TRAM:30-5","SUBWAY:서울2호선"]},"demo-concert-001|vs-CNP024679":{"ok":true,"minutes":49,"transfers":1,"mode":"transit","modes":["TRAM:30-5","SUBWAY:서울2호선"]},"demo-concert-001|vs-CNP002077":{"ok":true,"minutes":56,"transfers":2,"mode":"transit","modes":["TRAM:3413","SUBWAY:서울2호선","SUBWAY:서울6호선"]},"demo-concert-001|vs-CNP2ts0gq":{"ok":true,"minutes":72,"transfers":2,"mode":"transit","modes":["TRAM:30-5","SUBWAY:서울2호선","TRAM:273"]},"demo-concert-001|vs-CNP000286":{"ok":true,"minutes":55,"transfers":1,"mode":"transit","modes":["TRAM:30-5","SUBWAY:서울2호선"]},"demo-concert-001|vs-CNPouf85a":{"ok":true,"minutes":49,"transfers":3,"mode":"transit","modes":["TRAM:16","SUBWAY:서울2호선","SUBWAY:수인분당선","TRAM:2224"]},"demo-concert-001|vs-CNPnj8f9x":{"ok":true,"minutes":38,"transfers":0,"mode":"transit","modes":["TRAM:3411"]},"demo-concert-001|vs-CNP002220":{"ok":true,"minutes":54,"transfers":3,"mode":"transit","modes":["TRAM:3411","SUBWAY:서울2호선","SUBWAY:서울3호선","TRAM:3012"]},"demo-concert-001|vs-CNP012993":{"ok":true,"minutes":58,"transfers":3,"mode":"transit","modes":["TRAM:30-5","TRAM:3414","SUBWAY:서울9호선","SUBWAY:서울5호선"]},"demo-concert-001|vs-CNP000036":{"ok":true,"minutes":62,"transfers":2,"mode":"transit","modes":["TRAM:30-3","SUBWAY:서울2호선","TRAM:04"]},"demo-concert-001|vs-CNP037008":{"ok":true,"minutes":57,"transfers":2,"mode":"transit","modes":["TRAM:30-5","SUBWAY:서울2호선","SUBWAY:서울3호선"]},"cortis-001|vs-CNP002077":{"ok":true,"minutes":25,"transfers":1,"mode":"transit","modes":["TRAM:100","SUBWAY:서울6호선"]},"cortis-001|vs-CNP012993":{"ok":true,"minutes":30,"transfers":2,"mode":"transit","modes":["TRAM:6211","SUBWAY:서울9호선","SUBWAY:서울5호선"]},"cortis-002|cortis-006":{"ok":true,"minutes":27,"transfers":2,"mode":"transit","modes":["TRAM:3400","SUBWAY:서울6호선","TRAM:150"]},"cortis-002|vs-CNP000067":{"ok":true,"minutes":23,"transfers":1,"mode":"transit","modes":["TRAM:7737","SUBWAY:서울2호선"]},"cortis-003|vs-CNPnj8f9x":{"ok":true,"minutes":22,"transfers":1,"mode":"transit","modes":["SUBWAY:서울7호선","TRAM:301"]},"cortis-003|vs-CNP016328":{"ok":true,"minutes":30,"transfers":1,"mode":"transit","modes":["SUBWAY:서울7호선","SUBWAY:서울2호선"]},"cortis-004|cortis-005":{"ok":true,"minutes":21,"transfers":1,"mode":"transit","modes":["SUBWAY:서울9호선","SUBWAY:서울3호선"]},"cortis-005|vs-CNPnj8f9x":{"ok":true,"minutes":21,"transfers":1,"mode":"transit","modes":["TRAM:4212","TRAM:4318"]},"cortis-006|vs-CNP002077":{"ok":true,"minutes":14,"transfers":1,"mode":"transit","modes":["TRAM:150","SUBWAY:서울6호선"]},"cortis-007|vs-CNPnj8f9x":{"ok":true,"minutes":21,"transfers":1,"mode":"transit","modes":["TRAM:2016","TRAM:3217"]},"cortis-007|cortis-009":{"ok":true,"minutes":27,"transfers":1,"mode":"transit","modes":["SUBWAY:서울2호선","SUBWAY:경의중앙선"]},"cortis-009|vs-CNP000036":{"ok":true,"minutes":30,"transfers":2,"mode":"transit","modes":["TRAM:6211","TRAM:420","TRAM:02"]},"cortis-009|vs-CNP002220":{"ok":true,"minutes":21,"transfers":1,"mode":"transit","modes":["SUBWAY:경의중앙선","TRAM:502"]},"cortis-006|cortis-010":{"ok":true,"minutes":43,"transfers":2,"mode":"transit","modes":["TRAM:150","SUBWAY:서울6호선","TRAM:1004"]},"cortis-008|cortis-010":{"ok":true,"minutes":42,"transfers":2,"mode":"transit","modes":["TRAM:150","SUBWAY:서울6호선","TRAM:1004"]},"vs-CNP000067|vs-CNP000286":{"ok":true,"minutes":14,"transfers":0,"mode":"transit","modes":["TRAM:140"]},"vs-CNP000061|vs-CNP000067":{"ok":true,"minutes":13,"transfers":1,"mode":"transit","modes":["TRAM:2233","SUBWAY:서울4호선"]},"vs-CNP000061|vs-CNP015338":{"ok":true,"minutes":15,"transfers":0,"mode":"transit","modes":["TRAM:261"]},"vs-CNP015338|vs-CNP024679":{"ok":true,"minutes":15,"transfers":0,"mode":"transit","modes":["TRAM:152"]},"vs-CNP000067|vs-CNP024679":{"ok":true,"minutes":14,"transfers":0,"mode":"transit","modes":["SUBWAY:서울4호선"]},"cortis-006|vs-CNP2ts0gq":{"ok":true,"minutes":26,"transfers":1,"mode":"transit","modes":["TRAM:150","SUBWAY:서울6호선"]},"cortis-001|vs-CNP2ts0gq":{"ok":true,"minutes":38,"transfers":1,"mode":"transit","modes":["TRAM:100","SUBWAY:서울6호선"]},"vs-CNP002077|vs-CNP002220":{"ok":true,"minutes":25,"transfers":2,"mode":"transit","modes":["SUBWAY:서울6호선","SUBWAY:서울4호선","TRAM:502"]},"cortis-005|vs-CNP002220":{"ok":true,"minutes":18,"transfers":1,"mode":"transit","modes":["SUBWAY:서울3호선","TRAM:3012"]},"cortis-007|vs-CNP016328":{"ok":true,"minutes":33,"transfers":1,"mode":"transit","modes":["TRAM:2016","SUBWAY:서울2호선"]},"vs-CNP000036|vs-CNP000286":{"ok":true,"minutes":26,"transfers":1,"mode":"transit","modes":["TRAM:02","TRAM:104"]},"vs-CNP000036|vs-CNP037008":{"ok":true,"minutes":23,"transfers":1,"mode":"transit","modes":["TRAM:02","SUBWAY:서울3호선"]},"cortis-001|cortis-009":{"ok":true,"minutes":27,"transfers":1,"mode":"transit","modes":["TRAM:100","SUBWAY:경의중앙선"]},"vs-CNP002220|vs-CNP012993":{"ok":true,"minutes":36,"transfers":2,"mode":"transit","modes":["TRAM:502","SUBWAY:서울6호선","SUBWAY:서울5호선"]},"vs-CNP016328|vs-CNP024679":{"ok":true,"minutes":38,"transfers":0,"mode":"transit","modes":["SUBWAY:서울2호선"]},"vs-CNP000036|vs-CNP016328":{"ok":true,"minutes":56,"transfers":3,"mode":"transit","modes":["TRAM:04","TRAM:02","SUBWAY:서울4호선","SUBWAY:서울2호선"]},"cortis-010|vs-CNP000036":{"ok":true,"minutes":67,"transfers":3,"mode":"transit","modes":["SUBWAY:김포도시철도","SUBWAY:공항철도","SUBWAY:서울4호선","TRAM:02"]},"vs-CNP000036|vs-CNP024679":{"ok":true,"minutes":25,"transfers":1,"mode":"transit","modes":["TRAM:02","SUBWAY:서울4호선"]}}};
+window.TRANSIT_MATRIX = TRANSIT_MATRIX;
+// <<< TRANSIT_MATRIX
+
+/* 地点推荐语（构建期由 DeepSeek 预生成，中英各一份；静态页读这里展示，页面不能放 API Key）。
+ * 由 scripts/build-place-answers.mjs 生成，scripts/apply-place-answers-to-preview.mjs 注入。 */
+// >>> PLACE_ANSWERS
+const PLACE_ANSWERS = {"generatedAt":"2026-09-19T07:35:41.886Z","model":"deepseek-chat","answers":{"demo-concert-001":{"zh":"这是你已确认的 CORTIS 演唱会场地，演出日 19:00 开唱，粉丝关联的同款打卡地，行程已经锁定。场馆具体信息还在等确认，出发前记得把地址补上。","en":"This is a placeholder concert venue in Songpa District, tied to CORTIS, and it's already locked in as a confirmed stop on your itinerary. Showtime is 19:00 on the performance day, though the exact venue details are still waiting to be filled in.","confidence":"high","sources":["https://example.com/"]},"cortis-001":{"zh":"想打卡 CORTIS 同款的话，二村汉江公园本身就是粉丝认证的打卡地，不用再绕去 CU 便利店了。","en":"Ichon Hangang Park in Yongsan District is a fan-linked spot tied to CORTIS, and it's confirmed as a check-in point in its own right. Head here if you want to visit the same Hangang Park location fans have been posting about.","confidence":"high","sources":["https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5312lw=&xsec_source=pc_share"]},"cortis-002":{"zh":"在西大门区的oakberry，有粉丝提到（尚未核验）可以直接跟店员点CORTIS同款巴西莓碗，配料是冰沙+花生酱+燕麦+草莓+香蕉。想打卡同款的话可以照着这个组合点一份。","en":"A fan reported (not yet verified) that Oakberry in Seodaemun-gu is a spot linked to CORTIS, where you can ask the staff directly for the \"CORTIS same\" order: smoothie with peanut butter, oats, strawberry, and banana.","confidence":"medium","sources":["https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5313lw=&xsec_source=pc_share"]},"cortis-003":{"zh":"首尔儿童公园是CORTIS同款打卡地，也是团综两天一夜的拍摄地，粉丝可以来这里get同款路线。","en":"Seoul Children's Grand Park in Gwangjin District is a fan-linked spot known as a CORTIS location, and it served as a filming site for the group's two-day, one-night variety show. If you're following in those footsteps, this is an easy pick to add to your Seoul itinerary.","confidence":"high","sources":["https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5314lw=&xsec_source=pc_share"]},"cortis-004":{"zh":"在江南区想打卡 CORTIS 同款，可以来奉恩寺，这里正是成员严成玹同款手串的购买地。","en":"Bongeunsa Temple in Gangnam is a must-visit spot for fans, as it's tied to CORTIS. It's also where member Yan Chengxuan was reported to have bought the same bracelet.","confidence":"high","sources":["https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5315lw=&xsec_source=pc_share"]},"cortis-005":{"zh":"新沙站5号出口是CORTIS同款打卡点，也是MV拍摄地，粉丝已经确认过这个位置。想走一遍偶像走过的路，来这儿准没错。","en":"If you're a CORTIS fan, Sinsa Station's Exit 5 in Gangnam is a confirmed fan spot tied to the group, and it's also known as an MV filming location. It's an easy, worthwhile stop to add to your Seoul itinerary.","confidence":"high","sources":["https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5316lw=&xsec_source=pc_share"]},"cortis-006":{"zh":"想打卡 CORTIS 同款的话，龙山区这栋 HYBE 大楼值得走一趟。坐地铁4号线到新龙山站从2号出口出来，步行约5-10分钟就到；从龙山站1号出口过来也就10-11分钟。","en":"If you're a fan of CORTIS, the HYBE Headquarters building in Yongsan is a must-visit spot tied to them. Getting there is easy: take subway Line 4 to Sinyongsan Station and walk about 5–10 minutes from Exit 2, or take Line 1 or the Gyeongui-Jungang Line to Yongsan Station and walk roughly 10–11 minutes from Exit 1.","confidence":"high","sources":["https://www.xiaohongshu.com/discovery/item/6a881d45000000003502368a?source=webshare&xhsshare=pc_web&xsec_token=ABkEzyn-xPxexyXIi58tvjcvJInKq6mY3oKVEi3XMsACg=&xsec_source=pc_share"]},"cortis-007":{"zh":"有粉丝提到（尚未核验）这里是 CORTIS 成员 Martin 到访过的 Torriden DEEP DIVE NEWS 快闪店，位于圣水洞，属于粉丝同款打卡地。不过活动已于 2026-08-25 结束，想去的话得先确认后续是否还会再办。","en":"A fan reported (not yet verified) that CORTIS member Martin visited the Torriden DEEP DIVE NEWS pop-up at Factory Seongsu in Seongdong District. Note that the pop-up ran from August 14 to August 25, 2026 and has already ended, so you'd need to check whether it will be held again before planning a visit.","confidence":"medium","sources":["https://www.xiaohongshu.com/discovery/item/6a541dfd0000000021015ccb?source=webshare&xhsshare=pc_web&xsec_token=ABRmwKsb93wbSOszmTZYD9J7t5XcjWesb7cMkhBo7aDEs=&xsec_source=pc_share"]},"cortis-008":{"zh":"严成玹生日时去的餐厅，CORTIS 同款打卡地，就在龙山区汉江大路 58-1。想跟着偶像的足迹吃一顿，这家可以安排上。","en":"Jikhwajangin (Yongsan Branch) is a fan-linked spot in Yongsan District, noted as the restaurant where Eom Seong-hyeon celebrated his birthday. It's a same-as-their-pick kind of place for fans who want to eat where their favorite did.","confidence":"high","sources":["https://www.xiaohongshu.com/discovery/item/69ec9a3b0000000036032fc8?source=webshare&xhsshare=pc_web&xsec_token=AB9LKvZJTjWxpwtrEB4TyhVkK6aylTAYd7Lp8mRjjtdXc=&xsec_source=pc_share"]},"cortis-009":{"zh":"汉南站1号出口是CORTIS同款“凌晨外出”拍摄地的打卡点，想走一遍同款路线的粉丝可以来这里感受一下。","en":"Hannam Station (Exit 1) in Yongsan is a confirmed fan spot tied to CORTIS, known as a filming location for the \"early morning outing\" scene. Fans have marked it as a must-visit check-in point, so it's worth a stop if you're following in their footsteps.","confidence":"high","sources":["https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5312lw=&xsec_source=pc_share"]},"cortis-010":{"zh":"这家乙支路煤炭烧烤 Gochon 店是 CORTIS 同款打卡地，粉丝已经确认就是金浦高村店。不过它在金浦市、不在首尔市区，想来的话记得单独安排往返行程。","en":"If you're a CORTIS fan, this Euljiro Seoktan-gui branch in Gimpo is a spot tied to them, so it's worth the trip. Just note it's outside central Seoul, so you'll need to plan a separate round trip to get there.","confidence":"high","sources":["https://www.xiaohongshu.com/discovery/item/6a008d130000000036031377?source=webshare&xhsshare=pc_web&xsec_token=ABXbeyWbuHIo-I3SqM1N8bmbCmlRSbMop0YW4OgJClPJs=&xsec_source=pc_share"]},"vs-CNP000067":{"zh":"明洞是首尔最热闹的购物与美妆街区，也是年轻人逛街的首选。想感受首尔中区的活力，来这里逛一圈就对了。","en":"Myeongdong is Seoul's liveliest shopping and beauty district, and it's the top choice for young people looking to hit the streets. You'll find it in Jung-gu, Seoul, at 27 Myeongdong 8-gil, with each store keeping its own hours.","confidence":"plain","sources":[]},"vs-CNP015338":{"zh":"明洞圣堂1898广场是明洞的地标，红砖圣堂配上复合文化空间，值得专程去看看。开放时间09:00-22:00，安排行程很方便。","en":"A landmark in Myeongdong, this site pairs a red-brick cathedral with a multi-purpose cultural space. It's an official Seoul tourist spot in Jung-gu, open from 09:00 to 22:00 at 74 Myeongdong-gil.","confidence":"plain","sources":[]},"vs-CNP000061":{"zh":"东大门购物城是首尔的购物地标，商场与夜市集中，很适合傍晚之后去逛。各商场营业时间不同，不少都通宵开放，想逛到多晚都行。","en":"Dongdaemun Market is a Seoul shopping landmark where malls and night markets cluster together, making it a great spot to head to after dusk. Hours vary by mall, with many staying open all night.","confidence":"plain","sources":[]},"vs-CNP024679":{"zh":"东大门设计广场是首尔官方观光点，也是东大门一带的设计地标，展览、夜景与活动都集中在这里。开放时间10:00-20:00（各馆不同），去之前可以留意一下想看的馆。","en":"Dongdaemun Design Plaza (DDP) is a Seoul landmark in Jung-gu where exhibitions, night views, and events all come together. It's open 10:00–20:00, though hours vary by hall, so plan your visit around that.","confidence":"plain","sources":[]},"vs-CNP002077":{"zh":"梨泰院街道是首尔官方观光点，异国餐厅、酒吧与潮店聚集，全天开放（店铺各异），适合随时来逛。","en":"Itaewon is a must-visit spot in Yongsan-gu, Seoul, where you'll find a lively cluster of international restaurants, bars, and trendy shops. It's open all day, though individual shops keep their own hours.","confidence":"plain","sources":[]},"vs-CNP2ts0gq":{"zh":"弘大壁画街是首尔官方认证的观光点，街头文化与壁画打卡地，年轻氛围很浓。全天开放，随时都能去逛。","en":"Hongdae Mural Street is an official Seoul sightseeing spot in Mapo-gu, known for its street culture and mural photo spots with a lively young vibe. It's open all day, so you can wander the murals whenever the mood strikes.","confidence":"plain","sources":[]},"vs-CNP000286":{"zh":"想感受首尔最有名的传统市场之一，广藏市场的小吃和夜市氛围很值得一逛。市场约09:00-18:00开放，美食街更是营业到23:00，晚上去也不怕没得吃。","en":"Gwangjang Market is one of Seoul's most famous traditional markets, with a strong street-food and night-market atmosphere. It's in Jongno-gu, open roughly 09:00–18:00, with the food street running until 23:00.","confidence":"plain","sources":[]},"vs-CNPouf85a":{"zh":"圣水云桥是圣水洞潮流街区的地标装置，还能看到汉江景观，全天开放，随时都能去走走。","en":"Seongsu Pedestrian Overpass is a landmark installation in the trendy Seongsu-dong neighborhood, and it also offers views of the Han River. It's an official Seoul sightseeing spot in Seongdong-gu, open all day at 257 Gangbyeonbuk-ro.","confidence":"plain","sources":[]},"vs-CNPnj8f9x":{"zh":"想感受江南的K-POP氛围，来COEX K-POP广场就对了，这里还是首尔官方认证的观光点。逛完还能顺路去COEX商圈和星空图书馆，一举两得。","en":"COEX K-POP Square is an official Seoul tourist spot in Gangnam and a K-POP photo destination near the COEX shopping area and Starfield Library. Check the official website for opening hours before you go.","confidence":"plain","sources":[]},"vs-CNP002220":{"zh":"首尔官方观光点盘浦大桥月光彩虹喷泉，是汉江夜景的代表，也是热门打卡地。晚间有多场表演，想看汉江夜色的话值得安排一趟。","en":"The Banpodaegyo Bridge Moonlight Rainbow Fountain is a Seoul official tourist spot and a signature part of the Han River night view, making it a popular photo stop. It sits in Banpo-dong, Seocho District, Seoul, and runs multiple shows in the evening (see the official website for details).","confidence":"plain","sources":[]},"vs-CNP012993":{"zh":"汝矣岛汉江公园是首尔官方认证的观光点，24小时开放，汉江野餐和夜景都很有名，年轻人常来这里露营、骑车。想找个地方边吃边看江景，这里很合适。","en":"Yeouido Hangang Park in Yeongdeungpo-gu is a Seoul official sightseeing spot and a favorite for Han River picnics and night views, popular with young people for camping and cycling. It's open 24 hours at 330 Yeouido-ro, Seoul.","confidence":"plain","sources":[]},"vs-CNP016328":{"zh":"石村湖夜景就在乐天世界旁边，湖景配夜景，散步和拍照都很合适。24小时开放，首尔官方观光点，随时去都行。","en":"Seokchon Lake at Night is an official Seoul sightseeing spot in Songpa District, offering lakeside night views beside Lotte World that are great for both strolling and photos. It's open 24 hours at 136 Samhaksa-ro, Songpa District, Seoul (Jamsil-dong).","confidence":"plain","sources":[]},"vs-CNP000036":{"zh":"南山首尔塔是首尔的代表夜景地标，情侣和游客都爱去。开放时间10:00-22:30，周末延长到23:00，在龙山区南山公园路105号。","en":"Namsan Seoul Tower is Seoul's signature night-view landmark and a must-visit for couples and travelers alike. It's open 10:00–22:30, with weekend hours extending to 23:00.","confidence":"plain","sources":[]},"vs-CNP037008":{"zh":"益善洞韩屋街道是首尔官方观光点，韩屋改造的咖啡馆与小店聚集，是钟路年轻人爱逛的地方。全天开放，店铺时间各异，适合慢慢逛。","en":"Ikseon-dong Hanok Village is a Seoul official tourist spot in Jongno-gu where hanok houses have been converted into cafes and small shops. It's a favorite hangout for young people in Jongno, and it's open all day, though individual shops keep their own hours.","confidence":"plain","sources":[]}}};
+window.PLACE_ANSWERS = PLACE_ANSWERS;
+// <<< PLACE_ANSWERS
+
+(function (global) {
+  function distKm(a, b) {
+    const R = 6371;
+    const dLa = ((b.lat - a.lat) * Math.PI) / 180;
+    const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+    const x =
+      Math.sin(dLa / 2) ** 2 +
+      Math.cos((a.lat * Math.PI) / 180) * Math.cos((b.lat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+  }
+
+  /** 查询地点间真实耗时矩阵；找不到返回 null */
+  function matrixHit(a, b) {
+    if (!a || !b || !a.id || !b.id) return null;
+    const table = (global.TRANSIT_MATRIX && global.TRANSIT_MATRIX.pairs) || null;
+    if (!table) return null;
+    const hit = table[`${a.id}|${b.id}`] || table[`${b.id}|${a.id}`] || null;
+    return hit && hit.ok && Number.isFinite(hit.minutes) ? hit : null;
+  }
+
+  /** 该组合的耗时来源：transit（真实公交） / walk-estimate（步行估算） / estimate（粗略估算） */
+  function roughMinSource(a, b) {
+    const hit = matrixHit(a, b);
+    if (!hit) return "estimate";
+    return hit.mode === "walk-estimate" ? "walk-estimate" : "transit";
+  }
+
+  /** 站点间衔接详情，用于行程卡片逐段显示 */
+  function legInfo(a, b) {
+    const hit = matrixHit(a, b);
+    if (!hit) {
+      return { minutes: roughMin(a, b), tag: "估算", lines: [], transfers: null };
+    }
+    const lines = (hit.modes || [])
+      .map((m) => {
+        const [kind, raw] = String(m).split(":");
+        const name = raw || kind;
+        if (!name || name === "WALK") return null;
+        // 韩国数据里地铁线一般以"호선/선"结尾，其余按公交线路号处理
+        const rail = /호선|선$|철도|KTX/.test(name);
+        return (rail ? "🚇 " : "🚌 ") + name;
+      })
+      .filter(Boolean);
+    return {
+      minutes: Math.round(hit.minutes),
+      tag: hit.mode === "walk-estimate" ? "步行" : "实际路线",
+      lines,
+      transfers: hit.transfers ?? 0,
+    };
+  }
+
+  /** 站点间耗时：优先真实数据，缺失时退回粗略估算 */
+  function roughMin(a, b) {
+    const hit = matrixHit(a, b);
+    if (hit) return Math.max(3, Math.round(hit.minutes));
+    const km = distKm(a, b);
+    return Math.max(8, Math.round(km * 11));
+  }
+
+  function centroid(points) {
+    const lat = points.reduce((s, p) => s + p.lat, 0) / points.length;
+    const lng = points.reduce((s, p) => s + p.lng, 0) / points.length;
+    return { lat, lng };
+  }
+
+  function kmeans(points, k, maxIter = 30) {
+    if (!points.length) return [];
+    if (k >= points.length) return points.map((p) => [p]);
+    const sorted = [...points].sort((a, b) => a.lng - b.lng || a.lat - b.lat);
+    const centroids = [];
+    for (let i = 0; i < k; i += 1) {
+      const p = sorted[Math.floor((i * (sorted.length - 1)) / (k - 1))];
+      centroids.push({ lat: p.lat, lng: p.lng });
+    }
+    let clusters = [];
+    for (let iter = 0; iter < maxIter; iter += 1) {
+      clusters = Array.from({ length: k }, () => []);
+      points.forEach((p) => {
+        let best = 0;
+        let bestDist = Infinity;
+        centroids.forEach((c, i) => {
+          const d = distKm(p, c);
+          if (d < bestDist) {
+            bestDist = d;
+            best = i;
+          }
+        });
+        clusters[best].push(p);
+      });
+      let changed = false;
+      clusters.forEach((cluster, i) => {
+        if (!cluster.length) {
+          const biggest = clusters.reduce((a, b) => (b.length > a.length ? b : a), clusters[0]);
+          if (biggest.length > 1) {
+            const far = biggest.reduce((a, b) =>
+              distKm(b, centroids[i]) > distKm(a, centroids[i]) ? b : a
+            );
+            biggest.splice(biggest.indexOf(far), 1);
+            cluster.push(far);
+            changed = true;
+          }
+          return;
+        }
+        const c = centroid(cluster);
+        if (Math.abs(c.lat - centroids[i].lat) > 1e-9 || Math.abs(c.lng - centroids[i].lng) > 1e-9) {
+          changed = true;
+          centroids[i] = c;
+        }
+      });
+      if (!changed) break;
+    }
+    return clusters.filter((c) => c.length);
+  }
+
+  function nearestNeighborOrder(points, start) {
+    const rest = [...points];
+    const order = [];
+    let current = start || rest[0];
+    while (rest.length) {
+      let best = 0;
+      let bestDist = Infinity;
+      rest.forEach((p, i) => {
+        const d = distKm(current, p);
+        if (d < bestDist) {
+          bestDist = d;
+          best = i;
+        }
+      });
+      current = rest.splice(best, 1)[0];
+      order.push(current);
+    }
+    return order;
+  }
+
+  function twoOpt(order, start) {
+    if (order.length < 3) return order.slice();
+    const arr = order.slice();
+    let improved = true;
+    let guard = 0;
+    while (improved && guard < 200) {
+      improved = false;
+      guard += 1;
+      for (let i = 0; i < arr.length - 1; i += 1) {
+        for (let j = i + 1; j < arr.length; j += 1) {
+          const a = i === 0 ? start : arr[i - 1];
+          const b = arr[i];
+          const c = arr[j];
+          const d = j + 1 < arr.length ? arr[j + 1] : null;
+          const before = distKm(a, b) + (d ? distKm(c, d) : 0);
+          const after = distKm(a, c) + (d ? distKm(b, d) : 0);
+          if (after + 1e-9 < before) {
+            const segment = arr.slice(i, j + 1).reverse();
+            arr.splice(i, segment.length, ...segment);
+            improved = true;
+          }
+        }
+      }
+    }
+    return arr;
+  }
+
+  function orderRoute(points, start, endPoint) {
+    const middle = points.filter((p) => !(endPoint && p.id === endPoint.id));
+    const ordered = twoOpt(nearestNeighborOrder(middle, start), start);
+    if (endPoint) ordered.push(endPoint);
+    return ordered;
+  }
+
+  function priority(p) {
+    return typeof p._priority === "number" ? p._priority : 0;
+  }
+
+  function planDays({ points, days, concertDay, concertPoint, cap }) {
+    const buckets = Array.from({ length: days }, () => []);
+    const overflow = [];
+    if (!points.length) return { buckets, overflow };
+
+    const k = Math.max(1, Math.min(days, points.length));
+    const clusters = kmeans(points, k).map((cluster) => ({
+      points: cluster,
+      centroid: centroid(cluster),
+    }));
+    clusters.sort(
+      (a, b) => distKm(a.centroid, concertPoint) - distKm(b.centroid, concertPoint)
+    );
+
+    // 分配顺序：演唱会场馆最近的簇放演唱会日，然后依次放到前一天、后一天……
+    // 这样“演唱会前一晚”所在天天然离场馆最近，也符合住酒店的真实习惯。
+    const dayOrder = [];
+    dayOrder.push(concertDay);
+    for (let step = 1; dayOrder.length < days; step += 1) {
+      const before = concertDay - step;
+      const after = concertDay + step;
+      if (before >= 0 && dayOrder.length < days) dayOrder.push(before);
+      if (after < days && dayOrder.length < days) dayOrder.push(after);
+    }
+    for (let d = 0; d < days; d += 1) {
+      if (!dayOrder.includes(d)) dayOrder.push(d);
+    }
+
+    clusters.forEach((cluster, index) => {
+      if (index < days) {
+        buckets[dayOrder[index]].push(...cluster.points);
+        return;
+      }
+      let best = -1;
+      let bestScore = Infinity;
+      for (let d = 0; d < days; d += 1) {
+        const allowed = d === concertDay ? Math.max(1, cap - 1) : cap;
+        if (buckets[d].length >= allowed) continue;
+        const ref = buckets[d].length ? buckets[d] : [concertPoint];
+        const score =
+          Math.min(...ref.map((r) => distKm(r, cluster.points[0]))) + buckets[d].length * 0.2;
+        if (score < bestScore) {
+          bestScore = score;
+          best = d;
+        }
+      }
+      if (best < 0) overflow.push(...cluster.points);
+      else buckets[best].push(...cluster.points);
+    });
+
+    // 容量控制：优先保留“必去”，把超出的点放到最顺路的其他天
+    let changed = true;
+    let guard = 0;
+    while (changed && guard < 40) {
+      changed = false;
+      guard += 1;
+      for (let d = 0; d < days; d += 1) {
+        const allowed = d === concertDay ? Math.max(1, cap - 1) : cap;
+        while (buckets[d].length > allowed) {
+          const c = centroid(buckets[d]);
+          const victim = [...buckets[d]].sort((a, b) => {
+            if (priority(a) !== priority(b)) return priority(a) - priority(b);
+            return distKm(b, c) - distKm(a, c);
+          })[0];
+          buckets[d].splice(buckets[d].indexOf(victim), 1);
+          let target = -1;
+          let targetScore = Infinity;
+          for (let nd = 0; nd < days; nd += 1) {
+            if (nd === d) continue;
+            const allowedN = nd === concertDay ? Math.max(1, cap - 1) : cap;
+            if (buckets[nd].length >= allowedN) continue;
+            const ref = buckets[nd].length ? buckets[nd] : [concertPoint];
+            const score =
+              Math.min(...ref.map((r) => distKm(r, victim))) + buckets[nd].length * 0.2;
+            if (score < targetScore) {
+              targetScore = score;
+              target = nd;
+            }
+          }
+          if (target < 0) overflow.push(victim);
+          else buckets[target].push(victim);
+          changed = true;
+        }
+      }
+    }
+
+    points.forEach((p) => {
+      delete p._priority;
+    });
+    return { buckets, overflow };
+  }
+
+  function formatTime(minutes) {
+    const h = Math.floor(minutes / 60);
+    const m = Math.round(minutes % 60);
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  }
+
+  function scheduleDay(
+    places,
+    { startPoint, startMinutes = 9 * 60 + 30, pace, isConcertDay, concertPoint }
+  ) {
+    const visitMin = pace === "relaxed" ? 90 : pace === "busy" ? 60 : 75;
+    const items = [];
+    const overflow = [];
+    let current = startMinutes;
+    let previous = startPoint;
+    places.forEach((p) => {
+      if (isConcertDay && concertPoint && p.id === concertPoint.id) {
+        items.push({ place: p, time: "19:00", locked: true });
+        return;
+      }
+      const travel = previous ? roughMin(previous, p) : 0;
+      const arrive = current + travel;
+      if (isConcertDay && arrive + visitMin > 18 * 60 + 30) {
+        overflow.push(p);
+        return;
+      }
+      items.push({ place: p, time: formatTime(arrive), locked: false });
+      current = arrive + visitMin;
+      previous = p;
+    });
+    return { items, overflow };
+  }
+
+  global.RouteAlgo = {
+    distKm,
+    roughMin,
+    roughMinSource,
+    legInfo,
+    kmeans,
+    nearestNeighborOrder,
+    twoOpt,
+    orderRoute,
+    planDays,
+    scheduleDay,
+    formatTime,
+  };
+})(typeof window !== "undefined" ? window : globalThis);
+
+</script>
+<script>
+const PLACES = [
+  {id:"demo-concert-001",name:"示例·演唱会场地（待替换为真实场馆）",nameLocal:"서울 올림픽공원（예시）",type:"venue",pool:"fan",district:"松坡区",lat:37.5206,lng:127.1211,hours:"演出日 19:00",conf:"high",why:"P0 演唱会为已锁定行程；场馆信息待用户提供后替换为真实演出地址。",note:"",evidence:[{srcType:"official",src:"演唱会官方公告（占位）",claim:"用户已确认会在此场地观看 CORTIS 演唱会（场馆待补充）",date:"",url:"https://example.com/",summary:"演示占位；等待真实演出场馆",conf:"high"}]},
+  {id:"cortis-001",name:"二村汉江公园",nameLocal:"이촌한강공원",type:"photo_spot",pool:"fan",district:"龙山区",lat:37.518507,lng:126.9673584,hours:"时间以来源帖子为准",conf:"high",why:"用户确认：以二村汉江公园本身作为打卡点，不再使用 CU 便利店。",note:"",evidence:[{srcType:"community",src:"小红书",claim:"这个汉江公园也是同款打卡地",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5312lw=&xsec_source=pc_share",summary:"这个汉江公园也是同款打卡地",conf:"high"}]},
+  {id:"cortis-002",name:"oakberry巴西莓碗",nameLocal:"",type:"shop",pool:"fan",district:"西大门区",lat:37.5566933,lng:126.9367277,hours:"时间以来源帖子为准",conf:"medium",why:"可以直接和店员说要cortis同款 冰沙+花生酱+燕麦+草莓+香蕉",note:"",evidence:[{srcType:"community",src:"小红书",claim:"可以直接和店员说要cortis同款 冰沙+花生酱+燕麦+草莓+香蕉",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5313lw=&xsec_source=pc_share",summary:"可以直接和店员说要cortis同款 冰沙+花生酱+燕麦+草莓+香蕉",conf:"medium"}]},
+  {id:"cortis-003",name:"首尔儿童公园",nameLocal:"",type:"photo_spot",pool:"fan",district:"广津区",lat:37.5475998,lng:127.0743915,hours:"时间以来源帖子为准",conf:"high",why:"团综两天一夜拍摄地",note:"",evidence:[{srcType:"community",src:"小红书",claim:"团综两天一夜拍摄地",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5314lw=&xsec_source=pc_share",summary:"团综两天一夜拍摄地",conf:"high"}]},
+  {id:"cortis-004",name:"奉恩寺",nameLocal:"",type:"photo_spot",pool:"fan",district:"江南区",lat:37.5141869,lng:127.0602411,hours:"时间以来源帖子为准",conf:"high",why:"成员严成玹同款手串购买地",note:"",evidence:[{srcType:"community",src:"小红书",claim:"成员严成玹同款手串购买地",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5315lw=&xsec_source=pc_share",summary:"成员严成玹同款手串购买地",conf:"high"}]},
+  {id:"cortis-005",name:"新沙站（5号出口）",nameLocal:"신사역",type:"filming_location",pool:"fan",district:"江南区",lat:37.516154,lng:127.0196291,hours:"时间以来源帖子为准",conf:"high",why:"用户确认：以新沙站为打卡点（5 号出口）。",note:"",evidence:[{srcType:"community",src:"小红书",claim:"MV拍摄地",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5316lw=&xsec_source=pc_share",summary:"MV拍摄地",conf:"high"}]},
+  {id:"cortis-006",name:"HYBE大楼",nameLocal:"",type:"company",pool:"fan",district:"龙山区",lat:37.5245773,lng:126.9642142,hours:"时间以来源帖子为准",conf:"high",why:"地铁4号线​​在“ 新龙山站 ”（신용산역）下车，从2号出口出来，步行大约5-10分钟即可到达\n。地铁1号线/京义中央线​​在“ 龙山站 ”（용산역）下车，从1号出口出来，步行约10-11分钟也能到",note:"",evidence:[{srcType:"community",src:"小红书",claim:"地铁4号线​​在“ 新龙山站 ”（신용산역）下车，从2号出口出来，步行大约5-10分钟即可到达\n。地铁1号线/京义中央线​​在“ 龙山站 ”（용산역）下车，从1号出口出来，步行约10-11分钟也能到",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a881d45000000003502368a?source=webshare&xhsshare=pc_web&xsec_token=ABkEzyn-xPxexyXIi58tvjcvJInKq6mY3oKVEi3XMsACg=&xsec_source=pc_share",summary:"地铁4号线​​在“ 新龙山站 ”（신용산역）下车，从2号出口出来，步行大约5-10分钟即可到达\n。地铁1号线/京义中央线​​在“ 龙山站 ”（용산역）下车，从1号出口出来，步行约10-11分钟也能到",conf:"high"}]},
+  {id:"cortis-007",name:"Torriden 圣水快闪（Factory Seongsu）",nameLocal:"토리든 딥다이브 뉴스 팝업",type:"ad_spot",pool:"fan",district:"城东区",lat:37.544207,lng:127.0543773,hours:"快闪活动期间 2026-08-14 ~ 2026-08-25，11:00-20:00（已结束）",conf:"medium",why:"CORTIS 成员 Martin 到访的 Torriden DEEP DIVE NEWS 快闪店；活动已结束，后续是否再举办需确认。",note:"快闪活动已于 2026-08-25 结束，安排前需确认是否再举办",evidence:[{srcType:"community",src:"小红书",claim:"圣水洞torriden大楼 与 CORTIS 相关（用户整理）",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a541dfd0000000021015ccb?source=webshare&xhsshare=pc_web&xsec_token=ABRmwKsb93wbSOszmTZYD9J7t5XcjWesb7cMkhBo7aDEs=&xsec_source=pc_share",summary:"CORTIS 成员 Martin 到访的 Torriden DEEP DIVE NEWS 快闪店；活动已结束，后续是否再举办需确认。",conf:"medium"}]},
+  {id:"cortis-008",name:"直火匠人 龙山店",nameLocal:"직화장인 용산점",type:"shop",pool:"fan",district:"龙山区",lat:37.5258537,lng:126.9650592,hours:"时间以来源帖子为准",conf:"high",why:"用户提供的地址：龙山区 汉江大路 58-1；OSM 无该店精确 POI，坐标为地址级。",note:"",evidence:[{srcType:"community",src:"小红书",claim:"严成玹过生日时的餐厅",date:"",url:"https://www.xiaohongshu.com/discovery/item/69ec9a3b0000000036032fc8?source=webshare&xhsshare=pc_web&xsec_token=AB9LKvZJTjWxpwtrEB4TyhVkK6aylTAYd7Lp8mRjjtdXc=&xsec_source=pc_share",summary:"严成玹过生日时的餐厅",conf:"high"}]},
+  {id:"cortis-009",name:"汉南站（1号出口）",nameLocal:"한남역",type:"filming_location",pool:"fan",district:"龙山区",lat:37.5294298,lng:127.0092073,hours:"时间以来源帖子为准",conf:"high",why:"用户确认：以汉南站为“凌晨外出”拍摄地打卡点。",note:"",evidence:[{srcType:"community",src:"小红书",claim:"“凌晨外出”拍摄地 与 CORTIS 相关（用户整理）",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5312lw=&xsec_source=pc_share",summary:"用户确认：以汉南站为“凌晨外出”拍摄地打卡点。",conf:"high"}]},
+  {id:"cortis-010",name:"乙支路煤炭烧烤 Gochon店",nameLocal:"을지로 석탄구이 고촌점",type:"shop",pool:"fan",district:"金浦市",lat:37.6016091,lng:126.7702594,hours:"时间以来源帖子为准",conf:"high",why:"用户确认：就是金浦高村店，不在首尔市区；行程需要单独安排往返。",note:"位于金浦市，首尔市外，需单独安排往返",evidence:[{srcType:"community",src:"小红书",claim:"乙支路煤炭烧烤Gochon店 与 CORTIS 相关（用户整理）",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a008d130000000036031377?source=webshare&xhsshare=pc_web&xsec_token=ABXbeyWbuHIo-I3SqM1N8bmbCmlRSbMop0YW4OgJClPJs=&xsec_source=pc_share",summary:"用户确认：就是金浦高村店，不在首尔市区；行程需要单独安排往返。",conf:"high"}]},
+  {id:"vs-CNP000067",name:"明洞",nameLocal:"명동 쇼핑",type:"sightseeing",pool:"sight",district:"中区",lat:37.562531,lng:126.985168,hours:"购物街 · 各卖场不同",conf:null,why:"首尔最热闹的购物与美妆街区，年轻人逛街首选。",address:"首尔市中区明洞8街27",officialUrl:"",evidence:[]},
+  {id:"vs-CNP015338",name:"明洞圣堂1898广场",nameLocal:"1898 명동성당",type:"sightseeing",pool:"sight",district:"中区",lat:37.563677,lng:126.986775,hours:"09:00-22:00",conf:null,why:"明洞地标，红砖圣堂与复合文化空间。",address:"首尔特别市中区明洞街74",officialUrl:"https://1898.catholic.or.kr/plaza.asp",evidence:[]},
+  {id:"vs-CNP000061",name:"东大门购物城",nameLocal:"동대문 쇼핑타운",type:"sightseeing",pool:"sight",district:"中区",lat:37.567487,lng:127.008077,hours:"各商场不同（多为通宵）",conf:null,why:"东大门购物地标，商场与夜市集中，适合傍晚后。",address:"首尔市中区奖忠坛路253",officialUrl:"",evidence:[]},
+  {id:"vs-CNP024679",name:"东大门设计广场(DDP)",nameLocal:"동대문디자인플라자 (DDP)",type:"sightseeing",pool:"sight",district:"中区",lat:37.566813,lng:127.009626,hours:"10:00-20:00（各馆不同）",conf:null,why:"东大门设计地标，展览、夜景与活动集中。",address:"首尔市中区乙支路 281",officialUrl:"https://ddp.or.kr/?menuno=340",evidence:[]},
+  {id:"vs-CNP002077",name:"梨泰院街道",nameLocal:"",type:"sightseeing",pool:"sight",district:"龙山区",lat:37.534532,lng:126.994179,hours:"全天开放（店铺各异）",conf:null,why:"梨泰院街区，异国餐厅、酒吧与潮店聚集。",address:"首尔市龙山区黎泰院路27나길",officialUrl:"",evidence:[]},
+  {id:"vs-CNP2ts0gq",name:"弘大壁画街",nameLocal:"",type:"sightseeing",pool:"sight",district:"麻浦区",lat:37.55102,lng:126.924187,hours:"全天开放",conf:null,why:"弘大街头文化与壁画打卡地，年轻氛围浓。",address:"首尔市麻浦区上水洞72-36",officialUrl:"",evidence:[]},
+  {id:"vs-CNP000286",name:"广藏市场",nameLocal:"광장시장",type:"sightseeing",pool:"sight",district:"钟路区",lat:37.570057,lng:126.99895,hours:"市场约09:00-18:00；美食街至23:00",conf:null,why:"首尔最有名的传统市场之一，小吃与夜市感强。",address:"首尔市钟路区昌庆宫路88",officialUrl:"http://www.kwangjangmarket.co.kr/zh-hans/",evidence:[]},
+  {id:"vs-CNPouf85a",name:"圣水云桥",nameLocal:"",type:"sightseeing",pool:"sight",district:"城东区",lat:37.538962,lng:127.041604,hours:"全天开放",conf:null,why:"圣水洞潮流街区的地标装置与汉江景观。",address:"首尔城东区江边北路257",officialUrl:"",evidence:[]},
+  {id:"vs-CNPnj8f9x",name:"COEX K-POP广场",nameLocal:"",type:"sightseeing",pool:"sight",district:"江南区",lat:37.511824,lng:127.059159,hours:"开放时间以官网为准",conf:null,why:"江南 K-POP 打卡地，靠近 COEX 商圈与星空图书馆。",address:"首尔市江南区永东大路513",officialUrl:"https://business.coex.co.kr/",evidence:[]},
+  {id:"vs-CNP002220",name:"盘浦大桥月光彩虹喷泉",nameLocal:"반포대교 달빛무지개분수",type:"sightseeing",pool:"sight",district:"瑞草区",lat:37.505764,lng:126.981085,hours:"晚间多场（详见官网）",conf:null,why:"汉江夜景代表，月光彩虹喷泉是热门打卡点。",address:"首尔特别市瑞草区盘浦洞 649-1",officialUrl:"https://hangang.seoul.go.kr/www/bbsPost/30/list.do",evidence:[]},
+  {id:"vs-CNP012993",name:"汝矣岛汉江公园",nameLocal:"여의도 한강공원",type:"sightseeing",pool:"sight",district:"永登浦区",lat:37.527074,lng:126.933454,hours:"24 小时开放",conf:null,why:"汉江野餐与夜景圣地，年轻人露营、骑车常去。",address:"首尔市永登浦区汝矣岛路330号",officialUrl:"https://hangang.seoul.go.kr/www/contents/669.do?mid=473",evidence:[]},
+  {id:"vs-CNP016328",name:"石村湖夜景",nameLocal:"석촌호수 야경",type:"sightseeing",pool:"sight",district:"松坡区",lat:37.509063,lng:127.097868,hours:"24 小时开放",conf:null,why:"乐天世界旁的湖景夜景，散步与拍照都合适。",address:"首尔松坡区三学士路136（蚕室洞）",officialUrl:"",evidence:[]},
+  {id:"vs-CNP000036",name:"南山首尔塔",nameLocal:"남산서울타워",type:"sightseeing",pool:"sight",district:"龙山区",lat:37.551121,lng:126.987869,hours:"10:00-22:30（周末至23:00）",conf:null,why:"首尔代表夜景地标，情侣与游客必去。",address:"首尔龙山区南山公园路 105",officialUrl:"https://www.seoultower.co.kr/cn/",evidence:[]},
+  {id:"vs-CNP037008",name:"益善洞韩屋街道",nameLocal:"익선동 한옥거리",type:"sightseeing",pool:"sight",district:"钟路区",lat:37.573391,lng:126.990919,hours:"全天开放（店铺各异）",conf:null,why:"韩屋改造的咖啡馆与小店聚集，钟路年轻人爱逛。",address:"首尔钟路区敦化门路11ga街17",officialUrl:"",evidence:[]}
+];
+const STAYS=[
+  {id:"s1",name:"奥林匹克公园附近（示例酒店）",district:"松坡区",lat:37.5155,lng:127.1168,station:"梦村土城站",lines:["8号线"]},
+  {id:"s2",name:"弘大入口附近（示例酒店）",district:"麻浦区",lat:37.5569,lng:126.9239,station:"弘大入口站",lines:["2号线","机场铁路","京义中央线"]},
+  {id:"s3",name:"梨泰院附近（示例酒店）",district:"龙山区",lat:37.5345,lng:126.9942,station:"梨泰院站",lines:["6号线"]},
+  {id:"s4",name:"江南站附近（示例酒店）",district:"江南区",lat:37.5013,lng:127.0397,station:"江南站",lines:["2号线","新盆唐线"]},
+  {id:"s5",name:"钟路/景福宫附近（示例酒店）",district:"钟路区",lat:37.5796,lng:126.977,station:"景福宫站",lines:["3号线"]},
+  {id:"s6",name:"明洞附近（示例酒店）",district:"中区",lat:37.5636,lng:126.9869,station:"明洞站",lines:["4号线"]},
+  {id:"s7",name:"汝矣岛附近（示例酒店）",district:"永登浦区",lat:37.5284,lng:126.9333,station:"汝矣岛站",lines:["5号线","9号线"]},
+  {id:"s8",name:"东大门/乙支路附近（示例酒店）",district:"中区",lat:37.5665,lng:127.0087,station:"东大门历史文化公园站",lines:["2号线","4号线","5号线"]},
+  {id:"s9",name:"蚕室/乐天世界附近（示例酒店）",district:"松坡区",lat:37.5115,lng:127.098,station:"蚕室站",lines:["2号线","8号线"]}
+];
+const CONF={high:{label:"高置信度",cls:"high"},medium:{label:"中置信度",cls:"medium"},low:{label:"低置信度",cls:"low"}};
+const $=id=>document.getElementById(id);
+const state={fan:new Set(),must:new Set(),sight:new Set(),hideLow:false,hotel:{},lastPlan:null,mapMode:"all",dayFilter:null};
+let map=null,layerGroup=null;
+
+/* ================= 中英双语 =================
+ * 英文地点名不是"中文再翻英文"，而是：
+ *   ① P2 观光点：VisitSeoul 官方接口的英文版（scripts/visitseoul-fetch-en.mjs 抓取，lang_code_id=en）
+ *   ② P1 粉丝地点与车站：按韩国原名（nameLocal）罗马字化，用英文用户实际看到的写法
+ */
+const EN_PLACES={
+  "demo-concert-001":"Olympic Park, Seoul (placeholder venue)",
+  "cortis-001":"Ichon Hangang Park","cortis-002":"Oakberry (açaí bowls)","cortis-003":"Seoul Children's Grand Park",
+  "cortis-004":"Bongeunsa Temple","cortis-005":"Sinsa Station (Exit 5)","cortis-006":"HYBE Headquarters",
+  "cortis-007":"Torriden Pop-up (Factory Seongsu)","cortis-008":"Jikhwajangin (Yongsan Branch)",
+  "cortis-009":"Hannam Station (Exit 1)","cortis-010":"Euljiro Seoktan-gui (Gochon Branch)",
+  "vs-CNP000067":"Myeongdong","vs-CNP015338":"1898 Myeongdong Cathedral","vs-CNP000061":"Dongdaemun Market",
+  "vs-CNP024679":"Dongdaemun Design Plaza (DDP)","vs-CNP002077":"Itaewon","vs-CNP2ts0gq":"Hongdae Mural Street",
+  "vs-CNP000286":"Gwangjang Market","vs-CNPouf85a":"Seongsu Pedestrian Overpass","vs-CNPnj8f9x":"COEX K-POP Square",
+  "vs-CNP002220":"Banpodaegyo Bridge Moonlight Rainbow Fountain","vs-CNP012993":"Yeouido Hangang Park",
+  "vs-CNP016328":"Seokchon Lake at Night","vs-CNP000036":"Namsan Seoul Tower","vs-CNP037008":"Ikseon-dong Hanok Village"
+};
+const EN_DISTRICTS={"龙山区":"Yongsan-gu","江南区":"Gangnam-gu","松坡区":"Songpa-gu","中区":"Jung-gu","钟路区":"Jongno-gu","麻浦区":"Mapo-gu","城东区":"Seongdong-gu","西大门区":"Seodaemun-gu","广津区":"Gwangjin-gu","金浦市":"Gimpo-si","永登浦区":"Yeongdeungpo-gu","瑞草区":"Seocho-gu"};
+const EN_LINES={"서울1호선":"Line 1","서울2호선":"Line 2","서울3호선":"Line 3","서울4호선":"Line 4","서울5호선":"Line 5","서울6호선":"Line 6","서울7호선":"Line 7","서울8호선":"Line 8","서울9호선":"Line 9","경의중앙선":"Gyeongui–Jungang Line","수인분당선":"Suin–Bundang Line","신분당선":"Shinbundang Line","공항철도":"Airport Railroad (AREX)","김포도시철도":"Gimpo Goldline","경춘선":"Gyeongchun Line","우이신설선":"Ui-Sinseol Line","서해선":"Seohae Line"};
+const EN_NOTES={
+  "cortis-007":"The pop-up ended on 2026-08-25 — confirm whether it will run again before planning.",
+  "cortis-010":"Located in Gimpo, outside Seoul — plan a separate round trip."
+};
+/* 英文详情：① P2 观光点的 why/地址/开放时间取自 VisitSeoul 官方英文版（data/visitseoul-en.json）
+   ② P1 粉丝地点按韩国原名与来源内容改写，不用中文二次转译 */
+const EN_DETAILS={
+  "demo-concert-001":{why:"P0 — the concert is the fixed anchor of the trip. Venue details are a placeholder until the real show is confirmed.",hours:"19:00 on show day",address:null},
+  "cortis-001":{why:"The user confirmed this Han River park as the photo spot itself (an earlier CU convenience-store stop is no longer used).",hours:"See the source post"},
+  "cortis-002":{why:"You can ask the staff for the “CORTIS order”: smoothie + peanut butter + oats + strawberry + banana.",hours:"See the source post"},
+  "cortis-003":{why:"Filming location for the group's two-day, one-night variety show.",hours:"See the source post"},
+  "cortis-004":{why:"Bracelet purchase spot credited to a member in fan sources.",hours:"See the source post"},
+  "cortis-005":{why:"Confirmed by the user as the music-video filming spot (Exit 5).",hours:"See the source post"},
+  "cortis-006":{why:"The label's headquarters; walking directions from Sinyongsan and Yongsan stations are quoted in the evidence.",hours:"See the source post"},
+  "cortis-007":{why:"A member visited this Torriden pop-up; the event has ended and may not run again.",hours:"See the source post"},
+  "cortis-008":{why:"Restaurant credited to a member's birthday dinner in fan sources.",hours:"See the source post"},
+  "cortis-009":{why:"Confirmed by the user as the “early morning outing” filming spot (Exit 1).",hours:"See the source post"},
+  "cortis-010":{why:"Confirmed by the user: the Gochon branch is in Gimpo, outside Seoul — plan a separate round trip.",hours:"See the source post"},
+  "vs-CNP000067":{why:"Seoul's best-known shopping and beauty district, and a favourite among younger visitors.",hours:"Open daily",address:"27, Myeong-dong 8-gil, Jung-gu, Seoul"},
+  "vs-CNP015338":{why:"A landmark cathedral with a red-brick church and a cultural complex next door.",hours:"Daily 09:00 - 22:00 KST",address:"74, Myeongdong-gil, Jung-gu, Seoul"},
+  "vs-CNP000061":{why:"Dongdaemun shopping landmark: malls and a night market, best after dark.",hours:"00:00–24:00 (varies per mall)",address:"253, Jangchungdan-ro, Jung-gu, Seoul"},
+  "vs-CNP024679":{why:"Design landmark in Dongdaemun with exhibitions, night views and events.",hours:"10:00-20:00 KST (varies by space)",address:"281, Euljiro, Jung-gu, Seoul"},
+  "vs-CNP002077":{why:"Itaewon street: international restaurants, bars and trendy shops.",hours:"Open all day (shops vary)",address:"Itaewon-ro, Yongsan-gu, Seoul"},
+  "vs-CNP2ts0gq":{why:"Hongdae's mural street — street art and a young atmosphere.",hours:"Always open",address:"72-36 Sangsu-dong, Mapo-gu, Seoul"},
+  "vs-CNP000286":{why:"One of Seoul's best-known traditional markets — street food and a night-market feel.",hours:"Daily 09:00 - 18:00 KST (closed Sundays)",address:"88 Changgyeonggung-ro, Jongno-gu, Seoul"},
+  "vs-CNPouf85a":{why:"A Seongsu landmark over the river — good sunset and night views.",hours:"Always open",address:"257 Gangbyeonbuk-ro, Seongdong-gu, Seoul"},
+  "vs-CNPnj8f9x":{why:"K-POP Square at COEX, next to the shopping district and the Starfield Library.",hours:"See the official website",address:"513, Yeongdong-daero, Gangnam-gu, Seoul"},
+  "vs-CNP002220":{why:"The Han River's signature night view — the Moonlight Rainbow Fountain on Banpo Bridge.",hours:"Several shows each evening (see website)",address:"649-1 Banpo-dong, Seocho-gu, Seoul"},
+  "vs-CNP012993":{why:"A Han River park popular with younger visitors for picnics, cycling and night views.",hours:"24 hours",address:"330 Yeouidong-ro, Yeongdeungpo-gu, Seoul"},
+  "vs-CNP016328":{why:"Lakeside night views next to Lotte World — good for a walk and photos.",hours:"24 hours",address:"136, Samhaksa-ro, Songpa-gu, Seoul"},
+  "vs-CNP000036":{why:"Seoul's signature night-view landmark on Namsan — popular with couples and visitors.",hours:"Weekdays 10:00-22:30, weekends 10:00-23:00",address:"105, Namsangwon-gil, Yongsan-gu, Seoul"},
+  "vs-CNP037008":{why:"A hanok alley full of converted cafés and small shops, popular in Jongno.",hours:"Always open (shops vary)",address:"17, Donhwamun-ro 11ga-gil, Jongno-gu, Seoul"}
+};
+const EN_STAYS={
+  s1:{name:"Near Olympic Park (sample hotel)",station:"Mongchontoseong Station",lines:["Line 8"]},
+  s2:{name:"Near Hongik Univ. (sample hotel)",station:"Hongik Univ. Station",lines:["Line 2","AREX","Gyeongui–Jungang Line"]},
+  s3:{name:"Near Itaewon (sample hotel)",station:"Itaewon Station",lines:["Line 6"]},
+  s4:{name:"Near Gangnam Station (sample hotel)",station:"Gangnam Station",lines:["Line 2","Shinbundang Line"]},
+  s5:{name:"Near Jongno / Gyeongbokgung (sample hotel)",station:"Gyeongbokgung Station",lines:["Line 3"]},
+  s6:{name:"Near Myeongdong (sample hotel)",station:"Myeongdong Station",lines:["Line 4"]},
+  s7:{name:"Near Yeouido (sample hotel)",station:"Yeouido Station",lines:["Line 5","Line 9"]},
+  s8:{name:"Near Dongdaemun / Euljiro (sample hotel)",station:"Dongdaemun History & Culture Park Station",lines:["Line 2","Line 4","Line 5"]},
+  s9:{name:"Near Jamsil / Lotte World (sample hotel)",station:"Jamsil Station",lines:["Line 2","Line 8"]}
+};
+const I18N={
+ zh:{
+  pageTitle:"兴趣旅行助手 · CORTIS × Seoul 流程原型",appName:"兴趣旅行助手",
+  headerBadge:"粉丝地点/观光点真实数据 · 站点间耗时来自 Transitous",
+  h1:"告诉 AI：你为什么想去首尔？",
+  hint:"直接说想法，例如：“我对 CORTIS 感兴趣，想去看演唱会，也想去他们去过的地方打卡，顺便在首尔旅行。”",
+  intentDefault:"我对 CORTIS 感兴趣。想去看他们的演唱会，也想去他们去过的地方打卡，同时想在首尔好好旅行几天。演唱会票已经订好，其他安排围着它转。",
+  send:"发送给 AI",reset:"重新开始",
+  reasonLabel:"AI 已理解 · 处理优先级",reasonTitle:"系统按这个顺序规划",
+  p0Title:"P0 · 演唱会（已锁定）",p0Desc:"演出日晚上不再排行程，前后留出交通、吃饭与休息。",
+  p1Title:"P1 · CORTIS 相关地点",p1Desc:"从社交媒体/粉丝社区收集，每条带来源与可信度；低置信度会提示“顺路再去”。",
+  p2Title:"P2 · 首尔观光",p2Desc:"官方观光点用于调剂，不让旅行变成纯打卡。",
+  poolFanLabel:"P1 · CORTIS 相关地点（候选）",
+  poolFanSub:"10 条真实 CORTIS 同款地点（来自你整理的资料，含来源链接）；点卡片查看证据链，再给地点标“必去”或“顺路再去”。",
+  poolSightLabel:"P2 · 首尔观光（可选）",
+  poolSightSub:"来自 VisitSeoul 官方 API 的真实地点；此处精选 14 处（明洞 / 东大门 / 梨泰院 / 弘大 / 汉江夜景等），完整数据已存入项目文件。",
+  hideLowOff:"隐藏低置信度：关",hideLowOn:"隐藏低置信度：开",
+  qLabel:"确认约束",qTitle:"告诉我日期、预算与住宿偏好",qHint:"这些是“硬约束”，路线会围着它们排（演示中日期为示例）。",
+  lblDays:"玩几天",days2:"2 天",days3:"3 天",days4:"4 天",days5:"5 天",days6:"6 天",days7:"7 天",
+  lblConcertDay:"演唱会第几天",dayOption1:"第 1 天",dayOption2:"第 2 天",dayOption3:"第 3 天",
+  lblPace:"节奏",paceRelaxed:"宽松",paceNormal:"适中",paceBusy:"紧凑",
+  lblBudget:"预算档位",budgetLow:"经济",budgetMid:"舒适",budgetHigh:"高品质",
+  lblArrival:"第一天到达",arrMorning:"上午",arrNoon:"中午",arrAfternoon:"下午",arrEvening:"晚上",
+  lblDeparture:"最后一天离开",depMorning:"早上",depNoon:"中午",depAfternoon:"下午",depEvening:"晚上",
+  lblStay:"住宿策略",stayNearby:"每晚就近换（含演唱会就近）",staySame:"全程同一家（省心）",stayConcert:"演唱会周边优先",
+  planBtn:"生成路线与住宿推荐",
+  planTitle:"你的首尔兴趣之旅",
+  planSub:"路线默认显示全部行程总览（深色连贯线）；可切换“按天分开”看每天不同颜色。紫色图钉是可选酒店，红点粉丝、蓝点观光，低置信度用⚠标出。",
+  modeAll:"全部行程总览",modeDay:"按天分开",
+  legendFan:"粉丝地点",legendSight:"观光点",legendHotel:"酒店",legendDash:"虚线为当日示意连线",
+  note:"路线由确定性排程引擎生成：地理聚类分天 + 最近邻排序 + 2-opt 优化，同一区域尽量放在同一天。住宿评分 = 当天路线总通勤 + 地铁线路数 + 换酒店打车距离（25 分钟内优先）；<b>次日有演唱会时，优先住场馆附近为最高优先级</b>。P1 粉丝地点已接入真实调研数据（部分坐标为区域/站点级，待人工核验）；<b>“多久到”来自 Transitous 的真实公共交通路线</b>（未覆盖的组合会标注为“估算”）；酒店仍为演示数据；P2 观光点为 VisitSeoul 官方真实数据（2026-09-10 抓取）。",
+  footer:"© 2026 Interest-Driven Travel Assistant · P1 粉丝地点来自用户整理的真实资料（含来源链接，部分坐标待核验）；P2 观光点来自 VisitSeoul 官方 API（英文名取自官方英文版）；站点间耗时来自 <a href=\"https://transitous.org/sources/\" target=\"_blank\" rel=\"noreferrer\">Transitous</a>（源数据 KTDB / OpenStreetMap）；酒店仍为演示数据。",
+  mapFallback:"地图组件需联网加载（Leaflet/OSM）。离线时查看文字排程。",
+  aiReply:"收到！我先按优先级处理：\n① P0 演唱会已锁定，周边安排会避开演出日晚间\n② P1 收集 CORTIS 相关地点（每条带来源与可信度，低置信度只建议“顺路再去”）\n③ P2 补充首尔观光点\n\n请先选择想去的地点：给地点标“必去”或“顺路再去”。",
+  mustDo:"必去",mustDone:"必去 ✓",onTheWayShort:"顺路",onTheWayDone:"顺路 ✓",add:"加入",added:"已加入 ✓",
+  evCount:(n)=>`证据 ${n} 条 · 点卡片查看原文`,warnSingle:"⚠ 单一来源未交叉验证",plainSight:"普通观光",
+  confHigh:"高置信度",confMedium:"中置信度",confLow:"低置信度",
+  typeVenue:"演唱会场地",typeCafe:"咖啡馆",typeRestaurant:"餐厅",typeShop:"同款店铺",typeCompany:"公司",typeAdSpot:"广告/快闪",typeFilming:"拍摄地",typePhoto:"打卡点",typeSight:"观光点",typeDefault:"同款地点",
+  drawerFan:"粉丝相关地点",drawerSight:"观光地点",evChain:"证据链（原文可点）",
+  srcOfficial:"官方来源",srcMedia:"媒体来源",srcCommunity:"社区来源",
+  lblClaim:"主张：",lblSource:"出处：",lblDate:"时间：",lblSummary:"摘要：",
+  noEvidence:"暂无证据",noEvidenceNote:"未找到可靠来源，不建议加入行程。",
+  visitseoul:"VisitSeoul 官方观光点",lblAddress:"地址：",lblOfficialPage:"官方页面：",lblOriginal:"原文：",openOfficial:"打开官方页面",
+  noArtist:"不关联艺人，无粉丝证据链；用于平衡行程。",
+  alertNoFan:"请至少把一个粉丝地点标为“必去”或“顺路”。",
+  paceShortBusy:"紧凑",paceShortRelaxed:"宽松",paceShortNormal:"适中",
+  constraint:(c)=>`已锁定：演唱会 Day ${c.concertDay} 19:00 · 共 ${c.days} 天 · ${c.pace}节奏 · ${c.budget}档 · ${c.arrival}到达 / 最后一天${c.departure}离开（示例）`,
+  dayHeader:(n)=>`Day ${n} · 示例日期 `,concertDayBadge:"演唱会日",
+  whyTitle:"为什么这样排：",connectLabel:"衔接：",
+  aiWhyTitle:"AI 推荐（基于证据）：",aiWhySource:"来源：",
+  legTransit:"实际路线",legWalk:"步行",legEstimate:"估算",legMinutes:(n)=>`${n} 分钟`,transfers:(n)=>` · 换乘 ${n} 次`,
+  locked:"已锁定",moveTo:(n)=>`移到 Day ${n}`,onTheWay:"顺路",
+  stayReasonSame:"全程同一家：离全程地点综合最近，并优先多线地铁。",
+  stayReasonConcert:"演唱会优先：演出日与前一晚优先靠近场馆。",
+  stayReasonNearby:"每晚就近换：按当天路线总通勤最短，优先多线地铁；若次日有演唱会，则优先住演出场馆附近（强约束）。",
+  restNote:"🎵 演唱会 19:00 开始；之后不再排景点，预留返程与休息时间。",
+  overflowTitle:"待定清单（按节奏暂时没排进去）",
+  overflowNote:"把上面某些安排移到其他天，或把节奏改为“紧凑”，可自动补入（原型简化规则）。",
+  riskLow:"⚠ 单一来源地点：行程紧可取消",lowConfTip:"（低置信度）",hotelPin:"宿",
+  routeLeg:(a,b,m,tag)=>` ${a}→${b} 约 ${m} 分钟（${tag}）；`
+  ,
+  navHome:"首页",navExplore:"灵感",navCreate:"创建行程",navAbout:"关于",navSearch:"搜索",navSaved:"收藏",
+  heroEyebrow:"✦ AI 旅行助手",heroTitleA:"Turn what you love",heroTitleB:"into where you go.",
+  heroSub:"围绕你的兴趣来规划一趟有意义的旅行——可能是一个艺人、一部影视、一家咖啡馆，或一条户外路线；同时也给你留出普通旅行的时间。",
+  intentPlaceholder:"你想为什么去旅行？",
+  searchHint:"可以写一整句话，比如“我想去看演唱会，也想去他们去过的地方”",
+  catFandom:"粉丝 / 演出",catFilm:"影视取景",catFood:"美食",catCafe:"咖啡馆",catHike:"徒步 / 户外",catMore:"更多",
+  catFandomShort:"粉丝",catFilmShort:"影视",catHikeShort:"徒步",
+  catNote:"演示数据目前只有 CORTIS × Seoul 这条垂直线；其他兴趣会走同一套流程（发现 → 选点 → 生成）。",
+  heroBadgeTitle:"CORTIS × Seoul · 首个垂直线",heroBadgeText:"演唱会 + 同款地点 + 普通首尔观光，排进同一份可行行程",
+  featuredTitle:"Featured Trips",featuredSub:"同一个引擎可以做很多种“为兴趣而旅行”——下面是第一个完成品和两个方向示例。",
+  tripTagLive:"可体验",tripGo:"开始 →",tripConcept:"方向示例",
+  trip1Desc:"演唱会 + 成员同款地点 + 普通首尔观光，按真实公交耗时排进一份 2–7 天行程。",
+  trip2Title:"《繁花》上海取景路线",trip2Desc:"同样的流程换一个兴趣：影视取景地 + 城市漫步，行程逻辑完全复用。",
+  trip3Title:"济州岛徒步之旅",trip3Desc:"把“兴趣”换成户外路线：徒步段、休息点与住宿推荐用同一套约束求解。",
+  createTitle:"Create Your Trip",createSub:"告诉我们你的兴趣和目的地，我们把“兴趣相关的地点”和“普通旅行”揉成一份能真的走完的行程。",
+  planDates:"示例日期 · 3 天",planTagFandom:"粉丝 + 旅行",planTagEvidence:"带证据与置信度",
+  planEdit:"编辑",planSave:"保存",planShare:"分享",dayAll:"全部",
+  mapTitle:"你的兴趣地图",mapSub:"点任意图钉查看地点卡片：来源、置信度、为什么推荐；地图可以按天拆分查看。",
+  placeDetails:"查看详情",toastSaved:"已保存到这台设备",toastShared:"链接已复制",
+  aboutTitle:"How it works",aboutSub:"从兴趣出发，而不是从目的地出发——这是这个产品的核心。",
+  about1Title:"① 兴趣 → 地点",about1Desc:"从一个兴趣（艺人、影视、美食、徒步）出发，找到与之相关的地点，每条都带来源与置信度。",
+  about2Title:"② 我来选，系统来排",about2Desc:"你只负责“想去哪些”，排程交给确定性引擎：地理聚类分天、最近邻 + 2-opt 排序、真实公交耗时与硬约束。",
+  about3Title:"③ 兴趣 + 普通旅行",about3Desc:"官方观光点与粉丝地点混排，行程里既有同款打卡，也有正常的城市漫步——兴趣是加分项，不是全部。",
+  about4Title:"④ 说得清的数据来源",about4Desc:"观光点来自 VisitSeoul 官方 API（含官方英文名）；耗时来自 Transitous 真实公交；粉丝地点取自公开资料并保留原始链接。",
+  chipTextFandom:"我对 CORTIS 感兴趣，想去看演唱会，也想去他们去过的地方打卡，顺便在首尔旅行。",
+  chipTextFilm:"我想走一遍某部影视剧的取景地，同时正常玩几天。",
+  chipTextFood:"我想按照一座城市的特色美食规划一条路线。",
+  chipTextCafe:"我想找一条好的咖啡馆路线，慢慢逛。",
+  chipTextHike:"我想以徒步/户外路线为主，安排几天的行程。",
+  chipTextMore:"我想围绕一个自己的兴趣安排一趟旅行。"
+ },
+ en:{
+  pageTitle:"Interest-Driven Travel Assistant · CORTIS × Seoul prototype",appName:"Interest-Driven Travel Assistant",
+  headerBadge:"Real fan-place & sightseeing data · travel times from Transitous",
+  h1:"Tell the AI: why do you want to go to Seoul?",
+  hint:"Just say it in your own words — e.g. “I'm into CORTIS, I'm going to their concert, and I'd like to visit the places they've been to while I'm in Seoul.”",
+  intentDefault:"I'm into CORTIS. I'm going to their concert and I'd also like to visit the places they've been to, while still having a proper trip in Seoul. My concert ticket is booked — everything else works around it.",
+  send:"Send",reset:"Start over",
+  reasonLabel:"AI understood · planning priorities",reasonTitle:"The system plans in this order",
+  p0Title:"P0 · Concert (locked)",p0Desc:"Nothing else is scheduled on show night; buffer time is left for transit, dinner and rest.",
+  p1Title:"P1 · CORTIS-related places",p1Desc:"Collected from social media and fan communities; every entry carries a source and a confidence level. Low-confidence spots are only suggested as “if it's on the way”.",
+  p2Title:"P2 · Seoul sightseeing",p2Desc:"Official sightseeing spots keep the trip balanced, so it doesn't turn into a checklist.",
+  poolFanLabel:"P1 · CORTIS-related places (candidates)",
+  poolFanSub:"10 real CORTIS-related places (from collected sources, with links). Open a card to see the evidence chain, then mark it “must-go” or “nice-to-have”.",
+  poolSightLabel:"P2 · Seoul sightseeing (optional)",
+  poolSightSub:"Real places from the official VisitSeoul API — 14 selected here (Myeongdong, Dongdaemun, Itaewon, Hongdae, Han River night views and more).",
+  hideLowOff:"Hide low confidence: off",hideLowOn:"Hide low confidence: on",
+  qLabel:"Confirm constraints",qTitle:"Set your days, budget and lodging preference",qHint:"These are hard constraints the route is built around (dates are illustrative in this demo).",
+  lblDays:"Days",days2:"2 days",days3:"3 days",days4:"4 days",days5:"5 days",days6:"6 days",days7:"7 days",
+  lblConcertDay:"Concert on day",dayOption1:"Day 1",dayOption2:"Day 2",dayOption3:"Day 3",
+  lblPace:"Pace",paceRelaxed:"Relaxed",paceNormal:"Balanced",paceBusy:"Packed",
+  lblBudget:"Budget",budgetLow:"Budget",budgetMid:"Comfort",budgetHigh:"Premium",
+  lblArrival:"Arrive on day 1",arrMorning:"Morning",arrNoon:"Noon",arrAfternoon:"Afternoon",arrEvening:"Evening",
+  lblDeparture:"Leave on the last day",depMorning:"Morning",depNoon:"Noon",depAfternoon:"Afternoon",depEvening:"Evening",
+  lblStay:"Lodging",stayNearby:"Move nightly (closest to each day)",staySame:"Same hotel throughout",stayConcert:"Prioritise concert-area hotels",
+  planBtn:"Generate itinerary & lodging",
+  planTitle:"Your interest-driven Seoul trip",
+  planSub:"The map shows the whole trip as one line by default; switch to “By day” for daily colours. Purple pins are optional hotels, red dots are fan places, blue dots are sightseeing — low-confidence entries are flagged with ⚠.",
+  modeAll:"Whole trip",modeDay:"By day",
+  legendFan:"Fan places",legendSight:"Sightseeing",legendHotel:"Hotels",legendDash:"Dashed lines are same-day connections",
+  note:"The route comes from a deterministic scheduling engine: geographic clustering by day + nearest-neighbour ordering + 2-opt optimisation, keeping each area together. Lodging score = total travel time on that day + number of subway lines + taxi distance when changing hotels (under 25 minutes preferred); <b>when the next day has a concert, staying near the venue is the top priority</b>. P1 fan places use real collected data (some coordinates are area/station level, pending manual verification); <b>travel times come from real public-transit routing via Transitous</b> (uncovered pairs are marked “estimate”); hotels are still sample data; P2 sightseeing places are official VisitSeoul data (fetched 2026-09-10, English names from the official English version).",
+  footer:"© 2026 Interest-Driven Travel Assistant · P1 fan places come from collected public sources (with links; some coordinates pending verification); P2 sightseeing places come from the official VisitSeoul API (English names from the official English version); travel times come from <a href=\"https://transitous.org/sources/\" target=\"_blank\" rel=\"noreferrer\">Transitous</a> (KTDB / OpenStreetMap); hotels remain sample data.",
+  mapFallback:"The map needs a network connection (Leaflet / OSM). Offline, read the itinerary below.",
+  aiReply:"Got it. Here's how I'll handle it:\n① P0 — the concert is locked, and the days around it avoid late scheduling\n② P1 — collect CORTIS-related places (each with a source and a confidence level; low confidence is only suggested as “if it's on the way”)\n③ P2 — add Seoul sightseeing\n\nFirst, pick the places you want: mark them “must-go” or “nice-to-have”.",
+  mustDo:"Must-go",mustDone:"Must-go ✓",onTheWayShort:"On the way",onTheWayDone:"On the way ✓",add:"Add",added:"Added ✓",
+  evCount:(n)=>`${n} source${n>1?"s":""} · tap the card for the original`,warnSingle:"⚠ Single source, not cross-checked",plainSight:"Sightseeing",
+  confHigh:"high confidence",confMedium:"medium confidence",confLow:"low confidence",
+  typeVenue:"Concert venue",typeCafe:"Café",typeRestaurant:"Restaurant",typeShop:"Same-as-artist shop",typeCompany:"Company office",typeAdSpot:"Ad / pop-up",typeFilming:"Filming location",typePhoto:"Photo spot",typeSight:"Sightseeing",typeDefault:"Related place",
+  drawerFan:"Fan-related place",drawerSight:"Sightseeing place",evChain:"Evidence chain (sources are clickable)",
+  srcOfficial:"Official source",srcMedia:"Media source",srcCommunity:"Community source",
+  lblClaim:"Claim: ",lblSource:"Source: ",lblDate:"Date: ",lblSummary:"Summary: ",
+  noEvidence:"No evidence yet",noEvidenceNote:"No reliable source found — not recommended for the itinerary.",
+  visitseoul:"Official VisitSeoul sightseeing place",lblAddress:"Address: ",lblOfficialPage:"Official page: ",lblOriginal:"Original: ",openOfficial:"Open official page",
+  noArtist:"Not tied to any artist and has no fan evidence chain; used to balance the trip.",
+  alertNoFan:"Please mark at least one fan place as “must-go” or “on the way”.",
+  paceShortBusy:"packed",paceShortRelaxed:"relaxed",paceShortNormal:"balanced",
+  constraint:(c)=>`Locked: concert on Day ${c.concertDay} at 19:00 · ${c.days} days · ${c.pace} pace · ${c.budget} · arriving ${c.arrival}, leaving ${c.departure} on the last day (illustrative)`,
+  dayHeader:(n)=>`Day ${n} · sample date `,concertDayBadge:"Concert day",
+  whyTitle:"Why this order: ",connectLabel:"Connections: ",
+  aiWhyTitle:"AI recommendation (evidence-based): ",aiWhySource:"Source: ",
+  legTransit:"real route",legWalk:"walk",legEstimate:"estimate",legMinutes:(n)=>`${n} min`,transfers:(n)=>` · ${n} transfer${n>1?"s":""}`,
+  locked:"locked",moveTo:(n)=>`Move to Day ${n}`,onTheWay:"on the way",
+  stayReasonSame:"Same hotel throughout: closest to all places overall, with a preference for multi-line subway stations.",
+  stayReasonConcert:"Concert-first: the show day and the night before stay near the venue.",
+  stayReasonNearby:"Move nightly: shortest total travel for that day's route, preferring multi-line stations; if the next day has a concert, the venue area wins (hard constraint).",
+  restNote:"🎵 Concert starts at 19:00; nothing else is scheduled afterwards, leaving time to get back and rest.",
+  overflowTitle:"Not scheduled yet (didn't fit the pace)",
+  overflowNote:"Move some items to another day, or switch the pace to “Packed”, and they will be filled in automatically (simplified prototype rule).",
+  riskLow:"⚠ Single-source place: skip it if the schedule is tight",lowConfTip:" (low confidence)",hotelPin:"H",
+  routeLeg:(a,b,m,tag)=>` ${a}→${b} ≈ ${m} min (${tag}); `
+  ,
+  navHome:"Home",navExplore:"Explore",navCreate:"Create trip",navAbout:"About",navSearch:"Search",navSaved:"Saved places",
+  heroEyebrow:"✦ AI travel assistant",heroTitleA:"Turn what you love",heroTitleB:"into where you go.",
+  heroSub:"An AI travel assistant that plans meaningful trips around your interests — an artist, a film, a café, an outdoor route — and still leaves room for an ordinary holiday.",
+  intentPlaceholder:"What are you interested in?",
+  searchHint:"A full sentence works — e.g. “I'm going to a concert and want to visit the places they've been to”",
+  catFandom:"Fandom & gigs",catFilm:"Film & TV",catFood:"Food",catCafe:"Café",catHike:"Hiking",catMore:"More",
+  catFandomShort:"Fandom",catFilmShort:"Film & TV",catHikeShort:"Hiking",
+  catNote:"The demo data covers one vertical for now — CORTIS × Seoul. Other interests run through the same flow: discover → choose → generate.",
+  heroBadgeTitle:"CORTIS × Seoul · first vertical",heroBadgeText:"Concert + member spots + ordinary Seoul sightseeing, in one feasible itinerary",
+  featuredTitle:"Featured Trips",featuredSub:"The same engine works for many kinds of interest-driven travel — one live demo and two directions.",
+  tripTagLive:"Live demo",tripGo:"Start →",tripConcept:"Direction",
+  trip1Desc:"Concert + places the members have been to + ordinary Seoul sightseeing, scheduled with real transit times over 2–7 days.",
+  trip2Title:"Blossoms Shanghai filming route",trip2Desc:"Same flow, different interest: filming locations woven into a city walk.",
+  trip3Title:"Jeju hiking trip",trip3Desc:"Swap the interest for an outdoor route: hikes, rest stops and lodging solved with the same constraints.",
+  createTitle:"Create Your Trip",createSub:"Tell us your interest and where you're going. We'll blend interest-related places with ordinary travel into an itinerary you can actually walk.",
+  planDates:"Sample dates · 3 days",planTagFandom:"Fandom + travel",planTagEvidence:"Evidence & confidence",
+  planEdit:"Edit",planSave:"Save",planShare:"Share",dayAll:"All days",
+  mapTitle:"Your Interest Map",mapSub:"Tap any pin for a place card: source, confidence, why it's recommended. The map can be split by day.",
+  placeDetails:"View details",toastSaved:"Saved on this device",toastShared:"Link copied",
+  aboutTitle:"How it works",aboutSub:"Start from an interest, not from a destination — that's the core of the product.",
+  about1Title:"① Interest → places",about1Desc:"Start from an interest (an artist, a film, food, hiking) and find the places tied to it — each with a source and a confidence level.",
+  about2Title:"② You choose, the engine schedules",about2Desc:"You only pick what you want. Scheduling is deterministic: geographic clustering by day, nearest-neighbour + 2-opt ordering, real transit times and hard constraints.",
+  about3Title:"③ Interest + ordinary travel",about3Desc:"Official sightseeing and fan places are mixed, so the trip has both the pilgrimage moments and a normal city walk.",
+  about4Title:"④ Sources you can check",about4Desc:"Sightseeing from the official VisitSeoul API (with official English names); travel times from Transitous; fan places from public sources with original links.",
+  chipTextFandom:"I'm into CORTIS, I'm going to their concert, and I'd like to visit the places they've been to while I'm in Seoul.",
+  chipTextFilm:"I want to walk the filming locations of a film or series, and travel normally for a few days too.",
+  chipTextFood:"I want to plan a route around a city's signature food.",
+  chipTextCafe:"I want a good café route and a relaxed pace.",
+  chipTextHike:"I want an outdoor/hiking-focused trip for a few days.",
+  chipTextMore:"I want to build a trip around an interest of mine."
+ }
+};
+let LANG=(()=>{try{const s=localStorage.getItem("lang");if(s==="zh"||s==="en")return s;}catch(e){}return (navigator.language||"").toLowerCase().startsWith("en")?"en":"zh";})();
+/* 观光点官方配图（VisitSeoul 官方接口，data/visitseoul-selection.json 里的 imageUrl） */
+const PLACE_IMAGES={
+  "vs-CNP000067":"https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&parentSn=66476&fileTy=MEDIA&fileNo=3&thumbTy=M",
+  "vs-CNP015338":"https://api.visitseoul.net/comm/getImage?srvcId=POST&parentSn=15383&fileTy=POSTTHUMB&fileNo=1&thumbTy=M&postTy=P",
+  "vs-CNP000061":"https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&parentSn=77128&fileTy=MEDIA&fileNo=1&thumbTy=M",
+  "vs-CNP024679":"https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&parentSn=68048&fileTy=MEDIA&fileNo=1&thumbTy=M",
+  "vs-CNP002077":"https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&parentSn=66788&fileTy=MEDIA&fileNo=2&thumbTy=M",
+  "vs-CNP2ts0gq":"https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&parentSn=81754&fileTy=MEDIA&fileNo=1&thumbTy=M",
+  "vs-CNP000286":"https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&parentSn=77093&fileTy=MEDIA&fileNo=1&thumbTy=M",
+  "vs-CNPouf85a":"https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&parentSn=68511&fileTy=MEDIA&fileNo=2&thumbTy=M",
+  "vs-CNPnj8f9x":"https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&parentSn=74460&fileTy=MEDIA&fileNo=1&thumbTy=M",
+  "vs-CNP002220":"https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&parentSn=17046&fileTy=MEDIA&fileNo=2&thumbTy=M",
+  "vs-CNP012993":"https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&parentSn=72612&fileTy=MEDIA&fileNo=1&thumbTy=M",
+  "vs-CNP016328":"https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&parentSn=72614&fileTy=MEDIA&fileNo=1&thumbTy=M",
+  "vs-CNP000036":"https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&parentSn=68273&fileTy=MEDIA&fileNo=3&thumbTy=M",
+  "vs-CNP037008":"https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&parentSn=77270&fileTy=MEDIA&fileNo=1&thumbTy=M"
+};
+const TYPE_EMOJI={venue:"🎤",cafe:"☕",restaurant:"🍴",shop:"🛍",company:"🏢",ad_spot:"✨",filming_location:"🎬",photo_spot:"📸",sightseeing:"🏛"};
+function t(k,...a){const s=(I18N[LANG]&&I18N[LANG][k]!==undefined)?I18N[LANG][k]:I18N.zh[k];return typeof s==="function"?s(...a):(s!==undefined?s:k);}
+function pname(p){return LANG==="en"?(EN_PLACES[p.id]||p.name):p.name;}
+function dname(d){return LANG==="en"?(EN_DISTRICTS[d]||d):d;}
+function stayField(s,field){if(LANG!=="en")return field==="lines"?(s.lines||[]):s[field];const e=EN_STAYS[s.id];return e?(field==="lines"?(e.lines||[]):e[field]):(field==="lines"?(s.lines||[]):s[field]);}
+function lineName(raw){
+  const s=String(raw||"");
+  if(LANG!=="en")return s;
+  // legInfo 会带上 🚇 / 🚌 前缀，取名字部分去查表再拼回前缀
+  const prefix=(s.match(/^[^A-Za-z0-9\uAC00-\uD7AF\u4E00-\u9FFF]*/)||[""])[0];
+  const name=s.slice(prefix.length);
+  return prefix+(EN_LINES[name]||name);
+}
+function pwhy(p){return LANG==="en"?(EN_DETAILS[p.id]?.why||p.why):p.why;}
+function phours(p){return LANG==="en"?(EN_DETAILS[p.id]?.hours||p.hours):p.hours;}
+function paddr(p){return LANG==="en"?(EN_DETAILS[p.id]?.address||p.address):p.address;}
+function answerOf(p){return (window.PLACE_ANSWERS&&window.PLACE_ANSWERS.answers&&window.PLACE_ANSWERS.answers[p.id])||null;}
+function pAnswer(p){const a=answerOf(p);const s=a&&(LANG==="en"?a.en:a.zh);return s||pwhy(p);}
+function aiBlock(p){const a=answerOf(p);if(!a)return `<p style="color:var(--muted);font-size:14px">${esc(pwhy(p))}</p>`;const srcs=(Array.isArray(a.sources)?a.sources:[]).map((u)=>`<div class="row"><b>${t("aiWhySource")}</b><a href="${esc(u)}" target="_blank" rel="noreferrer">${esc(u)}</a></div>`).join("");return `<div class="ev" style="margin:8px 0 4px"><div class="src">${t("aiWhyTitle")}</div><div class="row">${esc(LANG==="en"?a.en:a.zh)}</div>${srcs}</div>`;}
+
+function syncConcertOptions(){
+  const days=Number($("days-select").value);
+  const prev=Number($("concert-select").value);
+  const keep=Math.min(Math.max(prev,0),days-1);
+  $("concert-select").innerHTML=Array.from({length:days},(_,i)=>`<option value="${i}" ${i===keep?"selected":""}>${dayLabel(i+1)}</option>`).join("");
+}
+$("days-select").addEventListener("change",syncConcertOptions);
+syncConcertOptions();
+
+function esc(s){return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function confLabel(c){return (!c||c==="plain")?t("plainSight"):t("conf"+String(c).charAt(0).toUpperCase()+String(c).slice(1));}
+function confBadge(p){return p.conf?`<span class="badge ${(CONF[p.conf]||{cls:"plain"}).cls}">${confLabel(p.conf)}</span>`:`<span class="badge plain">${t("plainSight")}</span>`;}
+function typeName(p){const m={venue:"typeVenue",cafe:"typeCafe",restaurant:"typeRestaurant",shop:"typeShop",company:"typeCompany",ad_spot:"typeAdSpot",filming_location:"typeFilming",photo_spot:"typePhoto",sightseeing:"typeSight"};return t(m[p.type]||"typeDefault");}
+function bubble(kind,text,key){bubbleLog.push({kind,text,key});const el=document.createElement("div");el.className="bubble "+kind;el.textContent=key?t(key):text;$("bubbles").appendChild(el);$("bubbles").scrollIntoView({behavior:"smooth",block:"end"});}
+
+function startFlow(){
+  const text=$("intent-input").value.trim()||t("intentDefault");
+  bubble("user",text);
+  $("send-btn").disabled=true;
+  setTimeout(()=>{
+    bubble("ai","", "aiReply");
+    $("reasoning").style.display="block";
+    $("pools").style.display="block";
+    renderPools();
+    showQuestions(false);
+    $("pools").scrollIntoView({behavior:"smooth",block:"start"});
+  },500);
+}
+
+function visibleFan(){return PLACES.filter(p=>p.pool==="fan"&&(!state.hideLow||p.conf!=="low"));}
+function isMust(id){return state.must.has(id);}
+function isPicked(pool,id){return pool==="fan"?state.fan.has(id):state.sight.has(id);}
+
+function cardHtml(p){
+  const isFan=p.pool==="fan";
+  const on=isFan?state.fan.has(p.id):state.sight.has(p.id);
+  let actions="";
+  if(isFan){
+    const must=isMust(p.id);
+    actions=`<div class="card-actions">
+      <button class="mini-btn must ${must?"on":""}" data-fan="${p.id}" data-mode="must">${must?t("mustDone"):t("mustDo")}</button>
+      <button class="mini-btn opt ${(!must&&on)?"on":""}" data-fan="${p.id}" data-mode="opt">${(!must&&on)?t("onTheWayDone"):t("onTheWayShort")}</button>
+    </div>`;
+  }else{
+    actions=`<div class="card-actions"><button class="mini-btn added ${on?"on":""}" data-sight="${p.id}">${on?t("added"):t("add")}</button></div>`;
+  }
+  const evText=isFan?`<br/>${t("evCount",p.evidence.length)}`:"";
+  const noteText=LANG==="en"?(EN_NOTES[p.id]||p.note):p.note;
+  const warn=p.note?'<div class="risk-note">⚠ '+esc(noteText)+'</div>':p.conf==="low"?`<div class="risk-note">${t("warnSingle")}</div>`:"";
+  return `<article class="card" data-id="${p.id}"><h3>${esc(pname(p))}</h3><div class="tag">${typeName(p)} · ${dname(p.district)} ${confBadge(p)}</div><div class="meta">${esc(phours(p))}${evText}</div>${warn}${actions}</article>`;
+}
+
+function renderPools(){
+  const fans=visibleFan();
+  $("fan-cards").innerHTML=fans.map(cardHtml).join("");
+  $("sight-cards").innerHTML=PLACES.filter(p=>p.pool==="sight").map(cardHtml).join("");
+  document.querySelectorAll("[data-fan]").forEach(btn=>btn.addEventListener("click",ev=>{ev.stopPropagation();toggleFan(btn.dataset.fan,btn.dataset.mode);}));
+  document.querySelectorAll("[data-sight]").forEach(btn=>btn.addEventListener("click",ev=>{ev.stopPropagation();toggleSight(btn.dataset.sight);}));
+  document.querySelectorAll(".card").forEach(c=>c.addEventListener("click",()=>openDrawer(c.dataset.id)));
+}
+
+function toggleFan(id,mode){
+  const p=PLACES.find(x=>x.id===id);
+  if(mode==="must"){
+    state.fan.add(id);
+    if(state.must.has(id)){state.must.delete(id);}else{state.must.add(id);}
+  }else{
+    if(state.fan.has(id)){state.fan.delete(id);state.must.delete(id);}
+    else{state.fan.add(id);state.must.delete(id);}
+  }
+  renderPools();
+}
+function toggleSight(id){
+  state.sight.has(id)?state.sight.delete(id):state.sight.add(id);
+  renderPools();
+}
+function showQuestions(scroll=false){$("questions").style.display="block";if(scroll)$("questions").scrollIntoView({behavior:"smooth",block:"start"});}
+
+function openDrawer(id){
+  const p=PLACES.find(x=>x.id===id);if(!p)return;
+  currentDrawer=id;
+  const noteText=LANG==="en"?(EN_NOTES[p.id]||p.note):p.note;
+  let body=`<span class="step-label ${p.pool==="fan"?"orange":"blue"}">${p.pool==="fan"?t("drawerFan"):t("drawerSight")}</span><h2 style="font-size:18px">${esc(pname(p))}</h2>${p.nameLocal?`<div style="color:var(--muted);font-size:13px;margin-bottom:4px">${esc(p.nameLocal)}</div>`:""}<div class="tag" style="margin-bottom:8px">${dname(p.district)} · ${esc(phours(p))} ${confBadge(p)}</div>${aiBlock(p)}${p.note?`<div class="risk-note">⚠ ${esc(noteText)}</div>`:""}${LANG==="en"?'<p style="color:var(--muted);font-size:12px">Evidence quotes below are kept in the original language they were collected in (Chinese).</p>':""}`;
+  if(p.pool==="fan"&&p.evidence.length){
+    body+=`<h3 style="font-size:15px;margin:12px 0 6px">${t("evChain")}</h3>`+p.evidence.map(ev=>{
+      const typeLabel=ev.srcType==="official"?t("srcOfficial"):ev.srcType==="media"?t("srcMedia"):t("srcCommunity");
+      return `<div class="ev"><div class="src">${typeLabel} · ${t("conf"+String(ev.conf||"high").charAt(0).toUpperCase()+String(ev.conf||"high").slice(1))}</div><div class="row"><b>${t("lblClaim")}</b>${esc(ev.claim)}</div><div class="row"><b>${t("lblSource")}</b>${esc(ev.src)}</div><div class="row"><b>${t("lblDate")}</b>${esc(ev.date||"—")}</div><div class="row"><b>${t("lblSummary")}</b>${esc(ev.summary)}</div><div class="row"><b>${t("lblOriginal")}</b><a href="${esc(ev.url)}" target="_blank" rel="noreferrer">${esc(ev.url)}</a></div></div>`;
+    }).join("");
+  }else if(p.pool==="fan"){
+    body+=`<div class="ev"><div class="src">${t("noEvidence")}</div><div class="row">${t("noEvidenceNote")}</div></div>`;
+  }else{
+    body+=`<div class="ev"><div class="src">${t("visitseoul")}</div>${paddr(p)?`<div class="row"><b>${t("lblAddress")}</b>${esc(paddr(p))}</div>`:""}<div class="row">${t("noArtist")}</div>${p.officialUrl?`<div class="row"><b>${t("lblOfficialPage")}</b><a href="${esc(p.officialUrl)}" target="_blank" rel="noreferrer">${t("openOfficial")}</a></div>`:""}</div>`;
+  }
+  $("drawer-body").innerHTML=body;
+  $("drawer").classList.add("open");$("drawer-mask").style.display="block";
+}
+function closeDrawer(){$("drawer").classList.remove("open");$("drawer-mask").style.display="none";currentDrawer=null;}
+
+const distKm=RouteAlgo.distKm,roughMin=RouteAlgo.roughMin,roughMinSource=RouteAlgo.roughMinSource,legInfo=RouteAlgo.legInfo;
+
+function buildPlan(){
+  const days=Number($("days-select").value),concertDay=Number($("concert-select").value);
+  const cap=$("pace-select").value==="busy"?5:$("pace-select").value==="relaxed"?3:4;
+  const fanSelected=PLACES.filter(p=>p.pool==="fan"&&state.fan.has(p.id)&&(!state.hideLow||p.conf!=="low"));
+  const sightSelected=PLACES.filter(p=>p.pool==="sight"&&state.sight.has(p.id));
+  if(!fanSelected.length){alert(t("alertNoFan"));return;}
+  const concert=fanSelected.find(p=>p.type==="venue")||fanSelected[0];
+  const otherFan=fanSelected.filter(p=>p.id!==concert.id);
+  const otherSight=sightSelected.slice();
+  const mustFan=otherFan.filter(p=>state.must.has(p.id));
+  const optionalFan=otherFan.filter(p=>!state.must.has(p.id));
+  // 确定性排程：地理聚类分天 → 最近邻 + 2-opt 排序 → 按时间安排 → 酒店由当天行程距离决定
+  mustFan.forEach(p=>{p._priority=2;});
+  optionalFan.forEach(p=>{p._priority=1;});
+  otherSight.forEach(p=>{p._priority=0;});
+  const points=[...mustFan,...optionalFan,...otherSight];
+  const plan=RouteAlgo.planDays({points,days,concertDay,concertPoint:concert,cap});
+  const buckets=Array.from({length:days},()=>[]);
+  const overflow=[...plan.overflow];
+  const paceValue=$("pace-select").value;
+  const arrival=$("arrival-select").value;
+  const firstStart=arrival==="morning"?10*60:arrival==="afternoon"?13*60:arrival==="evening"?16*60:11*60+30;
+  const hotels=[];
+  const stayMode=$("stay-mode").value;
+  plan.buckets.forEach((places,d)=>{
+    const prevHotel=d>0?hotels[d-1]:null;
+    const isConcertDay=d===concertDay;
+    const isNightBefore=d+1===concertDay;
+    const hotel=(stayMode==="same"&&hotels[0])?hotels[0]:chooseHotel(places,{prevHotel,isConcertDay,isNightBefore,concertPoint:concert,mode:stayMode});
+    hotels[d]=hotel;
+    const ordered=RouteAlgo.orderRoute(places,hotel,d===concertDay?concert:null);
+    const scheduled=RouteAlgo.scheduleDay(ordered,{startPoint:hotel,startMinutes:d===0?firstStart:9*60+30,pace:paceValue,isConcertDay:d===concertDay,concertPoint:concert});
+    buckets[d]=scheduled.items;
+    scheduled.overflow.forEach(p=>{overflow.push(p);});
+    if(d===concertDay&&!buckets[d].some(x=>x.locked))buckets[d].push({place:concert,time:"19:00",locked:true});
+  });
+  buckets.forEach(b=>b.sort((a,c)=>(a.time||"").localeCompare(c.time||"")));
+  state.hotel={};hotels.forEach((h,d)=>{state.hotel[d]=h.id;});
+  state.lastPlan={days,buckets,concertDay,overflow,hotels:hotels.map(h=>h.id)};
+  renderPlan(false);
+  $("plan").style.display="block";
+  updateConstraintSummary();
+  setTimeout(()=>{$("plan").scrollIntoView({behavior:"smooth",block:"start"});},60);
+}
+
+/** 约束摘要（切语言时也要跟着刷新，所以单独抽出来） */
+function updateConstraintSummary(){
+  const p=state.lastPlan;if(!p)return;
+  const cap1=s=>String(s).charAt(0).toUpperCase()+String(s).slice(1);
+  const pace=$("pace-select").value==="busy"?t("paceShortBusy"):$("pace-select").value==="relaxed"?t("paceShortRelaxed"):t("paceShortNormal");
+  const budgetKey={budget:"budgetLow",comfort:"budgetMid",premium:"budgetHigh"}[$("budget-select").value]||"budgetMid";
+  $("constraint-summary").textContent=t("constraint",{concertDay:p.concertDay+1,days:p.days,pace,budget:t(budgetKey),arrival:t("arr"+cap1($("arrival-select").value)),departure:t("dep"+cap1($("departure-select").value))});
+}
+
+function hotelScore(stay,points){return points.reduce((s,x)=>s+distKm(stay,x),0);}
+function defaultHotel(points,mode,concertPoint){
+  let sorted=[...STAYS].sort((a,b)=>hotelScore(a,points)-hotelScore(b,points));
+  if(mode==="concert")sorted=[...STAYS].sort((a,b)=>distKm(a,concertPoint)-distKm(b,concertPoint));
+  return sorted[0];
+}
+function taxiMin(a,b){return Math.max(6,Math.round(distKm(a,b)*3.2));}
+function chooseHotel(points,{prevHotel,isConcertDay,isNightBefore,concertPoint,mode}){
+  let best=null,bestScore=Infinity;
+  STAYS.forEach(stay=>{
+    const ordered=RouteAlgo.orderRoute(points,stay,null);
+    let travel=0;
+    if(ordered.length){
+      travel+=roughMin(stay,ordered[0]);
+      for(let i=0;i<ordered.length-1;i++)travel+=roughMin(ordered[i],ordered[i+1]);
+      travel+=roughMin(ordered[ordered.length-1],stay)*0.7;
+    }
+    let score=travel;
+    // 1) 靠近地铁：线路越多越方便
+    score-=Math.min(3,(stay.lines||[]).length)*3;
+    // 2) 换酒店：行李打车 25 分钟内可接受，太远逐步惩罚
+    if(prevHotel&&prevHotel.id!==stay.id){
+      const km=distKm(prevHotel,stay);
+      const taxi=taxiMin(prevHotel,stay);
+      const factor=(isConcertDay||isNightBefore)?0.3:1;
+      if(km>12)score+=60*factor;
+      else if(taxi>25)score+=(taxi-25)*2.2*factor;
+    }
+    // 3) 演唱会硬约束：次日有演出时最强，当天其次
+    if(concertPoint){
+      if(isNightBefore)score+=distKm(stay,concertPoint)*45;
+      if(isConcertDay)score+=distKm(stay,concertPoint)*30;
+      if(mode==="concert")score+=distKm(stay,concertPoint)*12;
+    }
+    // 4) 全程同一家策略：换店额外惩罚
+    if(mode==="same"&&prevHotel&&prevHotel.id!==stay.id)score+=25;
+    if(score<bestScore){bestScore=score;best=stay;}
+  });
+  return best||STAYS[0];
+}
+function renderPlan(resetHotels){
+  const {days,buckets,concertDay,overflow}=state.lastPlan;
+  buckets.forEach(b=>b.sort((a,c)=>(a.time||"").localeCompare(c.time||"")));
+  const mode=$("stay-mode").value;
+  const allPoints=buckets.flat().filter(x=>x.place).map(x=>x.place);
+  const concert=buckets[concertDay].find(x=>x.locked)?.place||allPoints[0];
+  if(resetHotels){state.hotel={};buckets.forEach((b,d)=>{const pts=b.filter(x=>x.place).map(x=>x.place);state.hotel[d]=defaultHotel(pts.length?pts:allPoints,mode,concert).id;});}
+  let html="";
+  buckets.forEach((items,d)=>{
+    if(state.dayFilter!==null&&state.dayFilter!==d)return;
+    const pts=items.filter(x=>x.place).map(x=>x.place);
+    let hotelOptions=[...STAYS];
+    if(mode==="concert")hotelOptions.sort((a,b)=>distKm(a,concert)-distKm(b,concert));
+    else if(mode==="same")hotelOptions.sort((a,b)=>hotelScore(a,allPoints)-hotelScore(b,allPoints));
+    else hotelOptions.sort((a,b)=>hotelScore(a,pts)-hotelScore(b,pts));
+    const chosen=STAYS.find(s=>s.id===state.hotel[d])||hotelOptions[0];
+    const sLines=stayField(chosen,"lines").map(lineName);
+    const stationInfo=stayField(chosen,"station")?` · ${stayField(chosen,"station")}${sLines.length?"（"+sLines.join("/")+"）":""}`:"";
+    const reason=t(mode==="same"?"stayReasonSame":mode==="concert"?"stayReasonConcert":"stayReasonNearby");
+    html+=`<div class="day-card"><h3>${t("dayHeader",d+1)}${d===concertDay?`<span class='badge high'>${t("concertDayBadge")}</span>`:""}</h3>`;
+    const whyParts=items.filter(x=>x.place&&!x.locked).slice(0,2).map(x=>pAnswer(x.place));
+    let routeWhy="";
+    for(let i=0;i<items.length-1;i++){const a=items[i].place,b=items[i+1].place;if(a&&b&&!items[i+1].locked){const src=roughMinSource(a,b);const tag=t(src==="transit"?"legTransit":src==="walk-estimate"?"legWalk":"legEstimate");routeWhy+=t("routeLeg",dname(a.district),dname(b.district),roughMin(a,b),tag);}}
+    if(whyParts.length||routeWhy)html+=`<div class="why">${t("whyTitle")}${whyParts.slice(0,2).join(" ")}${routeWhy?`<br/>${t("connectLabel")}${routeWhy}`:""}</div>`;
+    html+=`<div class="stay">🏨 <b>${esc(stayField(chosen,"name"))}</b>（${dname(stayField(chosen,"district")||chosen.district)}${stationInfo}）<br/><span style="font-size:12px;color:var(--muted)">${reason}</span>
+      <select data-hotel="${d}">${hotelOptions.map(s=>`<option value="${s.id}" ${s.id===chosen.id?"selected":""}>${esc(stayField(s,"name"))}（${dname(stayField(s,"district")||s.district)}${stayField(s,"station")?" · "+stayField(s,"station"):""}）</option>`).join("")}</select></div><div class="items">`;
+    items.forEach((x,i)=>{
+      const p=x.place;if(!p)return;
+      const tag=p.pool==="fan"?`<span class="badge ${CONF[p.conf].cls}">${t("legendFan")}·${confLabel(p.conf)}</span>`:`<span class="badge plain">${t("legendSight")}</span>`;
+      const lowRisk=p.pool==="fan"&&p.conf==="low"?`<div class="risk-note">${t("riskLow")}</div>`:"";
+      const img=PLACE_IMAGES[p.id];
+      const thumb=`<span class="thumb">${img?`<img src="${img}" alt="" loading="lazy" onerror="this.style.display='none';this.parentNode.textContent='${TYPE_EMOJI[p.type]||"📍"}'">`:(TYPE_EMOJI[p.type]||"📍")}</span>`;
+      html+=`<div class="item">${thumb}<span class="item-main"><b style="font-weight:600">${esc(pname(p))}</b> ${tag}${x.locked?` <span class='badge dark'>${t("locked")}</span>`:""}<span class="time" style="margin-left:8px">${x.time}</span></span>`;
+      if(!x.locked&&days>1)html+=`<select data-move="${d}:${i}">${Array.from({length:days},(_,k)=>`<option value="${k}" ${k===d?"selected":""}>${t("moveTo",k+1)}</option>`).join("")}</select>`;
+      html+=`</div>${lowRisk}`;
+      const nx=items[i+1];
+      if(nx&&nx.place){
+        const li=legInfo(p,nx.place);
+        const detail=li.lines.length?` · ${li.lines.map(lineName).join(" → ")}`:(li.transfers?t("transfers",li.transfers):"");
+        const legTag=LANG==="en"?(li.tag==="实际路线"?t("legTransit"):li.tag==="步行"?t("legWalk"):t("legEstimate")):li.tag;
+        html+=`<div class="leg">↓ <b>${t("legMinutes",li.minutes)}</b><span class="src">${legTag}</span><span class="lines">${esc(detail)}</span></div>`;
+      }
+    });
+    if(d===concertDay)html+=`<div class="rest-note">${t("restNote")}</div>`;
+    html+=`</div></div>`;
+  });
+  if(overflow.length&&state.dayFilter===null)html+=`<div class="day-card"><h3>${t("overflowTitle")}</h3>${overflow.map(p=>`<div class="item"><span class="time">${t("onTheWay")}</span><span class="item-main">${esc(pname(p))} ${p.pool==="fan"?"（"+t("legendFan")+"·"+confLabel(p.conf)+"）":"（"+t("legendSight")+"）"}</span></div>`).join("")}<div class="note">${t("overflowNote")}</div></div>`;
+  $("plan-days").innerHTML=html;
+  // 日期标签
+  const tabs=$("day-tabs");
+  if(tabs){
+    tabs.innerHTML=[`<button class="day-tab ${state.dayFilter===null?"on":""}" data-day="all">${t("dayAll")}</button>`]
+      .concat(buckets.map((_,d)=>`<button class="day-tab ${state.dayFilter===d?"on":""}" data-day="${d}">Day ${d+1}</button>`)).join("");
+    tabs.querySelectorAll("[data-day]").forEach(b=>b.addEventListener("click",()=>{
+      state.dayFilter=b.dataset.day==="all"?null:Number(b.dataset.day);
+      renderPlan(false);
+    }));
+  }
+  document.querySelectorAll("[data-hotel]").forEach(sel=>sel.addEventListener("change",ev=>{state.hotel[Number(sel.dataset.hotel)]=sel.value;renderPlan(false);}));
+  document.querySelectorAll("[data-move]").forEach(sel=>sel.addEventListener("change",ev=>{
+    const [from,idx]=sel.dataset.move.split(":").map(Number),to=Number(sel.value);if(to===from)return;
+    const item=buckets[from].splice(idx,1)[0];buckets[to].push(item);renderPlan(false);
+  }));
+  setTimeout(()=>renderMap(),80);
+}
+
+function renderMap(){
+  const {days,buckets,concertDay}=state.lastPlan;if(!days)return;
+  if(typeof L==="undefined"){$("map").innerHTML=`<div style="height:100%;display:grid;place-items:center;color:var(--muted)">${t("mapFallback")}</div>`;return;}
+  if(!map){
+    map=L.map("map").setView([37.54,126.99],11);
+    // 瓦片源按可达性排序：国内直连时官方 openstreetmap.org 常常超时，德国镜像最快（实测 1.4s），
+    // 其次是法国镜像；连续出错会自动降级到下一个源。
+    const tileSources=[
+      "https://tile.openstreetmap.de/{z}/{x}/{y}.png",
+      "https://a.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",
+      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    ];
+    let srcIndex=0,srcErrors=0;
+    const tileLayer=L.tileLayer(tileSources[0],{attribution:"© OpenStreetMap contributors",maxZoom:18}).addTo(map);
+    tileLayer.on("tileerror",()=>{
+      srcErrors+=1;
+      if(srcErrors>=4&&srcIndex<tileSources.length-1){srcIndex+=1;srcErrors=0;tileLayer.setUrl(tileSources[srcIndex]);}
+    });
+    layerGroup=L.layerGroup().addTo(map);
+  }
+  layerGroup.clearLayers();
+  const flat=[];buckets.forEach((items,d)=>items.forEach(x=>{if(x.place)flat.push({...x,day:d});}));
+  if(state.mapMode==="all"){
+    const ordered=[];
+    buckets.forEach((items,d)=>[...items].filter(x=>x.place).sort((a,c)=>(a.time||"").localeCompare(c.time||"")).forEach(x=>ordered.push({...x,day:d})));
+    const pts=ordered.filter(x=>x.place).map(m=>[m.place.lat,m.place.lng]);
+    if(pts.length>1)L.polyline(pts,{color:"#2d3138",weight:3,opacity:.85}).addTo(layerGroup);
+  }else{
+    const colors=["#2f6f4f","#c07f12","#4a6fa5","#8a4fa5"];
+    buckets.forEach((items,d)=>{const pts=[...items].filter(x=>x.place).sort((a,c)=>(a.time||"").localeCompare(c.time||"")).map(x=>[x.place.lat,x.place.lng]);if(pts.length>1)L.polyline(pts,{color:colors[d%colors.length],weight:3,opacity:.7,dashArray:"6 8"}).addTo(layerGroup);});
+  }
+  const seenHotel=[];
+  flat.forEach(m=>{
+    const p=m.place;const color=p.pool==="fan"?"#c2472f":"#4a6fa5";
+    const icon=L.divIcon({className:"",html:`<div style="width:15px;height:15px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3)"></div>`});
+    L.marker([p.lat,p.lng],{icon}).bindTooltip(`Day ${m.day+1} · ${pname(p)}${p.conf==="low"?t("lowConfTip"):""}`)
+      .on("click",()=>showPlaceCard(p,m.day)).addTo(layerGroup);
+    const stay=STAYS.find(s=>s.id===state.hotel[m.day]);if(!stay)return;
+    if(!seenHotel.includes(stay.id)){seenHotel.push(stay.id);const h=L.divIcon({className:"",html:`<div style="width:22px;height:22px;border-radius:50%;background:#6d3fa5;border:2px solid #fff;display:grid;place-items:center;font-size:11px;color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3)">${t("hotelPin")}</div>`});L.marker([stay.lat,stay.lng],{icon:h}).bindTooltip(`Day ${m.day+1} · ${stayField(stay,"name")}`).addTo(layerGroup);}
+  });
+  const all=flat.map(m=>[m.place.lat,m.place.lng]);
+  if(all.length>1)map.fitBounds(L.latLngBounds(all).pad(.15));else if(all.length)map.setView(all[0],12);
+  setTimeout(()=>map.invalidateSize(),80);
+}
+
+/* ---------- 语言切换 ---------- */
+let currentDrawer=null;
+const bubbleLog=[];
+function dayLabel(n){return LANG==="en"?`Day ${n}`:`第 ${n} 天`;}
+function renderBubbles(){
+  const box=$("bubbles");box.innerHTML="";
+  bubbleLog.forEach(b=>{const el=document.createElement("div");el.className="bubble "+b.kind;el.textContent=b.key?t(b.key):b.text;box.appendChild(el);});
+}
+function applyStatic(){
+  document.documentElement.lang=LANG==="en"?"en":"zh-CN";
+  document.title=t("pageTitle");
+  document.querySelectorAll("[data-i18n]").forEach(el=>{el.textContent=t(el.dataset.i18n);});
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{el.placeholder=t(el.dataset.i18nPh);});
+  document.querySelectorAll("[data-i18n-title]").forEach(el=>{el.title=t(el.dataset.i18nTitle);});
+  const dates=$("plan-dates");
+  if(dates&&state.lastPlan)dates.textContent=(LANG==="en"?`Sample dates · ${state.lastPlan.days} days`:`示例日期 · ${state.lastPlan.days} 天`);
+  const note=$("plan-note"),foot=document.getElementById("site-footer");
+  if(note)note.innerHTML=t("note");
+  if(foot)foot.innerHTML=t("footer");
+  const ta=$("intent-input");
+  if(ta&&(ta.value.trim()===""||ta.value===I18N.zh.intentDefault||ta.value===I18N.en.intentDefault))ta.value=t("intentDefault");
+  syncConcertOptions();
+  $("filter-low").textContent=t(state.hideLow?"hideLowOn":"hideLowOff");
+  const lg=$("lang-toggle");if(lg)lg.textContent=LANG==="en"?"中文":"EN";
+}
+function setLang(l){
+  LANG=l;try{localStorage.setItem("lang",l);}catch(e){}
+  applyStatic();renderBubbles();
+  if($("pools").style.display==="block")renderPools();
+  if(state.lastPlan){renderPlan(false);renderMap();updateConstraintSummary();}
+  if(currentDrawer)openDrawer(currentDrawer);
+}
+$("lang-toggle").addEventListener("click",()=>setLang(LANG==="en"?"zh":"en"));
+
+$("send-btn").addEventListener("click",startFlow);
+$("reset-btn").addEventListener("click",()=>location.reload());
+$("filter-low").addEventListener("click",()=>{state.hideLow=!state.hideLow;$("filter-low").textContent=t(state.hideLow?"hideLowOn":"hideLowOff");$("filter-low").classList.toggle("on",state.hideLow);renderPools();});
+$("plan-btn").addEventListener("click",buildPlan);
+function setMapMode(mode){state.mapMode=mode;$("mode-all").classList.toggle("on",mode==="all");$("mode-day").classList.toggle("on",mode==="day");if(state.lastPlan)renderMap();}
+$("mode-all").addEventListener("click",()=>setMapMode("all"));
+$("mode-day").addEventListener("click",()=>setMapMode("day"));
+$("drawer-close").addEventListener("click",closeDrawer);
+$("drawer-mask").addEventListener("click",closeDrawer);
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer();});
+
+/* ---------- v2 新增交互：兴趣分类 / 地图卡片 / 工具条 ---------- */
+function toast(msg){
+  let el=document.getElementById("toast");
+  if(!el){el=document.createElement("div");el.id="toast";el.className="toast";document.body.appendChild(el);}
+  el.textContent=msg;el.classList.add("show");
+  clearTimeout(el._timer);el._timer=setTimeout(()=>el.classList.remove("show"),1900);
+}
+function hidePlaceCard(){const c=$("place-card");if(c)c.classList.remove("show");}
+function showPlaceCard(p,day){
+  const card=$("place-card");if(!card||!map)return;
+  const img=PLACE_IMAGES[p.id];
+  card.innerHTML=
+    `${img?`<img src="${img}" alt="" loading="lazy" onerror="this.style.display='none'">`:`<div style="height:96px;display:grid;place-items:center;font-size:30px;background:linear-gradient(140deg,#E9E6FF,#DCEEFF)">${TYPE_EMOJI[p.type]||"📍"}</div>`}
+     <div class="pc-body">
+       <h4>${esc(pname(p))}</h4>
+       <div class="tag" style="font-size:12.5px;color:var(--muted)">${typeName(p)} · ${dname(p.district)} ${confBadge(p)}</div>
+       <p>${esc(String(pAnswer(p)||"").slice(0,150))}</p>
+       <div class="pc-row">
+         <span class="badge plain">Day ${day+1}</span>
+         <span style="display:flex;gap:6px">
+           <button class="mini-btn" id="pc-open">${t("placeDetails")}</button>
+           <button class="mini-btn" id="pc-close">×</button>
+         </span>
+       </div>
+     </div>`;
+  card.classList.add("show");
+  const pt=map.latLngToContainerPoint([p.lat,p.lng]);
+  const size=map.getSize();
+  card.style.left=Math.min(Math.max(10,pt.x-125),Math.max(10,size.x-262))+"px";
+  card.style.top=Math.max(10,Math.min(pt.y-170,size.y-220))+"px";
+  const open=document.getElementById("pc-open"),close=document.getElementById("pc-close");
+  if(open)open.addEventListener("click",()=>{hidePlaceCard();openDrawer(p.id);});
+  if(close)close.addEventListener("click",hidePlaceCard);
+}
+// 兴趣分类
+document.querySelectorAll("#cat-row .cat").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll("#cat-row .cat").forEach(b=>b.classList.toggle("on",b===btn));
+    const key={fandom:"chipTextFandom",film:"chipTextFilm",food:"chipTextFood",cafe:"chipTextCafe",hike:"chipTextHike",more:"chipTextMore"}[btn.dataset.cat]||"chipTextFandom";
+    $("intent-input").value=t(key);
+    $("intent-input").focus();
+    $("create").scrollIntoView({behavior:"smooth",block:"start"});
+    if(btn.dataset.cat==="fandom"&&!$("send-btn").disabled){startFlow();}
+  });
+});
+// Featured trips 的第一张卡：直接跑通流程
+document.querySelectorAll(".trip-card").forEach(card=>{
+  card.addEventListener("click",()=>{
+    if(card.dataset.trip!=="cortis")return;
+    $("intent-input").value=t("chipTextFandom");
+    $("create").scrollIntoView({behavior:"smooth",block:"start"});
+    if(!$("send-btn").disabled)startFlow();
+  });
+});
+// 行程工具条
+$("plan-edit").addEventListener("click",()=>{$("create").scrollIntoView({behavior:"smooth",block:"start"});});
+$("plan-save").addEventListener("click",()=>{
+  try{
+    localStorage.setItem("itp:last",JSON.stringify({
+      fan:[...state.fan],must:[...state.must],sight:[...state.sight],
+      days:$("days-select").value,concertDay:$("concert-select").value,
+      pace:$("pace-select").value,budget:$("budget-select").value,
+      arrival:$("arrival-select").value,departure:$("departure-select").value,stay:$("stay-mode").value
+    }));
+    toast(t("toastSaved"));
+  }catch(e){toast("localStorage unavailable");}
+});
+$("plan-share").addEventListener("click",async()=>{
+  try{ await navigator.clipboard.writeText(location.href); toast(t("toastShared")); }
+  catch(e){ toast(location.href); }
+});
+/* 上次保存的选择：**不再自动恢复**（默认必须由用户自己选），只给一个入口按钮 */
+function offerRestore(){
+  let saved=null;
+  try{const raw=localStorage.getItem("itp:last");if(raw)saved=JSON.parse(raw);}catch(e){}
+  if(!saved)return;
+  const n=(saved.fan||[]).length+(saved.sight||[]).length;
+  if(!n)return;
+  const box=$("restore-bar");
+  if(!box)return;
+  box.style.display="block";
+  box.innerHTML=`<button class="chip-btn" id="restore-btn">${LANG==="en"?`Restore last selection (${n} places)`:`恢复上次保存的选择（${n} 个地点）`}</button>`;
+  const btn=document.getElementById("restore-btn");
+  if(btn)btn.addEventListener("click",()=>{
+    try{
+      if(Array.isArray(saved.fan))saved.fan.forEach(id=>state.fan.add(id));
+      if(Array.isArray(saved.must))saved.must.forEach(id=>state.must.add(id));
+      if(Array.isArray(saved.sight))saved.sight.forEach(id=>state.sight.add(id));
+      const set=(id,v)=>{const el=$(id);if(el&&v)el.value=v;};
+      set("days-select",saved.days);syncConcertOptions();set("concert-select",saved.concertDay);
+      set("pace-select",saved.pace);set("budget-select",saved.budget);
+      set("arrival-select",saved.arrival);set("departure-select",saved.departure);set("stay-mode",saved.stay);
+      $("intent-input").value=t("chipTextFandom");
+      $("create").scrollIntoView({behavior:"smooth",block:"start"});
+      if(!$("send-btn").disabled)startFlow();
+      box.style.display="none";
+    }catch(e){}
+  });
+}
+applyStatic();
+offerRestore();
+</script>
+</body>
+</html>
