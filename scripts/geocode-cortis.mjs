@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const IN_FILE = path.join(ROOT, "data", "cortis-spots-raw.json");
 const OUT_FILE = path.join(ROOT, "data", "cortis-spots.json");
-const USER_AGENT = "interest-travel-assistant/0.1 (student prototype; https://xybbbbb.github.io/interest-travel-assistant/)";
+const USER_AGENT = "interest_trip/0.1 (student prototype; https://xybbbbb.github.io/interest_trip/)";
 
 const QUERIES = {
   "cortis-001": ["CU 한강르네상스 이촌2호점", "이촌한강공원", "Ichon Hangang Park"],
