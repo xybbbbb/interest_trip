@@ -1,136 +1,237 @@
-# interest-mcp（兴趣地点 + 证据服务 · 原型）
+# Interest-Driven Travel Assistant
 
-这是「Interest-Driven Travel Assistant」第一阶段的独立原型：一个符合 MCP（Streamable HTTP）协议的兴趣地点服务，用 **CORTIS × Seoul 示例数据**演示完整链路：
+> **Turn what you love into where you go.**
 
-```text
-兴趣/艺人关键词
-    → 发现关联地点（场馆 / 咖啡馆 / MV 取景地 / 打卡点）
-    → 每条地点携带证据链（来源、链接、时间、置信度）
-    → 供任意 MCP 客户端（行程规划应用）调用并生成行程
-```
+An AI-powered travel assistant that doesn't just help you visit a city — it helps you turn the places connected to **what you love** (an artist, a show, an interest) into a real, feasible trip.
 
-设计原则与项目 README 一致：**地点与证据是可追溯的结构化数据，不是 LLM 随口生成的文字**。
+The project started with a very personal question:
 
-## ⚠️ 重要说明
+> “If I'm traveling to Seoul for a CORTIS concert, why can't my itinerary also include the places they've been, the cafés they've visited, and the spots where their music videos were filmed?”
 
-`data/seoul-cortis-demo.json` 是**演示用占位数据**，不包含任何真实调研结论：
+The first vertical is **fandom travel**: CORTIS × Seoul. Underneath it, the project explores a broader framework of interest-driven travel that could also apply to film locations, café trails, food journeys, sports trips, hiking routes, and more.
 
-- 地点名称带“示例/Demo”标识；
-- 证据链接统一使用 `example.com`；
-- 坐标、营业时间仅用于展示字段结构。
+---
 
-正式版本必须用真实来源（官方物料、多方粉丝信源、媒体等）逐条核验后再替换本数据集。
+## 1. Positioning: Not “Another Generic AI Travel Planner”
 
-## 目录
+Generic AI travel planners are getting better every day, and competing with them on breadth is pointless.
 
-```text
-interest-mcp/
-├── server.mjs               # MCP Streamable HTTP 服务（零第三方依赖）
-├── smoke-test.mjs           # 协议冒烟测试：initialize → tools/list → tools/call
-├── package.json
-├── web-preview/
-│   └── index.html           # 可双击打开的产品界面原型（CORTIS × Seoul）
-├── docs/
-│   └── visitseoul-fields.md     # VisitSeoul 字段 → 本项目 schema 映射与清洗规则
-├── scripts/
-│   └── visitseoul-fetch.mjs     # VisitSeoul 抓取脚本骨架（Key 就绪后使用）
-└── data/
-    └── seoul-cortis-demo.json  # CORTIS × Seoul 演示地点与证据
-```
+This project focuses on a narrower question:
 
-## 网页界面原型
+> **When someone travels because of an interest, can an assistant discover, verify, and organize the places tied to that interest — and turn them into a realistic itinerary?**
 
-`web-preview/index.html` 是一个**自包含的界面原型**，不需要安装依赖、不需要服务器，双击即可在浏览器打开。它演示产品主流程：
+In other words:
 
 ```text
-用户说出旅行动机（对 CORTIS 感兴趣 / 想看演唱会 / 想在首尔旅行）
-    → AI 展示处理优先级：P0 演唱会 → P1 CORTIS 相关地点（带证据） → P2 首尔观光
-    → 用户给粉丝地点标“必去 / 顺路再去”，并选择观光点
-    → 用户回答天数、演唱会日期、节奏、预算、到达离开时间、住宿策略
-    → 生成带地图的路线（默认全部行程总览，可切换按天分开；每段给时间估算与“为什么这样排”）
-    → 演唱会日 19:00 后自动留白
-    → 按住宿策略推荐酒店（紫色图钉），支持逐日改选
-    → 低置信度地点可一键隐藏，进入行程时带 ⚠ 提示
-    → 支持把安排“移到其他天”做基础调整
+Typical:    Destination → Places → Itinerary
+Ours:       Interest → Associated Places → Destination → Constraints & Preferences → Personalized Journey
 ```
 
-地图使用 Leaflet + OpenStreetMap（联网时自动加载，离线时回退为文字排程）。页面中所有地点、证据、住宿、时间估算与路线均为演示占位数据，不代表真实调研结论；接入真实数据与确定性排程引擎后再替换。
+Fandom travel is just the first vertical — a way to test whether this framework works.
 
-## 本地运行
+---
 
-需要 Node.js 20+（本项目测试时使用 Node 22）。
+## 2. First Use Case: CORTIS × Seoul
 
-```bash
-node server.mjs
+A CORTIS fan traveling to Seoul might care about:
+
+- The concert venue (already confirmed — highest priority)
+- Restaurants and cafés the members have visited
+- Music video filming locations
+- Popular fan hangouts and photo spots
+- Recreating “same-pose” photos
+- Ordinary Seoul sightseeing that fits along the way
+
+The guiding principle:
+
+> **Fandom should light up a trip, not hijack it.**
+
+A good itinerary mixes fandom-related experiences with normal sightseeing, food, rest, and personal preferences — not a pilgrimage that leaves no room to simply enjoy Seoul.
+
+### Current Prototype Flow
+
+```text
+User states their motivation (CORTIS + concert + Seoul trip)
+  → System shows priorities: P0 concert → P1 related places → P2 sightseeing
+  → User marks fan places “must-go / nice-to-have” and multi-selects sights (continuous selection)
+  → Answers days, concert date, pace, budget, arrival/departure, lodging strategy
+  → Generates a map-based itinerary: full-trip overview by default, per-day view toggle
+  → Concert day automatically leaves time free after 7 PM
+  → Recommends the best place to stay per day (adjustable day by day)
+  → Low-confidence places can be hidden with one click and show a ⚠ warning in the plan
+  → Basic manual adjustments: move an item to another day
 ```
 
-默认监听 `http://127.0.0.1:8788/mcp`，可用环境变量覆盖：
+**Live prototype:** <https://xybbbbb.github.io/interest_trip/>
 
-```bash
-INTEREST_MCP_HOST=127.0.0.1 INTEREST_MCP_PORT=8788 node server.mjs
+> ⚠️ Every place, piece of evidence, hotel suggestion, and route in the prototype is placeholder demo data. It exists to validate the product pipeline, not to represent verified research findings.
+
+---
+
+## 3. Trust & Evidence Layer (Core Innovation)
+
+Claims like “this artist visited this restaurant” vary wildly in reliability. The source could be:
+
+- Official content / official social accounts (most reliable)
+- Press interviews and media reports
+- Multiple independent fan reports that corroborate each other
+- A single community post
+- An unverified rumor
+
+That's why evidence is a first-class data structure in this project — not a suggestion the AI makes up on the spot:
+
+```text
+Place
+│
+├── Interest / Entity
+├── Source
+├── Evidence
+├── Date
+└── Confidence
 ```
 
-浏览器访问 `http://127.0.0.1:8788/` 可查看健康信息。
+Confidence levels:
 
-## VisitSeoul 官方观光数据（Key 已核验）
+- 🟢 High — official or first-hand evidence
+- 🟡 Medium — multiple independent secondary sources
+- 🔴 Low — a single unverified community claim
 
-项目 P2「首尔普通观光地点池」使用 VisitSeoul OpenAPI。API Key 已于 2026-09-09 核验可用，`langs` / `categories` / `list` / `info` 四个接口均已实测通过：
+The system is transparent when information can't be independently verified: low-confidence places are downgraded or clearly flagged, and users can hide them with one click.
 
-- [docs/visitseoul-fields.md](docs/visitseoul-fields.md)：API 端点、认证方式、抓取流程、字段映射表、数据清洗规则与“不做的事”。
-- [scripts/visitseoul-fetch.mjs](scripts/visitseoul-fetch.mjs)：零依赖抓取脚本骨架，支持 `langs` / `categories` / `list` / `info` 四个命令。
+### Data Acquisition Strategy (Important Boundaries)
 
-实际可用 Base URL 为 `https://api-call.visitseoul.net/api/v1`（官方概览页写作 `call-api.visitseoul.net`，但该域名无法解析）。后续按文档第 7 节执行小批量核验与批量导入：
+Social platforms generally block scraping and prohibit unauthorized automation, so this project does **not** rely on aggressive crawlers. Place data comes from three complementary paths:
 
-```bash
-$env:VISITSEOUL_API_KEY = "你的key"
-node scripts/visitseoul-fetch.mjs langs
-node scripts/visitseoul-fetch.mjs categories --lang en
-node scripts/visitseoul-fetch.mjs list --category <com_ctgry_sn> --lang zh-CN --max-pages 1
-node scripts/visitseoul-fetch.mjs info <cid> --lang en
+1. **Official sightseeing data**: ordinary Seoul attractions come from the VisitSeoul OpenAPI (application pending); maps and geocoding use free/open sources such as OpenStreetMap.
+2. **Semi-automated fan-data collection + human review**: candidate leads are collected from official content, public fan compilations, media, and user submissions. AI organizes and cross-checks; humans make the final call. The result is a place database with traceable evidence.
+3. **Image recognition as a verification tool, not an oracle**: in the future, visual comparison will help verify whether a fan-identified place actually matches footage. AI proposes candidates; it never delivers the verdict alone.
+
+Each new interest domain has a one-time database-building cost. This is a **reusable data asset and a moat**, not throwaway work — places overlap heavily across artists and verticals, so the database compounds over time.
+
+---
+
+## 4. The Role of AI
+
+The project deliberately does **not** use an LLM for everything:
+
+### AI / LLM
+
+- Natural-language preference understanding
+- Information extraction and entity identification
+- Recommendation reasoning and itinerary explanations
+- Conversational itinerary adaptation
+
+### Structured Data
+
+- Places, coordinates, opening hours, events
+- Evidence and source metadata
+- User preferences
+
+### Deterministic Systems (planned, not yet built)
+
+- Distance calculation
+- Travel time
+- Route feasibility
+- Opening-hours and schedule conflict checks
+- Geographic clustering
+
+Core design principle:
+
+> **Use AI where language understanding and reasoning add value; use deterministic systems where correctness must be deterministic.**
+
+---
+
+## 5. Current Technical Progress (Sep 2026)
+
+### References
+
+- Academic references: AgentTravel, TravelPlanner (studied for planning algorithms and deterministic constraints; not used as code bases).
+
+### Done
+
+- ✅ Standalone **interest-mcp** module (Node.js, zero third-party dependencies, MCP Streamable HTTP protocol): interest-place + evidence service. Protocol smoke tests: 7/7 passed.
+- ✅ CORTIS × Seoul demo dataset (places with evidence chains and high/medium/low/no confidence, all clearly marked as Demo).
+- ✅ Interactive product prototype (map-based itinerary overview, per-day toggle, lodging recommendations, evidence flags), published on GitHub Pages.
+- ✅ Prototype UX finalized; skipping Figma and large-scale UI testing to move straight to real data.
+- ✅ VisitSeoul integration plan: field-mapping document + fetch script skeleton ready, waiting for the API key.
+
+### Architecture
+
+```text
+┌───────────────────────────────────────────────┐
+│  User-facing prototype / future main app        │
+│  (standalone static prototype)                  │
+│  AI chat · map · itinerary editing              │
+└───────────────────┬────────────────────────────┘
+                    │ MCP Streamable HTTP
+┌───────────────────▼────────────────────────────┐
+│  interest-mcp (Node.js, independent module)      │
+│  interest places + evidence queries              │
+└───────┬─────────────────────────────┬───────────┘
+        │                             │
+┌───────▼───────────┐     ┌───────────▼──────────┐
+│  Fan place DB      │     │  VisitSeoul POI pool │
+│  official/fan/media│     │  (key pending)       │
+│  human review      │     │  official open data  │
+│  + evidence        │     │                      │
+└────────────────────┘     └──────────────────────┘
 ```
 
-先用小批量数据人工核对字段，再批量抓取并转换成 `data/visitseoul-seoul.json`。**VisitSeoul 是普通观光地点池，不含“CORTIS 去过哪里”的粉丝数据**；粉丝地点仍走独立策展 + 证据链流程。
+---
 
-## 冒烟测试
+## 6. Roadmap
 
-```bash
-node smoke-test.mjs
+```text
+✅ Concept: from generic AI travel planner to interest-driven travel
+✅ Competitive analysis and differentiation
+✅ First use case: CORTIS × Seoul
+✅ Standalone implementation (no external app base)
+✅ Interest place + evidence service prototype (MCP, 7/7 tests passed)
+✅ Product UI prototype published on GitHub Pages
+✅ VisitSeoul integration plan (field mapping + fetch script)
+⬜ Import real VisitSeoul sightseeing data (waiting for API key)
+⬜ CORTIS fan-place collection & evidence verification pipeline (first real data)
+⬜ YouTube Data API search for official content (metadata layer)
+⬜ Image-recognition-assisted verification (visual matching, evidence only)
+⬜ Deterministic scheduling engine (distance / travel time / opening hours / conflicts)
+⬜ Confidence-driven itinerary weighting
+⬜ Real-user validation and iteration
+⬜ Expand to more interest verticals
 ```
 
-测试覆盖 MCP 协议步骤：
+---
 
-1. `initialize`（协议版本 2025-06-18）
-2. `notifications/initialized`
-3. `tools/list`
-4. `tools/call search_interest_places`
-5. `tools/call get_place_evidence`
-6. 未知工具错误处理
+## 7. Project Status
 
-## 对外工具
+**Phase:** Product discovery → MVP prototype → real data integration
 
-| 工具 | 作用 |
-|---|---|
-| `search_interest_places` | 按兴趣/艺人关键词与类型筛选首尔关联地点，返回地点 + 证据概况 |
-| `get_place_evidence` | 按 `placeId` 返回完整证据链 |
-| `list_demo_interests` | 列出演示数据支持的兴趣标签与地点分类 |
+**Concept:** Interest-Driven Travel Assistant
 
-`search_interest_places` 参数示例：
+**First use case:** CORTIS × Seoul (fandom travel)
 
-```json
-{
-  "interest": "CORTIS",
-  "city": "Seoul",
-  "categories": ["concert_venue", "cafe"]
-}
-```
+**Live prototype:** <https://xybbbbb.github.io/interest_trip/>
 
-## 路线图
+**Next steps:** receive the VisitSeoul API key → import real sightseeing data → build the first verified CORTIS place → validate with real users
 
-- [x] MCP 服务骨架 + 证据字段模型
-- [x] CORTIS × Seoul 演示数据集
-- [x] 协议冒烟测试
-- [x] VisitSeoul 字段映射文档 + 抓取脚本骨架（待 Key 实测）
-- [ ] 接入 VisitSeoul 真实首尔观光数据（等 API Key）
-- [ ] 粉丝地点收集与证据核验管线（官方 / 媒体 / 多源社区）
-- [ ] 确定性排程引擎：距离、通勤时间、营业时间与冲突校验
-- [ ] 证据分级驱动行程权重（低置信度地点降权 / 标注）
+---
+
+## 8. Project Philosophy
+
+This is an independent product-building project, not a startup-first exercise. Priorities:
+
+1. Solve a problem the creator genuinely cares about;
+2. Practice end-to-end AI product development;
+3. Build a repeatable product discovery and validation workflow;
+4. Build and test a real MVP;
+5. Document decisions, failures, pivots, and iterations;
+6. Explore how a narrow vertical can reveal a broader framework.
+
+The project values **learning and validation over premature commercialization**.
+
+---
+
+## 9. License & Acknowledgments
+
+This project's own code is released under the **MIT License** — see [LICENSE](LICENSE).
+
+This is an independent learning/prototype project with no affiliation to any artist, group, or commercial product. All places and evidence in the demo data are placeholders.
