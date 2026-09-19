@@ -369,6 +369,23 @@ body.dragging-active .item,body.dragging-active .day-card{user-select:none}
   position:fixed;z-index:2000;pointer-events:none;transform:translate(-50%,-50%) rotate(1.2deg);
   background:#fff;border:1px solid var(--line);border-radius:var(--r-md);box-shadow:0 18px 38px rgba(23,26,46,.24);opacity:.96;
 }
+/* 现场模式 */
+.onsite-list{display:grid;gap:14px;margin-top:10px}
+.onsite-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 20px;box-shadow:var(--shadow-1)}
+.onsite-kr{font-size:34px;font-weight:800;line-height:1.15;color:var(--ink);letter-spacing:.5px;word-break:keep-all}
+.onsite-kr-miss{font-size:24px}
+.onsite-alt{margin-top:6px;font-size:14px;color:var(--muted)}
+.onsite-addr{margin-top:4px;font-size:13px;color:var(--muted-2)}
+.onsite-go{margin-top:14px;font-size:17px;font-weight:700;color:var(--brand-ink);background:var(--brand-soft);border-radius:var(--r-md);padding:10px 14px}
+.onsite-go span{display:block;margin-top:3px;font-size:12.5px;font-weight:500;color:var(--muted)}
+.onsite-map{display:inline-block;margin-top:10px;font-size:12.5px;color:var(--brand-ink);text-decoration:none;border:1px solid var(--line);border-radius:var(--r-pill);padding:5px 12px}
+.phrase-block{margin:16px 0 8px;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;box-shadow:var(--shadow-1)}
+.phrase-block h3{margin:0 0 10px;font-size:16px}
+.phrase-grid{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.phrase{border-top:1px dashed var(--line);padding:7px 0}
+.phrase b{display:block;font-size:15px;color:var(--ink)}
+.phrase .rom{display:block;font-size:11.5px;color:var(--muted-2);margin-top:1px}
+.phrase i{display:block;font-style:normal;font-size:12px;color:var(--muted);margin-top:2px}
 .leg{
   display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);
   padding:5px 0 5px 62px;
@@ -626,6 +643,7 @@ footer#site-footer{max-width:var(--maxw);margin:0 auto;padding:34px 20px 46px;fo
         <button class="chip-btn" id="plan-edit" data-i18n="planEdit">编辑</button>
         <button class="chip-btn" id="plan-save" data-i18n="planSave">保存</button>
         <button class="chip-btn" id="plan-share" data-i18n="planShare">分享</button>
+        <button class="chip-btn" id="plan-onsite" data-i18n="onsiteBtn">🚕 现场模式</button>
       </div>
     </div>
     <p class="pool-sub" data-i18n="planSub">路线默认显示全部行程总览（深色连贯线）；可切换“按天分开”看每天不同颜色。紫色图钉是可选酒店，红点粉丝、蓝点观光，低置信度用⚠标出。</p>
@@ -1032,11 +1050,11 @@ window.PLACE_ANSWERS = PLACE_ANSWERS;
 const PLACES = [
   {id:"demo-concert-001",name:"示例·演唱会场地（待替换为真实场馆）",nameLocal:"서울 올림픽공원（예시）",type:"venue",pool:"fan",district:"松坡区",lat:37.5206,lng:127.1211,hours:"演出日 19:00",conf:"high",why:"P0 演唱会为已锁定行程；场馆信息待用户提供后替换为真实演出地址。",note:"",evidence:[{srcType:"official",src:"演唱会官方公告（占位）",claim:"用户已确认会在此场地观看 CORTIS 演唱会（场馆待补充）",date:"",url:"https://example.com/",summary:"演示占位；等待真实演出场馆",conf:"high"}]},
   {id:"cortis-001",name:"二村汉江公园",nameLocal:"이촌한강공원",type:"photo_spot",pool:"fan",district:"龙山区",lat:37.518507,lng:126.9673584,hours:"时间以来源帖子为准",conf:"high",why:"用户确认：以二村汉江公园本身作为打卡点，不再使用 CU 便利店。",note:"",evidence:[{srcType:"community",src:"小红书",claim:"这个汉江公园也是同款打卡地",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5312lw=&xsec_source=pc_share",summary:"这个汉江公园也是同款打卡地",conf:"high"}]},
-  {id:"cortis-002",name:"oakberry巴西莓碗",nameLocal:"",type:"shop",pool:"fan",district:"西大门区",lat:37.5566933,lng:126.9367277,hours:"时间以来源帖子为准",conf:"medium",why:"可以直接和店员说要cortis同款 冰沙+花生酱+燕麦+草莓+香蕉",note:"",evidence:[{srcType:"community",src:"小红书",claim:"可以直接和店员说要cortis同款 冰沙+花生酱+燕麦+草莓+香蕉",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5313lw=&xsec_source=pc_share",summary:"可以直接和店员说要cortis同款 冰沙+花生酱+燕麦+草莓+香蕉",conf:"medium"}]},
-  {id:"cortis-003",name:"首尔儿童公园",nameLocal:"",type:"photo_spot",pool:"fan",district:"广津区",lat:37.5475998,lng:127.0743915,hours:"时间以来源帖子为准",conf:"high",why:"团综两天一夜拍摄地",note:"",evidence:[{srcType:"community",src:"小红书",claim:"团综两天一夜拍摄地",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5314lw=&xsec_source=pc_share",summary:"团综两天一夜拍摄地",conf:"high"}]},
-  {id:"cortis-004",name:"奉恩寺",nameLocal:"",type:"photo_spot",pool:"fan",district:"江南区",lat:37.5141869,lng:127.0602411,hours:"时间以来源帖子为准",conf:"high",why:"成员严成玹同款手串购买地",note:"",evidence:[{srcType:"community",src:"小红书",claim:"成员严成玹同款手串购买地",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5315lw=&xsec_source=pc_share",summary:"成员严成玹同款手串购买地",conf:"high"}]},
+  {id:"cortis-002",name:"oakberry巴西莓碗",nameLocal:"오크베리",type:"shop",pool:"fan",district:"西大门区",lat:37.5566933,lng:126.9367277,hours:"时间以来源帖子为准",conf:"medium",why:"可以直接和店员说要cortis同款 冰沙+花生酱+燕麦+草莓+香蕉",note:"",evidence:[{srcType:"community",src:"小红书",claim:"可以直接和店员说要cortis同款 冰沙+花生酱+燕麦+草莓+香蕉",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5313lw=&xsec_source=pc_share",summary:"可以直接和店员说要cortis同款 冰沙+花生酱+燕麦+草莓+香蕉",conf:"medium"}]},
+  {id:"cortis-003",name:"首尔儿童公园",nameLocal:"서울어린이대공원",type:"photo_spot",pool:"fan",district:"广津区",lat:37.5475998,lng:127.0743915,hours:"时间以来源帖子为准",conf:"high",why:"团综两天一夜拍摄地",note:"",evidence:[{srcType:"community",src:"小红书",claim:"团综两天一夜拍摄地",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5314lw=&xsec_source=pc_share",summary:"团综两天一夜拍摄地",conf:"high"}]},
+  {id:"cortis-004",name:"奉恩寺",nameLocal:"봉은사",type:"photo_spot",pool:"fan",district:"江南区",lat:37.5141869,lng:127.0602411,hours:"时间以来源帖子为准",conf:"high",why:"成员严成玹同款手串购买地",note:"",evidence:[{srcType:"community",src:"小红书",claim:"成员严成玹同款手串购买地",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5315lw=&xsec_source=pc_share",summary:"成员严成玹同款手串购买地",conf:"high"}]},
   {id:"cortis-005",name:"新沙站（5号出口）",nameLocal:"신사역",type:"filming_location",pool:"fan",district:"江南区",lat:37.516154,lng:127.0196291,hours:"时间以来源帖子为准",conf:"high",why:"用户确认：以新沙站为打卡点（5 号出口）。",note:"",evidence:[{srcType:"community",src:"小红书",claim:"MV拍摄地",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5316lw=&xsec_source=pc_share",summary:"MV拍摄地",conf:"high"}]},
-  {id:"cortis-006",name:"HYBE大楼",nameLocal:"",type:"company",pool:"fan",district:"龙山区",lat:37.5245773,lng:126.9642142,hours:"时间以来源帖子为准",conf:"high",why:"地铁4号线​​在“ 新龙山站 ”（신용산역）下车，从2号出口出来，步行大约5-10分钟即可到达\n。地铁1号线/京义中央线​​在“ 龙山站 ”（용산역）下车，从1号出口出来，步行约10-11分钟也能到",note:"",evidence:[{srcType:"community",src:"小红书",claim:"地铁4号线​​在“ 新龙山站 ”（신용산역）下车，从2号出口出来，步行大约5-10分钟即可到达\n。地铁1号线/京义中央线​​在“ 龙山站 ”（용산역）下车，从1号出口出来，步行约10-11分钟也能到",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a881d45000000003502368a?source=webshare&xhsshare=pc_web&xsec_token=ABkEzyn-xPxexyXIi58tvjcvJInKq6mY3oKVEi3XMsACg=&xsec_source=pc_share",summary:"地铁4号线​​在“ 新龙山站 ”（신용산역）下车，从2号出口出来，步行大约5-10分钟即可到达\n。地铁1号线/京义中央线​​在“ 龙山站 ”（용산역）下车，从1号出口出来，步行约10-11分钟也能到",conf:"high"}]},
+  {id:"cortis-006",name:"HYBE大楼",nameLocal:"하이브 사옥",type:"company",pool:"fan",district:"龙山区",lat:37.5245773,lng:126.9642142,hours:"时间以来源帖子为准",conf:"high",why:"地铁4号线​​在“ 新龙山站 ”（신용산역）下车，从2号出口出来，步行大约5-10分钟即可到达\n。地铁1号线/京义中央线​​在“ 龙山站 ”（용산역）下车，从1号出口出来，步行约10-11分钟也能到",note:"",evidence:[{srcType:"community",src:"小红书",claim:"地铁4号线​​在“ 新龙山站 ”（신용산역）下车，从2号出口出来，步行大约5-10分钟即可到达\n。地铁1号线/京义中央线​​在“ 龙山站 ”（용산역）下车，从1号出口出来，步行约10-11分钟也能到",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a881d45000000003502368a?source=webshare&xhsshare=pc_web&xsec_token=ABkEzyn-xPxexyXIi58tvjcvJInKq6mY3oKVEi3XMsACg=&xsec_source=pc_share",summary:"地铁4号线​​在“ 新龙山站 ”（신용산역）下车，从2号出口出来，步行大约5-10分钟即可到达\n。地铁1号线/京义中央线​​在“ 龙山站 ”（용산역）下车，从1号出口出来，步行约10-11分钟也能到",conf:"high"}]},
   {id:"cortis-007",name:"Torriden 圣水快闪（Factory Seongsu）",nameLocal:"토리든 딥다이브 뉴스 팝업",type:"ad_spot",pool:"fan",district:"城东区",lat:37.544207,lng:127.0543773,hours:"快闪活动期间 2026-08-14 ~ 2026-08-25，11:00-20:00（已结束）",conf:"medium",why:"CORTIS 成员 Martin 到访的 Torriden DEEP DIVE NEWS 快闪店；活动已结束，后续是否再举办需确认。",note:"快闪活动已于 2026-08-25 结束，安排前需确认是否再举办",evidence:[{srcType:"community",src:"小红书",claim:"圣水洞torriden大楼 与 CORTIS 相关（用户整理）",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a541dfd0000000021015ccb?source=webshare&xhsshare=pc_web&xsec_token=ABRmwKsb93wbSOszmTZYD9J7t5XcjWesb7cMkhBo7aDEs=&xsec_source=pc_share",summary:"CORTIS 成员 Martin 到访的 Torriden DEEP DIVE NEWS 快闪店；活动已结束，后续是否再举办需确认。",conf:"medium"}]},
   {id:"cortis-008",name:"直火匠人 龙山店",nameLocal:"직화장인 용산점",type:"shop",pool:"fan",district:"龙山区",lat:37.5258537,lng:126.9650592,hours:"时间以来源帖子为准",conf:"high",why:"用户提供的地址：龙山区 汉江大路 58-1；OSM 无该店精确 POI，坐标为地址级。",note:"",evidence:[{srcType:"community",src:"小红书",claim:"严成玹过生日时的餐厅",date:"",url:"https://www.xiaohongshu.com/discovery/item/69ec9a3b0000000036032fc8?source=webshare&xhsshare=pc_web&xsec_token=AB9LKvZJTjWxpwtrEB4TyhVkK6aylTAYd7Lp8mRjjtdXc=&xsec_source=pc_share",summary:"严成玹过生日时的餐厅",conf:"high"}]},
   {id:"cortis-009",name:"汉南站（1号出口）",nameLocal:"한남역",type:"filming_location",pool:"fan",district:"龙山区",lat:37.5294298,lng:127.0092073,hours:"时间以来源帖子为准",conf:"high",why:"用户确认：以汉南站为“凌晨外出”拍摄地打卡点。",note:"",evidence:[{srcType:"community",src:"小红书",claim:"“凌晨外出”拍摄地 与 CORTIS 相关（用户整理）",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5312lw=&xsec_source=pc_share",summary:"用户确认：以汉南站为“凌晨外出”拍摄地打卡点。",conf:"high"}]},
@@ -1045,11 +1063,11 @@ const PLACES = [
   {id:"vs-CNP015338",name:"明洞圣堂1898广场",nameLocal:"1898 명동성당",type:"sightseeing",pool:"sight",district:"中区",lat:37.563677,lng:126.986775,hours:"09:00-22:00",conf:null,why:"明洞地标，红砖圣堂与复合文化空间。",address:"首尔特别市中区明洞街74",officialUrl:"https://1898.catholic.or.kr/plaza.asp",evidence:[]},
   {id:"vs-CNP000061",name:"东大门购物城",nameLocal:"동대문 쇼핑타운",type:"sightseeing",pool:"sight",district:"中区",lat:37.567487,lng:127.008077,hours:"各商场不同（多为通宵）",conf:null,why:"东大门购物地标，商场与夜市集中，适合傍晚后。",address:"首尔市中区奖忠坛路253",officialUrl:"",evidence:[]},
   {id:"vs-CNP024679",name:"东大门设计广场(DDP)",nameLocal:"동대문디자인플라자 (DDP)",type:"sightseeing",pool:"sight",district:"中区",lat:37.566813,lng:127.009626,hours:"10:00-20:00（各馆不同）",conf:null,why:"东大门设计地标，展览、夜景与活动集中。",address:"首尔市中区乙支路 281",officialUrl:"https://ddp.or.kr/?menuno=340",evidence:[]},
-  {id:"vs-CNP002077",name:"梨泰院街道",nameLocal:"",type:"sightseeing",pool:"sight",district:"龙山区",lat:37.534532,lng:126.994179,hours:"全天开放（店铺各异）",conf:null,why:"梨泰院街区，异国餐厅、酒吧与潮店聚集。",address:"首尔市龙山区黎泰院路27나길",officialUrl:"",evidence:[]},
-  {id:"vs-CNP2ts0gq",name:"弘大壁画街",nameLocal:"",type:"sightseeing",pool:"sight",district:"麻浦区",lat:37.55102,lng:126.924187,hours:"全天开放",conf:null,why:"弘大街头文化与壁画打卡地，年轻氛围浓。",address:"首尔市麻浦区上水洞72-36",officialUrl:"",evidence:[]},
+  {id:"vs-CNP002077",name:"梨泰院街道",nameLocal:"이태원 거리",type:"sightseeing",pool:"sight",district:"龙山区",lat:37.534532,lng:126.994179,hours:"全天开放（店铺各异）",conf:null,why:"梨泰院街区，异国餐厅、酒吧与潮店聚集。",address:"首尔市龙山区黎泰院路27나길",officialUrl:"",evidence:[]},
+  {id:"vs-CNP2ts0gq",name:"弘大壁画街",nameLocal:"홍대 벽화거리",type:"sightseeing",pool:"sight",district:"麻浦区",lat:37.55102,lng:126.924187,hours:"全天开放",conf:null,why:"弘大街头文化与壁画打卡地，年轻氛围浓。",address:"首尔市麻浦区上水洞72-36",officialUrl:"",evidence:[]},
   {id:"vs-CNP000286",name:"广藏市场",nameLocal:"광장시장",type:"sightseeing",pool:"sight",district:"钟路区",lat:37.570057,lng:126.99895,hours:"市场约09:00-18:00；美食街至23:00",conf:null,why:"首尔最有名的传统市场之一，小吃与夜市感强。",address:"首尔市钟路区昌庆宫路88",officialUrl:"http://www.kwangjangmarket.co.kr/zh-hans/",evidence:[]},
-  {id:"vs-CNPouf85a",name:"圣水云桥",nameLocal:"",type:"sightseeing",pool:"sight",district:"城东区",lat:37.538962,lng:127.041604,hours:"全天开放",conf:null,why:"圣水洞潮流街区的地标装置与汉江景观。",address:"首尔城东区江边北路257",officialUrl:"",evidence:[]},
-  {id:"vs-CNPnj8f9x",name:"COEX K-POP广场",nameLocal:"",type:"sightseeing",pool:"sight",district:"江南区",lat:37.511824,lng:127.059159,hours:"开放时间以官网为准",conf:null,why:"江南 K-POP 打卡地，靠近 COEX 商圈与星空图书馆。",address:"首尔市江南区永东大路513",officialUrl:"https://business.coex.co.kr/",evidence:[]},
+  {id:"vs-CNPouf85a",name:"圣水云桥",nameLocal:"성수육교",type:"sightseeing",pool:"sight",district:"城东区",lat:37.538962,lng:127.041604,hours:"全天开放",conf:null,why:"圣水洞潮流街区的地标装置与汉江景观。",address:"首尔城东区江边北路257",officialUrl:"",evidence:[]},
+  {id:"vs-CNPnj8f9x",name:"COEX K-POP广场",nameLocal:"코엑스 K-POP 광장",type:"sightseeing",pool:"sight",district:"江南区",lat:37.511824,lng:127.059159,hours:"开放时间以官网为准",conf:null,why:"江南 K-POP 打卡地，靠近 COEX 商圈与星空图书馆。",address:"首尔市江南区永东大路513",officialUrl:"https://business.coex.co.kr/",evidence:[]},
   {id:"vs-CNP002220",name:"盘浦大桥月光彩虹喷泉",nameLocal:"반포대교 달빛무지개분수",type:"sightseeing",pool:"sight",district:"瑞草区",lat:37.505764,lng:126.981085,hours:"晚间多场（详见官网）",conf:null,why:"汉江夜景代表，月光彩虹喷泉是热门打卡点。",address:"首尔特别市瑞草区盘浦洞 649-1",officialUrl:"https://hangang.seoul.go.kr/www/bbsPost/30/list.do",evidence:[]},
   {id:"vs-CNP012993",name:"汝矣岛汉江公园",nameLocal:"여의도 한강공원",type:"sightseeing",pool:"sight",district:"永登浦区",lat:37.527074,lng:126.933454,hours:"24 小时开放",conf:null,why:"汉江野餐与夜景圣地，年轻人露营、骑车常去。",address:"首尔市永登浦区汝矣岛路330号",officialUrl:"https://hangang.seoul.go.kr/www/contents/669.do?mid=473",evidence:[]},
   {id:"vs-CNP016328",name:"石村湖夜景",nameLocal:"석촌호수 야경",type:"sightseeing",pool:"sight",district:"松坡区",lat:37.509063,lng:127.097868,hours:"24 小时开放",conf:null,why:"乐天世界旁的湖景夜景，散步与拍照都合适。",address:"首尔松坡区三学士路136（蚕室洞）",officialUrl:"",evidence:[]},
@@ -1069,7 +1087,7 @@ const STAYS=[
 ];
 const CONF={high:{label:"高置信度",cls:"high"},medium:{label:"中置信度",cls:"medium"},low:{label:"低置信度",cls:"low"}};
 const $=id=>document.getElementById(id);
-const state={fan:new Set(),must:new Set(),sight:new Set(),hideLow:false,hotel:{},lastPlan:null,mapMode:"all",dayFilter:null};
+const state={fan:new Set(),must:new Set(),sight:new Set(),hideLow:false,hotel:{},lastPlan:null,mapMode:"all",dayFilter:null,onsite:false};
 let map=null,layerGroup=null;
 
 /* ================= 中英双语 =================
@@ -1186,6 +1204,8 @@ const I18N={
   whyTitle:"为什么这样排：",connectLabel:"衔接：",
   aiWhyTitle:"AI 推荐（基于证据）：",aiWhySource:"来源：",
   dragHint:"拖到其他天",
+  onsiteBtn:"🚕 现场模式",onsiteExit:"← 返回行程",phrasesTitle:"常用语（给店员 / 司机看）",
+  onsiteGo:"여기로 가주세요",onsiteGoSub:"请带我去这里",onsiteMap:"🗺 在地图上打开",
   legTransit:"实际路线",legWalk:"步行",legEstimate:"估算",legMinutes:(n)=>`${n} 分钟`,transfers:(n)=>` · 换乘 ${n} 次`,
   locked:"已锁定",moveTo:(n)=>`移到 Day ${n}`,onTheWay:"顺路",
   stayReasonSame:"全程同一家：离全程地点综合最近，并优先多线地铁。",
@@ -1278,6 +1298,8 @@ const I18N={
   whyTitle:"Why this order: ",connectLabel:"Connections: ",
   aiWhyTitle:"AI recommendation (evidence-based): ",aiWhySource:"Source: ",
   dragHint:"Drag to another day",
+  onsiteBtn:"🚕 On-site mode",onsiteExit:"← Back to itinerary",phrasesTitle:"Essential phrases",
+  onsiteGo:"여기로 가주세요",onsiteGoSub:"Please take me here",onsiteMap:"🗺 Open in maps",
   legTransit:"real route",legWalk:"walk",legEstimate:"estimate",legMinutes:(n)=>`${n} min`,transfers:(n)=>` · ${n} transfer${n>1?"s":""}`,
   locked:"locked",moveTo:(n)=>`Move to Day ${n}`,onTheWay:"on the way",
   stayReasonSame:"Same hotel throughout: closest to all places overall, with a preference for multi-line subway stations.",
@@ -1635,6 +1657,42 @@ function wireDrag(el){
   el.addEventListener("pointercancel",end);
 }
 
+/* ---------- 现场模式：把行程变成可以递给司机 / 店员的韩文卡片 ---------- */
+const ONSITE_PHRASES=[
+  {kr:"여기로 가주세요",rom:"yeogiro gajuseyo",zh:"请带我去这里",en:"Please take me here"},
+  {kr:"안녕하세요",rom:"annyeonghaseyo",zh:"你好",en:"Hello"},
+  {kr:"감사합니다",rom:"gamsahamnida",zh:"谢谢",en:"Thank you"},
+  {kr:"이거 얼마예요?",rom:"igeo eolmayeyo?",zh:"这个多少钱？",en:"How much is this?"},
+  {kr:"카드 돼요?",rom:"kadeu dwaeyo?",zh:"可以刷卡吗？",en:"Do you take card?"},
+  {kr:"이거 주세요",rom:"igeo juseyo",zh:"请给我这个",en:"I'll have this"},
+  {kr:"안 맵게 해주세요",rom:"an maepge haejuseyo",zh:"请做不辣的",en:"Not spicy, please"},
+  {kr:"영어 메뉴 있어요?",rom:"yeongeo menyu isseoyo?",zh:"有英文菜单吗？",en:"Is there an English menu?"},
+  {kr:"화장실 어디예요?",rom:"hwajangsil eodiyeyo?",zh:"洗手间在哪里？",en:"Where is the restroom?"},
+  {kr:"계산해 주세요",rom:"gyesanhae juseyo",zh:"请结账",en:"Check, please"},
+  {kr:"사진 찍어 주실 수 있어요?",rom:"sajin jjigeo jusil su isseoyo?",zh:"能帮我拍张照吗？",en:"Could you take a photo?"},
+  {kr:"천천히 말해 주세요",rom:"cheoncheonhi malhae juseyo",zh:"请说慢一点",en:"Please speak slowly"},
+  {kr:"잠시만요",rom:"jamsimanyo",zh:"请稍等",en:"Just a moment"},
+  {kr:"도와주세요",rom:"dowajuseyo",zh:"请帮帮我",en:"Help me, please"}
+];
+function onsiteCard(p){
+  const kr=String(p.nameLocal||"").trim();
+  const en=EN_PLACES[p.id];
+  const alt=[p.name,en&&en!==p.name?en:""].filter(Boolean).join(" · ");
+  const addr=LANG==="en"?(EN_DETAILS[p.id]?.address||p.address):p.address;
+  const mapUrl="https://www.google.com/maps/search/?api=1&query="+p.lat+","+p.lng;
+  return `<div class="onsite-card">`
+    +(kr?`<div class="onsite-kr">${esc(kr)}</div>`:`<div class="onsite-kr onsite-kr-miss">${esc(alt)}</div>`)
+    +`<div class="onsite-alt">${esc(alt)}</div>`
+    +(addr?`<div class="onsite-addr">${esc(addr)}</div>`:"")
+    +`<div class="onsite-go">${esc(t("onsiteGo"))}<span>${esc(t("onsiteGoSub"))}</span></div>`
+    +`<a class="onsite-map" href="${esc(mapUrl)}" target="_blank" rel="noreferrer">${esc(t("onsiteMap"))}</a>`
+    +`</div>`;
+}
+function onsitePhrases(){
+  return `<div class="phrase-block"><h3>${esc(t("phrasesTitle"))}</h3><div class="phrase-grid">`
+    +ONSITE_PHRASES.map(x=>`<div class="phrase"><b>${esc(x.kr)}</b><span class="rom">${esc(x.rom)}</span><i>${esc(LANG==="en"?x.en:x.zh)}</i></div>`).join("")
+    +`</div></div>`;
+}
 function renderPlan(resetHotels){
   const {days,buckets,concertDay,overflow}=state.lastPlan;
   buckets.forEach(b=>b.sort((a,c)=>(a.time||"").localeCompare(c.time||"")));
@@ -1643,8 +1701,13 @@ function renderPlan(resetHotels){
   const concert=buckets[concertDay].find(x=>x.locked)?.place||allPoints[0];
   if(resetHotels){state.hotel={};buckets.forEach((b,d)=>{const pts=b.filter(x=>x.place).map(x=>x.place);state.hotel[d]=defaultHotel(pts.length?pts:allPoints,mode,concert).id;});}
   let html="";
+  if(state.onsite)html+=onsitePhrases();
   buckets.forEach((items,d)=>{
     if(state.dayFilter!==null&&state.dayFilter!==d)return;
+    if(state.onsite){
+      html+=`<div class="day-card onsite" data-daycard="${d}"><h3>${t("dayHeader",d+1)}${d===concertDay?`<span class='badge high'>${t("concertDayBadge")}</span>`:""}</h3><div class="onsite-list">${items.filter(x=>x.place).map(x=>onsiteCard(x.place)).join("")}</div></div>`;
+      return;
+    }
     const pts=items.filter(x=>x.place).map(x=>x.place);
     let hotelOptions=[...STAYS];
     if(mode==="concert")hotelOptions.sort((a,b)=>distKm(a,concert)-distKm(b,concert));
@@ -1760,6 +1823,7 @@ function applyStatic(){
   document.documentElement.lang=LANG==="en"?"en":"zh-CN";
   document.title=t("pageTitle");
   document.querySelectorAll("[data-i18n]").forEach(el=>{el.textContent=t(el.dataset.i18n);});
+  {const ob=$("plan-onsite");if(ob)ob.textContent=state.onsite?t("onsiteExit"):t("onsiteBtn");}
   document.querySelectorAll("[data-i18n-ph]").forEach(el=>{el.placeholder=t(el.dataset.i18nPh);});
   document.querySelectorAll("[data-i18n-title]").forEach(el=>{el.title=t(el.dataset.i18nTitle);});
   const dates=$("plan-dates");
@@ -1860,6 +1924,7 @@ $("plan-save").addEventListener("click",()=>{
     toast(t("toastSaved"));
   }catch(e){toast("localStorage unavailable");}
 });
+$("plan-onsite").addEventListener("click",()=>{state.onsite=!state.onsite;$("plan-onsite").classList.toggle("on",state.onsite);$("plan-onsite").textContent=state.onsite?t("onsiteExit"):t("onsiteBtn");renderPlan(false);});
 $("plan-share").addEventListener("click",async()=>{
   try{ await navigator.clipboard.writeText(location.href); toast(t("toastShared")); }
   catch(e){ toast(location.href); }
