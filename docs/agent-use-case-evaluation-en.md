@@ -4,7 +4,7 @@
 From one sentence ("I'm going to a CORTIS concert and want to see the places they've been to") to an itinerary you can actually walk.
 This document covers the use case, the evaluation design (18 test cases), and five rounds of iteration on the retrieval pipeline.
 
-> 中文版：[`agent-use-case-evaluation.md`](agent-use-case-evaluation.md) · Live prototype: https://xybbbbb.github.io/interest-travel-assistant/ (EN / 中文)
+> 中文版：[`agent-use-case-evaluation.md`](agent-use-case-evaluation.md) · Live prototype: https://xybbbbb.github.io/interest_trip/ (EN / 中文)
 
 ---
 

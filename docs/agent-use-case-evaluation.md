@@ -4,7 +4,7 @@
 一句话：把粉丝"我想去看演唱会、顺便打卡他们去过的地方"这种模糊需求，变成一份**有据可查、时间可行**的旅行行程。
 本文记录它的 use case 定义、评估设计（18 个测试 case）与 5 轮迭代过程。
 
-> English version: [`agent-use-case-evaluation-en.md`](agent-use-case-evaluation-en.md) · 线上原型：https://xybbbbb.github.io/interest-travel-assistant/ (EN / 中文)
+> English version: [`agent-use-case-evaluation-en.md`](agent-use-case-evaluation-en.md) · 线上原型：https://xybbbbb.github.io/interest_trip/ (EN / 中文)
 
 ---
 
