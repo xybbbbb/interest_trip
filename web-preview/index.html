@@ -196,6 +196,9 @@ header.nav{
   background:linear-gradient(150deg,#2A2350 0%,#3B4C8F 45%,#6B5BF6 100%);
 }
 .hero-media img{width:100%;height:100%;object-fit:cover;display:block;min-height:340px;opacity:.92}
+.hero-art{display:none;height:100%;min-height:340px;place-items:center;font-size:78px;line-height:1}
+.hero-media.placeholder img{display:none}
+.hero-media.placeholder .hero-art{display:grid}
 .hero-media::after{
   content:"";position:absolute;inset:0;
   background:linear-gradient(180deg,rgba(23,26,46,.05) 0%,rgba(23,26,46,.55) 100%);
@@ -220,6 +223,7 @@ header.nav{
   box-shadow:var(--shadow-1);cursor:pointer;transition:transform .2s ease,box-shadow .2s ease;display:flex;flex-direction:column;
 }
 .trip-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-2)}
+.trip-card[data-trip="cortis"],.trip-card[data-trip="nyc"]{cursor:pointer}
 .trip-media{position:relative;height:150px;background:linear-gradient(140deg,#E9E6FF,#DCEEFF)}
 .trip-media img{width:100%;height:100%;object-fit:cover;display:block}
 .trip-media .trip-mark{
@@ -448,6 +452,7 @@ footer#site-footer{max-width:var(--maxw);margin:0 auto;padding:34px 20px 46px;fo
   .hero{grid-template-columns:1fr;gap:24px;padding-top:34px}
   .hero-media{min-height:240px;order:-1}
   .hero-media img{min-height:240px}
+  .hero-art{min-height:240px;font-size:60px}
   .trip-grid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:760px){
@@ -517,6 +522,7 @@ footer#site-footer{max-width:var(--maxw);margin:0 auto;padding:34px 20px 46px;fo
     <div class="hero-media">
       <img id="hero-img" alt="Seoul at night" loading="lazy"
            src="https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&amp;parentSn=72614&amp;fileTy=MEDIA&amp;fileNo=1&amp;thumbTy=M" />
+      <div class="hero-art" id="hero-art" aria-hidden="true">🖼</div>
       <div class="hero-badge">
         <b data-i18n="heroBadgeTitle">CORTIS × Seoul · 首个垂直线</b>
         <span data-i18n="heroBadgeText">演唱会 + 同款地点 + 普通首尔观光，排进同一份可行行程</span>
@@ -548,14 +554,14 @@ footer#site-footer{max-width:var(--maxw);margin:0 auto;padding:34px 20px 46px;fo
           </div>
         </div>
       </article>
-      <article class="trip-card" data-trip="film">
-        <div class="trip-media" style="display:grid;place-items:center;font-size:34px;background:linear-gradient(140deg,#E9E6FF,#DCEEFF)">🎬</div>
+      <article class="trip-card" data-trip="nyc">
+        <div class="trip-media" style="display:grid;place-items:center;font-size:34px;background:linear-gradient(140deg,#E9E6FF,#DCEEFF)">🖼</div>
         <div class="trip-body">
-          <h3 data-i18n="trip2Title">《繁花》上海取景路线</h3>
-          <p data-i18n="trip2Desc">同样的流程换一个兴趣：影视取景地 + 城市漫步，行程逻辑完全复用。</p>
+          <h3 data-i18n="trip2Title">纽约 · 艺术与文化</h3>
+          <p data-i18n="trip2Desc">换城市、换兴趣：美术馆与画廊 + 普通纽约观光，用同一套引擎排出真实公交可达的行程。</p>
           <div class="trip-foot">
-            <div class="trip-tags"><span class="badge plain" data-i18n="catFilmShort">影视</span><span class="badge plain">Shanghai</span></div>
-            <span class="trip-go" data-i18n="tripConcept">方向示例</span>
+            <div class="trip-tags"><span class="badge plain" data-i18n="trip2Tag">艺术与文化</span><span class="badge plain">New York</span></div>
+            <span class="trip-go" data-i18n="tripTagLive">可体验</span>
           </div>
         </div>
       </article>
@@ -635,7 +641,7 @@ footer#site-footer{max-width:var(--maxw);margin:0 auto;padding:34px 20px 46px;fo
         <div class="plan-meta">
           <span id="plan-dates" data-i18n="planDates">示例日期 · 3 天</span>
           <span class="badge plain" data-i18n="planTagFandom">粉丝 + 旅行</span>
-          <span class="badge plain">CORTIS × Seoul</span>
+          <span class="badge plain" id="plan-tag-vertical">CORTIS × Seoul</span>
           <span class="badge plain" data-i18n="planTagEvidence">带证据与置信度</span>
         </div>
       </div>
@@ -657,14 +663,14 @@ footer#site-footer{max-width:var(--maxw);margin:0 auto;padding:34px 20px 46px;fo
       </div>
     </div>
     <div class="map-tools">
-      <button class="chip-btn on" id="mode-all">全部行程总览</button>
-      <button class="chip-btn" id="mode-day">按天分开</button>
+      <button class="chip-btn on" id="mode-all" data-i18n="modeAll">全部行程总览</button>
+      <button class="chip-btn" id="mode-day" data-i18n="modeDay">按天分开</button>
     </div>
     <div style="position:relative">
       <div id="map"></div>
       <div class="place-card" id="place-card"></div>
     </div>
-    <div class="legend"><span><span class="dot" style="background:#c2472f"></span>粉丝地点</span><span><span class="dot" style="background:#4a6fa5"></span>观光点</span><span><span class="dot" style="background:#6d3fa5"></span>酒店</span><span>虚线为当日示意连线</span></div>
+    <div class="legend"><span><span class="dot" style="background:#c2472f"></span><span data-i18n="legendFan">粉丝地点</span></span><span><span class="dot" style="background:#4a6fa5"></span><span data-i18n="legendSight">观光点</span></span><span><span class="dot" style="background:#6d3fa5"></span><span data-i18n="legendHotel">酒店</span></span><span data-i18n="legendDash">虚线为当日示意连线</span></div>
     <p class="note" id="plan-note">路线由确定性排程引擎生成：地理聚类分天 + 最近邻排序 + 2-opt 优化，同一区域尽量放在同一天。住宿评分 = 当天路线总通勤 + 地铁线路数 + 换酒店打车距离（25 分钟内优先）；<b>次日有演唱会时，优先住场馆附近为最高优先级</b>。P1 粉丝地点已接入真实调研数据（部分坐标为区域/站点级，待人工核验）；<b>“多久到”来自 Transitous 的真实公共交通路线</b>（未覆盖的组合会标注为“估算”）；酒店仍为演示数据；P2 观光点为 VisitSeoul 官方真实数据（2026-09-10 抓取）。</p>
   </section>
   </section>
@@ -705,7 +711,7 @@ footer#site-footer{max-width:var(--maxw);margin:0 auto;padding:34px 20px 46px;fo
 </section>
 <div class="drawer-mask" id="drawer-mask"></div>
 <aside class="drawer" id="drawer"><button class="close" id="drawer-close">×</button><div id="drawer-body"></div></aside>
-<footer id="site-footer">© 2026 Interest-Driven Travel Assistant · P1 粉丝地点来自用户整理的真实资料（含来源链接，部分坐标待核验）；P2 观光点来自 VisitSeoul 官方 API；站点间耗时来自 <a href="https://transitous.org/sources/" target="_blank" rel="noreferrer">Transitous</a>（源数据 KTDB / OpenStreetMap）；酒店仍为演示数据。</footer>
+ <footer id="site-footer">© 2026 InterestTrip · P1 粉丝地点来自用户整理的真实资料（含来源链接，部分坐标待核验）；P2 观光点来自 VisitSeoul 官方 API；站点间耗时来自 <a href="https://transitous.org/sources/" target="_blank" rel="noreferrer">Transitous</a>（源数据 KTDB / OpenStreetMap）；酒店仍为演示数据。<br/>地图瓦片与「纽约 · 艺术与文化」的地点数据 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors（ODbL）。</footer>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 /**
@@ -771,9 +777,12 @@ window.PLACE_ANSWERS = PLACE_ANSWERS;
         const [kind, raw] = String(m).split(":");
         const name = raw || kind;
         if (!name || name === "WALK") return null;
-        // 韩国数据里地铁线一般以"호선/선"结尾，其余按公交线路号处理
-        const rail = /호선|선$|철도|KTX/.test(name);
-        return (rail ? "🚇 " : "🚌 ") + name;
+        // 地铁/铁路：MOTIS 用 SUBWAY / RAIL 标识；韩国数据的地铁线名以"호선/선"结尾，
+        // 而首尔 feed 里的 TRAM 实际是公交，所以只有名字带"선/철도"才算地铁。
+        const k = String(kind || "").toUpperCase();
+        const train = /^(RAIL|REGIONAL_RAIL|KTX)$/.test(k) || /철도|KTX/.test(name);
+        const rail = train || /^(SUBWAY|METRO)$/.test(k) || /호선|선$/.test(name);
+        return (train ? "🚆 " : rail ? "🚇 " : "🚌 ") + name;
       })
       .filter(Boolean);
     return {
@@ -1005,21 +1014,33 @@ window.PLACE_ANSWERS = PLACE_ANSWERS;
 
   function scheduleDay(
     places,
-    { startPoint, startMinutes = 9 * 60 + 30, pace, isConcertDay, concertPoint }
+    { startPoint, startMinutes = 9 * 60 + 30, pace, isConcertDay, concertPoint, anchor }
   ) {
     const visitMin = pace === "relaxed" ? 90 : pace === "busy" ? 60 : 75;
+    // anchor = { placeId, time:"19:00", position:"last"|"first" }
+    //   "last"  = 当天最后一站（晚场演出：之前的点必须在开始前收尾）
+    //   "first" = 当天第一站（定时入场：之后的点从它结束的时间开始排）
+    // 不传 anchor 时，退回旧的 isConcertDay / concertPoint 行为，保持向后兼容。
+    const aPlace = anchor ? anchor.placeId : isConcertDay && concertPoint ? concertPoint.id : null;
+    const aTime = anchor ? anchor.time : isConcertDay ? "19:00" : null;
+    const aPos = anchor ? anchor.position || "last" : "last";
+    const aMin = aTime ? toMinutes(aTime) : null;
     const items = [];
     const overflow = [];
     let current = startMinutes;
     let previous = startPoint;
     places.forEach((p) => {
-      if (isConcertDay && concertPoint && p.id === concertPoint.id) {
-        items.push({ place: p, time: "19:00", locked: true });
+      if (aPlace && p.id === aPlace) {
+        items.push({ place: p, time: aTime, locked: true });
+        if (aPos === "first" && aMin !== null) {
+          current = aMin + visitMin;
+          previous = p;
+        }
         return;
       }
       const travel = previous ? roughMin(previous, p) : 0;
       const arrive = current + travel;
-      if (isConcertDay && arrive + visitMin > 18 * 60 + 30) {
+      if (aPos === "last" && aMin !== null && arrive + visitMin > aMin - 30) {
         overflow.push(p);
         return;
       }
@@ -1028,6 +1049,12 @@ window.PLACE_ANSWERS = PLACE_ANSWERS;
       previous = p;
     });
     return { items, overflow };
+  }
+
+  /** "19:00" → 1140（分钟） */
+  function toMinutes(hhmm) {
+    const [h, m] = String(hhmm || "").split(":").map(Number);
+    return (Number.isFinite(h) ? h : 0) * 60 + (Number.isFinite(m) ? m : 0);
   }
 
   global.RouteAlgo = {
@@ -1047,7 +1074,7 @@ window.PLACE_ANSWERS = PLACE_ANSWERS;
 
 </script>
 <script>
-const PLACES = [
+let PLACES = [
   {id:"demo-concert-001",name:"示例·演唱会场地（待替换为真实场馆）",nameLocal:"서울 올림픽공원（예시）",type:"venue",pool:"fan",district:"松坡区",lat:37.5206,lng:127.1211,hours:"演出日 19:00",conf:"high",why:"P0 演唱会为已锁定行程；场馆信息待用户提供后替换为真实演出地址。",note:"",evidence:[{srcType:"official",src:"演唱会官方公告（占位）",claim:"用户已确认会在此场地观看 CORTIS 演唱会（场馆待补充）",date:"",url:"https://example.com/",summary:"演示占位；等待真实演出场馆",conf:"high"}]},
   {id:"cortis-001",name:"二村汉江公园",nameLocal:"이촌한강공원",type:"photo_spot",pool:"fan",district:"龙山区",lat:37.518507,lng:126.9673584,hours:"时间以来源帖子为准",conf:"high",why:"用户确认：以二村汉江公园本身作为打卡点，不再使用 CU 便利店。",note:"",evidence:[{srcType:"community",src:"小红书",claim:"这个汉江公园也是同款打卡地",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5312lw=&xsec_source=pc_share",summary:"这个汉江公园也是同款打卡地",conf:"high"}]},
   {id:"cortis-002",name:"oakberry巴西莓碗",nameLocal:"오크베리",type:"shop",pool:"fan",district:"西大门区",lat:37.5566933,lng:126.9367277,hours:"时间以来源帖子为准",conf:"medium",why:"可以直接和店员说要cortis同款 冰沙+花生酱+燕麦+草莓+香蕉",note:"",evidence:[{srcType:"community",src:"小红书",claim:"可以直接和店员说要cortis同款 冰沙+花生酱+燕麦+草莓+香蕉",date:"",url:"https://www.xiaohongshu.com/discovery/item/6a015ad60000000006031889?source=webshare&xhsshare=pc_web&xsec_token=ABohEuAW8YZZXhmHRlSj925FE0cP7PY7Il0zDgx5313lw=&xsec_source=pc_share",summary:"可以直接和店员说要cortis同款 冰沙+花生酱+燕麦+草莓+香蕉",conf:"medium"}]},
@@ -1074,7 +1101,7 @@ const PLACES = [
   {id:"vs-CNP000036",name:"南山首尔塔",nameLocal:"남산서울타워",type:"sightseeing",pool:"sight",district:"龙山区",lat:37.551121,lng:126.987869,hours:"10:00-22:30（周末至23:00）",conf:null,why:"首尔代表夜景地标，情侣与游客必去。",address:"首尔龙山区南山公园路 105",officialUrl:"https://www.seoultower.co.kr/cn/",evidence:[]},
   {id:"vs-CNP037008",name:"益善洞韩屋街道",nameLocal:"익선동 한옥거리",type:"sightseeing",pool:"sight",district:"钟路区",lat:37.573391,lng:126.990919,hours:"全天开放（店铺各异）",conf:null,why:"韩屋改造的咖啡馆与小店聚集，钟路年轻人爱逛。",address:"首尔钟路区敦化门路11ga街17",officialUrl:"",evidence:[]}
 ];
-const STAYS=[
+let STAYS=[
   {id:"s1",name:"奥林匹克公园附近（示例酒店）",district:"松坡区",lat:37.5155,lng:127.1168,station:"梦村土城站",lines:["8号线"]},
   {id:"s2",name:"弘大入口附近（示例酒店）",district:"麻浦区",lat:37.5569,lng:126.9239,station:"弘大入口站",lines:["2号线","机场铁路","京义中央线"]},
   {id:"s3",name:"梨泰院附近（示例酒店）",district:"龙山区",lat:37.5345,lng:126.9942,station:"梨泰院站",lines:["6号线"]},
@@ -1087,7 +1114,7 @@ const STAYS=[
 ];
 const CONF={high:{label:"高置信度",cls:"high"},medium:{label:"中置信度",cls:"medium"},low:{label:"低置信度",cls:"low"}};
 const $=id=>document.getElementById(id);
-const state={fan:new Set(),must:new Set(),sight:new Set(),hideLow:false,hotel:{},lastPlan:null,mapMode:"all",dayFilter:null,onsite:false};
+const state={fan:new Set(),must:new Set(),sight:new Set(),hideLow:false,hotel:{},lastPlan:null,mapMode:"all",dayFilter:null,onsite:false,vertical:"cortis",flowStarted:false};
 let map=null,layerGroup=null;
 
 /* ================= 中英双语 =================
@@ -1095,7 +1122,7 @@ let map=null,layerGroup=null;
  *   ① P2 观光点：VisitSeoul 官方接口的英文版（scripts/visitseoul-fetch-en.mjs 抓取，lang_code_id=en）
  *   ② P1 粉丝地点与车站：按韩国原名（nameLocal）罗马字化，用英文用户实际看到的写法
  */
-const EN_PLACES={
+let EN_PLACES={
   "demo-concert-001":"Olympic Park, Seoul (placeholder venue)",
   "cortis-001":"Ichon Hangang Park","cortis-002":"Oakberry (açaí bowls)","cortis-003":"Seoul Children's Grand Park",
   "cortis-004":"Bongeunsa Temple","cortis-005":"Sinsa Station (Exit 5)","cortis-006":"HYBE Headquarters",
@@ -1115,7 +1142,7 @@ const EN_NOTES={
 };
 /* 英文详情：① P2 观光点的 why/地址/开放时间取自 VisitSeoul 官方英文版（data/visitseoul-en.json）
    ② P1 粉丝地点按韩国原名与来源内容改写，不用中文二次转译 */
-const EN_DETAILS={
+let EN_DETAILS={
   "demo-concert-001":{why:"P0 — the concert is the fixed anchor of the trip. Venue details are a placeholder until the real show is confirmed.",hours:"19:00 on show day",address:null},
   "cortis-001":{why:"The user confirmed this Han River park as the photo spot itself (an earlier CU convenience-store stop is no longer used).",hours:"See the source post"},
   "cortis-002":{why:"You can ask the staff for the “CORTIS order”: smoothie + peanut butter + oats + strawberry + banana.",hours:"See the source post"},
@@ -1142,7 +1169,7 @@ const EN_DETAILS={
   "vs-CNP000036":{why:"Seoul's signature night-view landmark on Namsan — popular with couples and visitors.",hours:"Weekdays 10:00-22:30, weekends 10:00-23:00",address:"105, Namsangwon-gil, Yongsan-gu, Seoul"},
   "vs-CNP037008":{why:"A hanok alley full of converted cafés and small shops, popular in Jongno.",hours:"Always open (shops vary)",address:"17, Donhwamun-ro 11ga-gil, Jongno-gu, Seoul"}
 };
-const EN_STAYS={
+let EN_STAYS={
   s1:{name:"Near Olympic Park (sample hotel)",station:"Mongchontoseong Station",lines:["Line 8"]},
   s2:{name:"Near Hongik Univ. (sample hotel)",station:"Hongik Univ. Station",lines:["Line 2","AREX","Gyeongui–Jungang Line"]},
   s3:{name:"Near Itaewon (sample hotel)",station:"Itaewon Station",lines:["Line 6"]},
@@ -1155,7 +1182,7 @@ const EN_STAYS={
 };
 const I18N={
  zh:{
-  pageTitle:"兴趣旅行助手 · CORTIS × Seoul 流程原型",appName:"兴趣旅行助手",
+  pageTitle:"InterestTrip · 兴趣驱动的旅行助手（原型）",appName:"兴趣旅行助手",
   headerBadge:"粉丝地点/观光点真实数据 · 站点间耗时来自 Transitous",
   h1:"告诉 AI：你为什么想去首尔？",
   hint:"直接说想法，例如：“我对 CORTIS 感兴趣，想去看演唱会，也想去他们去过的地方打卡，顺便在首尔旅行。”",
@@ -1184,7 +1211,7 @@ const I18N={
   modeAll:"全部行程总览",modeDay:"按天分开",
   legendFan:"粉丝地点",legendSight:"观光点",legendHotel:"酒店",legendDash:"虚线为当日示意连线",
   note:"路线由确定性排程引擎生成：地理聚类分天 + 最近邻排序 + 2-opt 优化，同一区域尽量放在同一天。住宿评分 = 当天路线总通勤 + 地铁线路数 + 换酒店打车距离（25 分钟内优先）；<b>次日有演唱会时，优先住场馆附近为最高优先级</b>。P1 粉丝地点已接入真实调研数据（部分坐标为区域/站点级，待人工核验）；<b>“多久到”来自 Transitous 的真实公共交通路线</b>（未覆盖的组合会标注为“估算”）；酒店仍为演示数据；P2 观光点为 VisitSeoul 官方真实数据（2026-09-10 抓取）。",
-  footer:"© 2026 Interest-Driven Travel Assistant · P1 粉丝地点来自用户整理的真实资料（含来源链接，部分坐标待核验）；P2 观光点来自 VisitSeoul 官方 API（英文名取自官方英文版）；站点间耗时来自 <a href=\"https://transitous.org/sources/\" target=\"_blank\" rel=\"noreferrer\">Transitous</a>（源数据 KTDB / OpenStreetMap）；酒店仍为演示数据。",
+  footer:"© 2026 InterestTrip · P1 粉丝地点来自用户整理的真实资料（含来源链接，部分坐标待核验）；P2 观光点来自 VisitSeoul 官方 API（英文名取自官方英文版）；站点间耗时来自 <a href=\"https://transitous.org/sources/\" target=\"_blank\" rel=\"noreferrer\">Transitous</a>（源数据 KTDB / OpenStreetMap）；酒店仍为演示数据。<br/>地图瓦片与「纽约 · 艺术与文化」的地点数据 © <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noreferrer\">OpenStreetMap</a> contributors（ODbL）。",
   mapFallback:"地图组件需联网加载（Leaflet/OSM）。离线时查看文字排程。",
   aiReply:"收到！我先按优先级处理：\n① P0 演唱会已锁定，周边安排会避开演出日晚间\n② P1 收集 CORTIS 相关地点（每条带来源与可信度，低置信度只建议“顺路再去”）\n③ P2 补充首尔观光点\n\n请先选择想去的地点：给地点标“必去”或“顺路再去”。",
   mustDo:"必去",mustDone:"必去 ✓",onTheWayShort:"顺路",onTheWayDone:"顺路 ✓",add:"加入",added:"已加入 ✓",
@@ -1199,7 +1226,7 @@ const I18N={
   noArtist:"不关联艺人，无粉丝证据链；用于平衡行程。",
   alertNoFan:"请至少把一个粉丝地点标为“必去”或“顺路”。",
   paceShortBusy:"紧凑",paceShortRelaxed:"宽松",paceShortNormal:"适中",
-  constraint:(c)=>`已锁定：演唱会 Day ${c.concertDay} 19:00 · 共 ${c.days} 天 · ${c.pace}节奏 · ${c.budget}档 · ${c.arrival}到达 / 最后一天${c.departure}离开（示例）`,
+  constraint:"已锁定：{anchor} · Day {day} {time} · 共 {days} 天 · {pace}节奏 · {budget}档 · {arrival}到达 / 最后一天{departure}离开（示例）",
   dayHeader:(n)=>`Day ${n} · 示例日期 `,concertDayBadge:"演唱会日",
   whyTitle:"为什么这样排：",connectLabel:"衔接：",
   aiWhyTitle:"AI 推荐（基于证据）：",aiWhySource:"来源：",
@@ -1224,12 +1251,13 @@ const I18N={
   searchHint:"可以写一整句话，比如“我想去看演唱会，也想去他们去过的地方”",
   catFandom:"粉丝 / 演出",catFilm:"影视取景",catFood:"美食",catCafe:"咖啡馆",catHike:"徒步 / 户外",catMore:"更多",
   catFandomShort:"粉丝",catFilmShort:"影视",catHikeShort:"徒步",
-  catNote:"演示数据目前只有 CORTIS × Seoul 这条垂直线；其他兴趣会走同一套流程（发现 → 选点 → 生成）。",
+  catNote:"演示数据目前有两条垂直线：CORTIS × Seoul 与 纽约 · 艺术与文化；其他兴趣会走同一套流程（发现 → 选点 → 生成）。",
+  verticalSoon:"这条线还是方向示例，暂时不能体验。",
   heroBadgeTitle:"CORTIS × Seoul · 首个垂直线",heroBadgeText:"演唱会 + 同款地点 + 普通首尔观光，排进同一份可行行程",
   featuredTitle:"Featured Trips",featuredSub:"同一个引擎可以做很多种“为兴趣而旅行”——下面是第一个完成品和两个方向示例。",
   tripTagLive:"可体验",tripGo:"开始 →",tripConcept:"方向示例",
   trip1Desc:"演唱会 + 成员同款地点 + 普通首尔观光，按真实公交耗时排进一份 2–7 天行程。",
-  trip2Title:"《繁花》上海取景路线",trip2Desc:"同样的流程换一个兴趣：影视取景地 + 城市漫步，行程逻辑完全复用。",
+  trip2Title:"纽约 · 艺术与文化",trip2Desc:"换城市、换兴趣：美术馆与画廊 + 普通纽约观光，用同一套引擎排出真实公交可达的行程。",trip2Tag:"艺术与文化",
   trip3Title:"济州岛徒步之旅",trip3Desc:"把“兴趣”换成户外路线：徒步段、休息点与住宿推荐用同一套约束求解。",
   createTitle:"Create Your Trip",createSub:"告诉我们你的兴趣和目的地，我们把“兴趣相关的地点”和“普通旅行”揉成一份能真的走完的行程。",
   planDates:"示例日期 · 3 天",planTagFandom:"粉丝 + 旅行",planTagEvidence:"带证据与置信度",
@@ -1249,7 +1277,7 @@ const I18N={
   chipTextMore:"我想围绕一个自己的兴趣安排一趟旅行。"
  },
  en:{
-  pageTitle:"Interest-Driven Travel Assistant · CORTIS × Seoul prototype",appName:"Interest-Driven Travel Assistant",
+  pageTitle:"InterestTrip · interest-driven travel assistant (prototype)",appName:"Interest-Driven Travel Assistant",
   headerBadge:"Real fan-place & sightseeing data · travel times from Transitous",
   h1:"Tell the AI: why do you want to go to Seoul?",
   hint:"Just say it in your own words — e.g. “I'm into CORTIS, I'm going to their concert, and I'd like to visit the places they've been to while I'm in Seoul.”",
@@ -1278,7 +1306,7 @@ const I18N={
   modeAll:"Whole trip",modeDay:"By day",
   legendFan:"Fan places",legendSight:"Sightseeing",legendHotel:"Hotels",legendDash:"Dashed lines are same-day connections",
   note:"The route comes from a deterministic scheduling engine: geographic clustering by day + nearest-neighbour ordering + 2-opt optimisation, keeping each area together. Lodging score = total travel time on that day + number of subway lines + taxi distance when changing hotels (under 25 minutes preferred); <b>when the next day has a concert, staying near the venue is the top priority</b>. P1 fan places use real collected data (some coordinates are area/station level, pending manual verification); <b>travel times come from real public-transit routing via Transitous</b> (uncovered pairs are marked “estimate”); hotels are still sample data; P2 sightseeing places are official VisitSeoul data (fetched 2026-09-10, English names from the official English version).",
-  footer:"© 2026 Interest-Driven Travel Assistant · P1 fan places come from collected public sources (with links; some coordinates pending verification); P2 sightseeing places come from the official VisitSeoul API (English names from the official English version); travel times come from <a href=\"https://transitous.org/sources/\" target=\"_blank\" rel=\"noreferrer\">Transitous</a> (KTDB / OpenStreetMap); hotels remain sample data.",
+  footer:"© 2026 InterestTrip · P1 fan places come from collected public sources (with links; some coordinates pending verification); P2 sightseeing places come from the official VisitSeoul API (English names from the official English version); travel times come from <a href=\"https://transitous.org/sources/\" target=\"_blank\" rel=\"noreferrer\">Transitous</a> (KTDB / OpenStreetMap); hotels remain sample data.<br/>Map tiles and the “New York · Art & Culture” place data © <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noreferrer\">OpenStreetMap</a> contributors (ODbL).",
   mapFallback:"The map needs a network connection (Leaflet / OSM). Offline, read the itinerary below.",
   aiReply:"Got it. Here's how I'll handle it:\n① P0 — the concert is locked, and the days around it avoid late scheduling\n② P1 — collect CORTIS-related places (each with a source and a confidence level; low confidence is only suggested as “if it's on the way”)\n③ P2 — add Seoul sightseeing\n\nFirst, pick the places you want: mark them “must-go” or “nice-to-have”.",
   mustDo:"Must-go",mustDone:"Must-go ✓",onTheWayShort:"On the way",onTheWayDone:"On the way ✓",add:"Add",added:"Added ✓",
@@ -1293,7 +1321,7 @@ const I18N={
   noArtist:"Not tied to any artist and has no fan evidence chain; used to balance the trip.",
   alertNoFan:"Please mark at least one fan place as “must-go” or “on the way”.",
   paceShortBusy:"packed",paceShortRelaxed:"relaxed",paceShortNormal:"balanced",
-  constraint:(c)=>`Locked: concert on Day ${c.concertDay} at 19:00 · ${c.days} days · ${c.pace} pace · ${c.budget} · arriving ${c.arrival}, leaving ${c.departure} on the last day (illustrative)`,
+  constraint:"Locked: {anchor} · Day {day} at {time} · {days} days · {pace} pace · {budget} · arriving {arrival}, leaving {departure} on the last day (illustrative)",
   dayHeader:(n)=>`Day ${n} · sample date `,concertDayBadge:"Concert day",
   whyTitle:"Why this order: ",connectLabel:"Connections: ",
   aiWhyTitle:"AI recommendation (evidence-based): ",aiWhySource:"Source: ",
@@ -1318,12 +1346,13 @@ const I18N={
   searchHint:"A full sentence works — e.g. “I'm going to a concert and want to visit the places they've been to”",
   catFandom:"Fandom & gigs",catFilm:"Film & TV",catFood:"Food",catCafe:"Café",catHike:"Hiking",catMore:"More",
   catFandomShort:"Fandom",catFilmShort:"Film & TV",catHikeShort:"Hiking",
-  catNote:"The demo data covers one vertical for now — CORTIS × Seoul. Other interests run through the same flow: discover → choose → generate.",
+  catNote:"The demo covers two verticals — CORTIS × Seoul and New York · Art & Culture. Other interests run through the same flow: discover → choose → generate.",
+  verticalSoon:"This one is still a direction example — not playable yet.",
   heroBadgeTitle:"CORTIS × Seoul · first vertical",heroBadgeText:"Concert + member spots + ordinary Seoul sightseeing, in one feasible itinerary",
   featuredTitle:"Featured Trips",featuredSub:"The same engine works for many kinds of interest-driven travel — one live demo and two directions.",
   tripTagLive:"Live demo",tripGo:"Start →",tripConcept:"Direction",
   trip1Desc:"Concert + places the members have been to + ordinary Seoul sightseeing, scheduled with real transit times over 2–7 days.",
-  trip2Title:"Blossoms Shanghai filming route",trip2Desc:"Same flow, different interest: filming locations woven into a city walk.",
+  trip2Title:"New York · Art & Culture",trip2Desc:"A different city and a different interest: museums and galleries plus ordinary NYC sightseeing, scheduled with real transit times.",trip2Tag:"Art & culture",
   trip3Title:"Jeju hiking trip",trip3Desc:"Swap the interest for an outdoor route: hikes, rest stops and lodging solved with the same constraints.",
   createTitle:"Create Your Trip",createSub:"Tell us your interest and where you're going. We'll blend interest-related places with ordinary travel into an itinerary you can actually walk.",
   planDates:"Sample dates · 3 days",planTagFandom:"Fandom + travel",planTagEvidence:"Evidence & confidence",
@@ -1345,7 +1374,7 @@ const I18N={
 };
 let LANG=(()=>{try{const s=localStorage.getItem("lang");if(s==="zh"||s==="en")return s;}catch(e){}return (navigator.language||"").toLowerCase().startsWith("en")?"en":"zh";})();
 /* 观光点官方配图（VisitSeoul 官方接口，data/visitseoul-selection.json 里的 imageUrl） */
-const PLACE_IMAGES={
+let PLACE_IMAGES={
   "vs-CNP000067":"https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&parentSn=66476&fileTy=MEDIA&fileNo=3&thumbTy=M",
   "vs-CNP015338":"https://api.visitseoul.net/comm/getImage?srvcId=POST&parentSn=15383&fileTy=POSTTHUMB&fileNo=1&thumbTy=M&postTy=P",
   "vs-CNP000061":"https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&parentSn=77128&fileTy=MEDIA&fileNo=1&thumbTy=M",
@@ -1361,8 +1390,75 @@ const PLACE_IMAGES={
   "vs-CNP000036":"https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&parentSn=68273&fileTy=MEDIA&fileNo=3&thumbTy=M",
   "vs-CNP037008":"https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&parentSn=77270&fileTy=MEDIA&fileNo=1&thumbTy=M"
 };
+/* ---------- 垂直线（vertical）：换城市 / 换兴趣时，只换这一层 ---------- */
+const VERTICALS={};
+VERTICALS.cortis={
+  id:"cortis",
+  label:{zh:"CORTIS × Seoul",en:"CORTIS × Seoul"},
+  heroImg:"https://api.visitseoul.net/comm/getImage?srvcId=MEDIA&parentSn=72614&fileTy=MEDIA&fileNo=1&thumbTy=M",
+  heroEmoji:"🌃",
+  places:PLACES,stays:STAYS,
+  enPlaces:EN_PLACES,enDetails:EN_DETAILS,enStays:EN_STAYS,
+  images:PLACE_IMAGES,
+  transit:(typeof window!=="undefined")?window.TRANSIT_MATRIX:null,
+  answers:(typeof window!=="undefined")?window.PLACE_ANSWERS:null,
+  // 锚点＝已预约、改不了的那个时间点。position:"last"=当天最后一站（晚场演出）；"first"=当天第一站（定时入场）
+  anchor:{placeId:"demo-concert-001",time:"19:00",position:"last",labelZh:"演唱会",labelEn:"Concert"},
+  i18n:null,
+};
+// >>> VERTICAL_NYC
+VERTICALS.nyc = {"id":"nyc","label":{"zh":"纽约 · 艺术与文化","en":"New York · Art & Culture"},"heroEmoji":"🖼","places":[{"id":"nyc-met","name":"大都会艺术博物馆","nameLocal":"The Metropolitan Museum of Art","type":"sightseeing","pool":"fan","district":"上东区","lat":40.77944,"lng":-73.96338,"hours":"10:00-17:00; Fr-Sa 10:00-21:00; We off","conf":"high","why":"纽约最大、最全的百科全书式美术馆，古埃及、欧洲绘画与盔甲展厅都值得专程。","address":"1000 5th Avenue","officialUrl":"https://www.metmuseum.org/","source":"https://www.openstreetmap.org/relation/3698894","note":"","evidence":[]},{"id":"nyc-moma","name":"现代艺术博物馆 MoMA","nameLocal":"MoMA","type":"sightseeing","pool":"fan","district":"中城","lat":40.76161,"lng":-73.9775,"hours":"Mo-Su 10:30-17:30; Sa 10:30-19:00","conf":"high","why":"现代艺术的主场，梵高《星月夜》与整层的当代馆藏都在这里。","address":"11 West 53rd Street","officialUrl":"https://www.moma.org/","source":"https://www.openstreetmap.org/way/278346578","note":"","evidence":[]},{"id":"nyc-guggenheim","name":"古根海姆博物馆","nameLocal":"Solomon R. Guggenheim Museum","type":"sightseeing","pool":"fan","district":"上东区","lat":40.78299,"lng":-73.95892,"hours":"Mo-Su 10:30-17:30","conf":"high","why":"赖特设计的螺旋建筑本身就是展品，沿坡道一路走上去的观展方式独一无二。","address":"1071 5th Avenue","officialUrl":"https://www.guggenheim.org/new-york","source":"https://www.openstreetmap.org/way/170149134","note":"","evidence":[]},{"id":"nyc-whitney","name":"惠特尼美国艺术博物馆","nameLocal":"Whitney Museum of American Art","type":"sightseeing","pool":"fan","district":"肉库区","lat":40.73965,"lng":-74.00892,"hours":"Mo-Su 10:30-18:00; Tu off; Fr 10:30-22:00","conf":"high","why":"美国当代艺术主场，露台正对哈德逊河与高线公园。","address":"99 Gansevoort Street","officialUrl":"https://www.whitney.org/","source":"https://www.openstreetmap.org/way/288749896","note":"","evidence":[]},{"id":"nyc-morgan","name":"摩根图书馆与博物馆","nameLocal":"The Morgan Library & Museum","type":"sightseeing","pool":"fan","district":"中城","lat":40.74927,"lng":-73.98147,"hours":"Tu-Su 10:30-17:00; Fr 10:30-20:00; Mo off","conf":"high","why":"金融大亨的私人书房原样保留，中世纪手抄本与古籍的藏量惊人。","address":"225 Madison Avenue","officialUrl":"https://www.themorgan.org/","source":"https://www.openstreetmap.org/node/4462440249","note":"","evidence":[]},{"id":"nyc-frick","name":"弗里克收藏","nameLocal":"The Frick Collection","type":"sightseeing","pool":"fan","district":"上东区","lat":40.77126,"lng":-73.96717,"hours":"Mo,We-Su 10:30-17:30","conf":"high","why":"豪宅改成的美术馆，馆藏不大但每一件都是精品，氛围安静。","address":"1 East 70th Street","officialUrl":"https://www.frick.org/","source":"https://www.openstreetmap.org/node/14075405131","note":"","evidence":[]},{"id":"nyc-neue","name":"新画廊 Neue Galerie","nameLocal":"Neue Galerie New York","type":"sightseeing","pool":"fan","district":"上东区","lat":40.78122,"lng":-73.96024,"hours":"We-Mo 10:00-18:00","conf":"high","why":"专攻德语区艺术，克里姆特的《艾蒂儿肖像一号》就在这里。","address":"1048 5th Avenue","officialUrl":"https://www.neuegalerie.org/","source":"https://www.openstreetmap.org/way/266934254","note":"","evidence":[]},{"id":"nyc-cloisters","name":"修道院博物馆 The Cloisters","nameLocal":"The Cloisters","type":"sightseeing","pool":"fan","district":"华盛顿高地","lat":40.86483,"lng":-73.93171,"hours":"开放时间以官网为准","conf":"high","why":"大都会的中世纪分馆，把整座修道院搬到了曼哈顿北端的公园里，氛围完全不像纽约。","address":"99 Margaret Corbin Drive","officialUrl":"https://www.metmuseum.org/visit/plan-your-visit/met-cloisters","source":"https://www.openstreetmap.org/relation/6424088","note":"","evidence":[]},{"id":"nyc-brooklynmuseum","name":"布鲁克林博物馆","nameLocal":"Brooklyn Museum","type":"sightseeing","pool":"fan","district":"布鲁克林","lat":40.67095,"lng":-73.96329,"hours":"We-Su 11:00-18:00","conf":"high","why":"布鲁克林的艺术主场，非洲、埃及与女性艺术家馆藏是特色。","address":"200 Eastern Parkway","officialUrl":"https://www.brooklynmuseum.org/","source":"https://www.openstreetmap.org/way/1432069915","note":"","evidence":[]},{"id":"nyc-ps1","name":"MoMA PS1","nameLocal":"MoMA PS1","type":"sightseeing","pool":"fan","district":"长岛市（皇后区）","lat":40.74558,"lng":-73.94747,"hours":"开放时间以官网为准","conf":"high","why":"MoMA 的当代分馆，由旧学校改造，实验性展览与院子里的夏季音乐项目很有名。","address":"22-25 Jackson Avenue","officialUrl":"https://momaps1.org/","source":"https://www.openstreetmap.org/way/370574294","note":"","evidence":[]},{"id":"nyc-noguchi","name":"野口勇博物馆","nameLocal":"The Noguchi Museum","type":"sightseeing","pool":"fan","district":"长岛市（皇后区）","lat":40.76699,"lng":-73.93761,"hours":"Mo,Tu off; We-Su 11:00-18:00","conf":"high","why":"雕塑家野口勇自己设计的馆与庭园，光线和石头的关系是主角。","address":"9-01 33rd Road","officialUrl":"https://www.noguchi.org/","source":"https://www.openstreetmap.org/way/383689939","note":"","evidence":[]},{"id":"nyc-newmuseum","name":"新当代艺术博物馆","nameLocal":"New Museum","type":"sightseeing","pool":"fan","district":"下东区","lat":40.72235,"lng":-73.99284,"hours":"Tu,We,Fr-Su 11:00-18:00; Th 11:00-21:00","conf":"high","why":"Bowery 街上的白色堆叠建筑，只做当代艺术，展陈很锋利。","address":"235 Bowery","officialUrl":"https://www.newmuseum.org/","source":"https://www.openstreetmap.org/node/13732385972","note":"","evidence":[]},{"id":"nyc-elmuseo","name":"巴里奥博物馆","nameLocal":"El Museo del Barrio","type":"sightseeing","pool":"fan","district":"东哈莱姆","lat":40.79312,"lng":-73.95134,"hours":"Th-Su 11:00-17:00","conf":"high","why":"专注加勒比与拉美艺术，在博物馆一英里的最北端。","address":"1230 5th Avenue","officialUrl":"https://elmuseo.org/","source":"https://www.openstreetmap.org/way/271274003","note":"","evidence":[]},{"id":"nyc-highline","name":"高线公园","nameLocal":"High Line","type":"sightseeing","pool":"fan","district":"切尔西","lat":40.74971,"lng":-74.00343,"hours":"开放时间以官网为准","conf":"high","why":"废弃高架铁路改成的空中步道，沿途是公共艺术与哈德逊河景。","address":"Gansevoort St to W 34th St","officialUrl":"https://www.thehighline.org/","source":"https://www.openstreetmap.org/way/277945818","note":"","evidence":[]},{"id":"nyc-shed","name":"The Shed","nameLocal":"The Shed","type":"sightseeing","pool":"fan","district":"哈德逊城市广场","lat":40.75328,"lng":-74.00267,"hours":"Mo off","conf":"high","why":"可伸缩外壳的艺文空间，主打定时上演的跨界委约作品。","address":"545 West 30th Street","officialUrl":"https://theshed.org/","source":"https://www.openstreetmap.org/way/681503639","note":"","evidence":[]},{"id":"nyc-printedmatter","name":"Printed Matter 艺术书店","nameLocal":"Printed Matter Inc.","type":"sightseeing","pool":"fan","district":"切尔西","lat":40.75068,"lng":-74.00593,"hours":"Mo-Su 11:00-19:00","conf":"high","why":"1976 年创立的艺术家书专门店，是看独立出版与 zine 的地方。","address":"231 11th Avenue","officialUrl":"https://www.printedmatter.org/","source":"https://www.openstreetmap.org/node/4310137730","note":"","evidence":[]},{"id":"nyc-cpark","name":"中央公园","nameLocal":"Central Park","type":"sightseeing","pool":"sight","district":"曼哈顿","lat":40.78277,"lng":-73.96536,"hours":"06:00-01:00","conf":null,"why":"曼哈顿正中的大公园，从大都会出来就是，适合把上东区的行程接起来。","address":"","officialUrl":"https://www.centralparknyc.org","source":"https://www.openstreetmap.org/W/427818536","note":"","evidence":[]},{"id":"nyc-brooklynbridge","name":"布鲁克林大桥","nameLocal":"Brooklyn Bridge","type":"sightseeing","pool":"sight","district":"布鲁克林/曼哈顿","lat":40.70565,"lng":-73.99642,"hours":"24 小时开放","conf":null,"why":"步行过桥看曼哈顿天际线，是纽约最经典的走法。","address":"","officialUrl":"","source":"https://www.openstreetmap.org/W/46177152","note":"","evidence":[]},{"id":"nyc-wsquare","name":"华盛顿广场公园","nameLocal":"Washington Square Park","type":"sightseeing","pool":"sight","district":"格林威治村","lat":40.7309,"lng":-73.9976,"hours":"全天开放","conf":null,"why":"格林威治村的中心，街头音乐与拱门是这一带的日常。","address":"","officialUrl":"https://www.nycgovparks.org/parks/washington-square-park","source":"https://www.openstreetmap.org/W/22899302","note":"","evidence":[]},{"id":"nyc-grandcentral","name":"中央车站","nameLocal":"Grand Central Terminal","type":"sightseeing","pool":"sight","district":"中城","lat":40.75269,"lng":-73.97725,"hours":"Mo-Su 05:30-02:00","conf":null,"why":"布杂艺术的火车站大厅，天花板星座穹顶值得抬头看。","address":"","officialUrl":"https://www.grandcentralterminal.com/","source":"https://www.openstreetmap.org/W/265947358","note":"","evidence":[]},{"id":"nyc-nypl","name":"纽约公共图书馆","nameLocal":"New York Public Library","type":"sightseeing","pool":"sight","district":"中城","lat":40.75334,"lng":-73.98215,"hours":"Mo,Th-Sa 10:00-18:00; Tu-We 08:00-20:00","conf":null,"why":"主馆的玫瑰阅览室免费开放，就在中央车站旁边。","address":"","officialUrl":"https://www.nypl.org/locations/schwarzman","source":"https://www.openstreetmap.org/W/265302076","note":"","evidence":[]},{"id":"nyc-chelseamarket","name":"切尔西市场","nameLocal":"Chelsea Market","type":"sightseeing","pool":"sight","district":"切尔西","lat":40.74205,"lng":-74.0049,"hours":"Mo-Su 07:00-22:00","conf":null,"why":"由旧饼干厂改造的美食市场，紧邻高线公园。","address":"","officialUrl":"https://www.chelseamarket.com/","source":"https://www.openstreetmap.org/N/1272608999","note":"","evidence":[]},{"id":"nyc-littleisland","name":"Little Island","nameLocal":"Little Island","type":"sightseeing","pool":"sight","district":"切尔西","lat":40.742,"lng":-74.01061,"hours":"Mo-Su 06:00-23:00","conf":null,"why":"哈德逊河上的郁金香形人工岛，免费开放，紧邻惠特尼与高线。","address":"","officialUrl":"https://littleisland.org/","source":"https://www.openstreetmap.org/W/833335529","note":"","evidence":[]},{"id":"nyc-flushingmeadows","name":"法拉盛草原可乐娜公园","nameLocal":"Flushing Meadows-Corona Park","type":"sightseeing","pool":"sight","district":"法拉盛（皇后区）","lat":40.7571,"lng":-73.8455,"hours":"公园全天开放（场馆另计）","conf":null,"why":"世博会旧址改建的大公园，Unisphere 地球仪是纽约的地标之一。","address":"","officialUrl":"https://www.nycgovparks.org/parks/flushing-meadows-corona-park/","source":"https://www.openstreetmap.org/R/14402283","note":"落点取公园主入口 Mets–Willets Point 站（7 号线 / LIRR），公园本身无通行入口坐标。","evidence":[]},{"id":"nyc-flushingmain","name":"法拉盛唐人街（Main Street 一带）","nameLocal":"Flushing Chinatown","type":"sightseeing","pool":"sight","district":"法拉盛（皇后区）","lat":40.74726,"lng":-73.82519,"hours":"24/7","conf":null,"why":"全美最大的华人街区之一，吃一顿再回曼哈顿是很多人的固定安排。","address":"","officialUrl":"","source":"https://www.openstreetmap.org/W/562015906","note":"","evidence":[]},{"id":"nyc-queensmuseum","name":"皇后区博物馆","nameLocal":"Queens Museum","type":"sightseeing","pool":"fan","district":"法拉盛（皇后区）","lat":40.74587,"lng":-73.84674,"hours":"开放时间以官网为准","conf":"high","why":"馆内的「纽约全景」模型把整座城市的每栋建筑都做了出来，就在法拉盛公园里。","address":"","officialUrl":"","source":"https://www.openstreetmap.org/W/284856409","note":"","evidence":[]}],"stays":[{"id":"s1","name":"标准酒店（高线店）","district":"切尔西","lat":40.74085,"lng":-74.00808,"station":"8 Av / 14 St","lines":["A","C","E","L"]},{"id":"s2","name":"Pod 51 酒店","district":"中城东","lat":40.75571,"lng":-73.96909,"station":"51 St","lines":["6"]},{"id":"s3","name":"YOTEL 纽约","district":"中城西","lat":40.75909,"lng":-73.99544,"station":"34 St-Hudson Yards","lines":["7"]},{"id":"s4","name":"HI 纽约国际青年旅舍","district":"上西区","lat":40.79871,"lng":-73.96663,"station":"103 St","lines":["1"]},{"id":"s5","name":"包厘酒店","district":"下东区","lat":40.72604,"lng":-73.99144,"station":"2 Av","lines":["F"]},{"id":"s6","name":"霍克斯顿酒店（威廉斯堡）","district":"布鲁克林","lat":40.72162,"lng":-73.95883,"station":"Bedford Av","lines":["L"]}],"enPlaces":{"nyc-met":"The Metropolitan Museum of Art","nyc-moma":"MoMA","nyc-guggenheim":"Solomon R. Guggenheim Museum","nyc-whitney":"Whitney Museum of American Art","nyc-morgan":"The Morgan Library & Museum","nyc-frick":"The Frick Collection","nyc-neue":"Neue Galerie New York","nyc-cloisters":"The Cloisters","nyc-brooklynmuseum":"Brooklyn Museum","nyc-ps1":"MoMA PS1","nyc-noguchi":"The Noguchi Museum","nyc-newmuseum":"New Museum","nyc-elmuseo":"El Museo del Barrio","nyc-highline":"High Line","nyc-shed":"The Shed","nyc-printedmatter":"Printed Matter Inc.","nyc-cpark":"Central Park","nyc-brooklynbridge":"Brooklyn Bridge","nyc-wsquare":"Washington Square Park","nyc-grandcentral":"Grand Central Terminal","nyc-nypl":"New York Public Library","nyc-chelseamarket":"Chelsea Market","nyc-littleisland":"Little Island","nyc-flushingmeadows":"Flushing Meadows-Corona Park","nyc-flushingmain":"Flushing Chinatown","nyc-queensmuseum":"Queens Museum"},"enDetails":{"nyc-met":{"why":"New York's encyclopedic museum — Egyptian tombs, European painting, the armour hall."},"nyc-moma":{"why":"Home of modern art: Van Gogh's Starry Night and a whole floor of contemporary work."},"nyc-guggenheim":{"why":"Wright's spiral building is itself the exhibit; you take in the art walking up the ramp."},"nyc-whitney":{"why":"The home of American contemporary art, with a terrace over the Hudson."},"nyc-morgan":{"why":"A financier's private library preserved intact, with medieval manuscripts."},"nyc-frick":{"why":"A mansion turned museum: a small collection where every piece is a highlight."},"nyc-neue":{"why":"German and Austrian art, including Klimt's Portrait of Adele Bloch-Bauer I."},"nyc-cloisters":{"why":"The Met's medieval branch, in a park at the top of Manhattan."},"nyc-brooklynmuseum":{"why":"Brooklyn's art museum — strong African, Egyptian and feminist holdings."},"nyc-ps1":{"why":"MoMA's contemporary outpost in a former school; experimental shows and summer music."},"nyc-noguchi":{"why":"Sculptor Isamu Noguchi's own museum and garden — light and stone."},"nyc-newmuseum":{"why":"A stacked white building on the Bowery, contemporary art only."},"nyc-elmuseo":{"why":"Caribbean and Latin American art, at the top of Museum Mile."},"nyc-highline":{"why":"A disused elevated railway turned into a park, with public art and river views."},"nyc-shed":{"why":"A retractable-shell arts centre with commissioned, ticketed performances."},"nyc-printedmatter":{"why":"Artist's books and zines since 1976 — the shop for independent publishing."},"nyc-cpark":{"why":"The big park in the middle of Manhattan — right outside the Met."},"nyc-brooklynbridge":{"why":"Walk across for the classic skyline view."},"nyc-wsquare":{"why":"The centre of Greenwich Village: the arch, street music, people-watching."},"nyc-grandcentral":{"why":"Beaux-Arts station hall with a celestial ceiling worth looking up at."},"nyc-nypl":{"why":"The main library's Rose Reading Room is free to enter, next to Grand Central."},"nyc-chelseamarket":{"why":"A food market in an old biscuit factory, next to the High Line."},"nyc-littleisland":{"why":"A tulip-shaped artificial island on the Hudson, free to enter."},"nyc-flushingmeadows":{"why":"A park on the old World's Fair site; the Unisphere is the landmark."},"nyc-flushingmain":{"why":"One of the largest Chinese neighbourhoods in the US — eat, then head back."},"nyc-queensmuseum":{"why":"Its Panorama models every building in New York City; inside Flushing Meadows."}},"enStays":{"s1":{"name":"The Standard, High Line","station":"8 Av / 14 St","lines":["A","C","E","L"]},"s2":{"name":"Pod 51","station":"51 St","lines":["6"]},"s3":{"name":"YOTEL New York","station":"34 St-Hudson Yards","lines":["7"]},"s4":{"name":"HI New York City Hostel","station":"103 St","lines":["1"]},"s5":{"name":"The Bowery Hotel","station":"2 Av","lines":["F"]},"s6":{"name":"The Hoxton, Williamsburg","station":"Bedford Av","lines":["L"]}},"images":{},"transit":{"generatedAt":"2026-09-19T13:57:41.719Z","queryTime":"2026-09-16T10:00:00-04:00","source":"Transitous (MOTIS) - data: MTA / NYC GTFS","sourceUrl":"https://transitous.org/sources/","note":"耗时来自 Transitous 免费公益接口（MOTIS）。时刻取工作日 10:00 一次采样，个别线路可能有偏差。","pairs":{"nyc-met|nyc-neue":{"ok":true,"minutes":6,"transfers":0,"mode":"walk-estimate","modes":["WALK"]},"nyc-cpark|nyc-met":{"ok":true,"minutes":7,"transfers":0,"mode":"walk-estimate","modes":["WALK"]},"nyc-guggenheim|nyc-met":{"ok":true,"minutes":8,"transfers":0,"mode":"transit","modes":["BUS:M3"]},"nyc-frick|nyc-met":{"ok":true,"minutes":17,"transfers":0,"mode":"transit","modes":["BUS:M4"]},"nyc-elmuseo|nyc-met":{"ok":true,"minutes":21,"transfers":0,"mode":"transit","modes":["BUS:M2"]},"nyc-grandcentral|nyc-moma":{"ok":true,"minutes":17,"transfers":0,"mode":"transit","modes":["BUS:M1"]},"nyc-moma|nyc-nypl":{"ok":true,"minutes":14,"transfers":0,"mode":"transit","modes":["BUS:Q32"]},"nyc-frick|nyc-moma":{"ok":true,"minutes":20,"transfers":0,"mode":"transit","modes":["BUS:M4"]},"nyc-moma|nyc-morgan":{"ok":true,"minutes":19,"transfers":0,"mode":"transit","modes":["BUS:M4"]},"nyc-met|nyc-moma":{"ok":true,"minutes":26,"transfers":0,"mode":"transit","modes":["BUS:M4"]},"nyc-guggenheim|nyc-neue":{"ok":true,"minutes":4,"transfers":0,"mode":"walk-estimate","modes":["WALK"]},"nyc-cpark|nyc-guggenheim":{"ok":true,"minutes":9,"transfers":0,"mode":"walk-estimate","modes":["WALK"]},"nyc-elmuseo|nyc-guggenheim":{"ok":true,"minutes":17,"transfers":0,"mode":"transit","modes":["BUS:M3"]},"nyc-frick|nyc-guggenheim":{"ok":true,"minutes":16,"transfers":0,"mode":"transit","modes":["BUS:M4"]},"nyc-littleisland|nyc-whitney":{"ok":true,"minutes":5,"transfers":0,"mode":"walk-estimate","modes":["WALK"]},"nyc-chelseamarket|nyc-whitney":{"ok":true,"minutes":7,"transfers":0,"mode":"walk-estimate","modes":["WALK"]},"nyc-highline|nyc-whitney":{"ok":true,"minutes":19,"transfers":0,"mode":"transit","modes":["BUS:M11"]},"nyc-printedmatter|nyc-whitney":{"ok":true,"minutes":17,"transfers":0,"mode":"transit","modes":["BUS:M12"]},"nyc-whitney|nyc-wsquare":{"ok":true,"minutes":21,"transfers":1,"mode":"transit","modes":["BUS:M14D-SBS","BUS:M8"]},"nyc-morgan|nyc-nypl":{"ok":true,"minutes":8,"transfers":0,"mode":"transit","modes":["BUS:M4"]},"nyc-grandcentral|nyc-morgan":{"ok":true,"minutes":9,"transfers":0,"mode":"walk-estimate","modes":["WALK"]},"nyc-morgan|nyc-shed":{"ok":true,"minutes":19,"transfers":0,"mode":"transit","modes":["BUS:34th St"]},"nyc-highline|nyc-morgan":{"ok":true,"minutes":20,"transfers":0,"mode":"transit","modes":["BUS:34th St"]},"nyc-frick|nyc-neue":{"ok":true,"minutes":14,"transfers":0,"mode":"transit","modes":["BUS:M4"]},"nyc-cpark|nyc-frick":{"ok":true,"minutes":19,"transfers":0,"mode":"transit","modes":["BUS:M1"]},"nyc-cpark|nyc-neue":{"ok":true,"minutes":8,"transfers":0,"mode":"walk-estimate","modes":["WALK"]},"nyc-elmuseo|nyc-neue":{"ok":true,"minutes":19,"transfers":0,"mode":"transit","modes":["BUS:M3"]},"nyc-cloisters|nyc-elmuseo":{"ok":true,"minutes":41,"transfers":3,"mode":"transit","modes":["BUS:M4","SUBWAY:A","SUBWAY:B","BUS:M4"]},"nyc-cloisters|nyc-guggenheim":{"ok":true,"minutes":46,"transfers":3,"mode":"transit","modes":["BUS:M4","SUBWAY:A","SUBWAY:B","BUS:M106"]},"nyc-cloisters|nyc-cpark":{"ok":true,"minutes":43,"transfers":3,"mode":"transit","modes":["BUS:M4","SUBWAY:A","SUBWAY:B","BUS:M10"]},"nyc-cloisters|nyc-neue":{"ok":true,"minutes":46,"transfers":3,"mode":"transit","modes":["BUS:M4","SUBWAY:A","SUBWAY:B","BUS:M86-SBS"]},"nyc-cloisters|nyc-met":{"ok":true,"minutes":47,"transfers":3,"mode":"transit","modes":["BUS:M4","SUBWAY:A","SUBWAY:B","BUS:M86-SBS"]},"nyc-brooklynbridge|nyc-brooklynmuseum":{"ok":true,"minutes":46,"transfers":2,"mode":"transit","modes":["BUS:B25","SUBWAY:C","SUBWAY:S"]},"nyc-brooklynmuseum|nyc-newmuseum":{"ok":true,"minutes":43,"transfers":2,"mode":"transit","modes":["BUS:B41","SUBWAY:D","BUS:M103"]},"nyc-brooklynmuseum|nyc-wsquare":{"ok":true,"minutes":48,"transfers":2,"mode":"transit","modes":["BUS:B69","SUBWAY:B","BUS:M8"]},"nyc-brooklynmuseum|nyc-ps1":{"ok":true,"minutes":40,"transfers":2,"mode":"transit","modes":["BUS:B48","SUBWAY:G","BUS:Q67"]},"nyc-brooklynmuseum|nyc-whitney":{"ok":true,"minutes":49,"transfers":2,"mode":"transit","modes":["BUS:B48","SUBWAY:C","BUS:M14D-SBS"]},"nyc-noguchi|nyc-ps1":{"ok":true,"minutes":23,"transfers":0,"mode":"transit","modes":["BUS:Q103"]},"nyc-grandcentral|nyc-ps1":{"ok":true,"minutes":22,"transfers":2,"mode":"transit","modes":["BUS:M42","SUBWAY:7","BUS:B32"]},"nyc-morgan|nyc-ps1":{"ok":true,"minutes":21,"transfers":3,"mode":"transit","modes":["BUS:M1","SUBWAY:6","SUBWAY:E","BUS:B32"]},"nyc-nypl|nyc-ps1":{"ok":true,"minutes":19,"transfers":1,"mode":"transit","modes":["SUBWAY:7","BUS:B32"]},"nyc-moma|nyc-ps1":{"ok":true,"minutes":19,"transfers":2,"mode":"transit","modes":["BUS:M4","SUBWAY:E","BUS:B32"]},"nyc-neue|nyc-noguchi":{"ok":true,"minutes":35,"transfers":3,"mode":"transit","modes":["BUS:M86-SBS","SUBWAY:5","SUBWAY:M","BUS:Q103"]},"nyc-guggenheim|nyc-noguchi":{"ok":true,"minutes":38,"transfers":3,"mode":"transit","modes":["BUS:M86-SBS","SUBWAY:5","SUBWAY:M","BUS:Q103"]},"nyc-frick|nyc-noguchi":{"ok":true,"minutes":35,"transfers":2,"mode":"transit","modes":["BUS:M1","SUBWAY:M","BUS:Q103"]},"nyc-met|nyc-noguchi":{"ok":true,"minutes":38,"transfers":3,"mode":"transit","modes":["BUS:M1","SUBWAY:6","SUBWAY:M","BUS:Q103"]},"nyc-newmuseum|nyc-wsquare":{"ok":true,"minutes":17,"transfers":0,"mode":"transit","modes":["BUS:M103"]},"nyc-brooklynbridge|nyc-newmuseum":{"ok":true,"minutes":37,"transfers":2,"mode":"transit","modes":["BUS:B25","SUBWAY:F","BUS:M21"]},"nyc-newmuseum|nyc-whitney":{"ok":true,"minutes":27,"transfers":3,"mode":"transit","modes":["BUS:M103","SUBWAY:B","SUBWAY:A","BUS:M14D-SBS"]},"nyc-chelseamarket|nyc-newmuseum":{"ok":true,"minutes":24,"transfers":2,"mode":"transit","modes":["BUS:M14D-SBS","SUBWAY:6X","BUS:M103"]},"nyc-littleisland|nyc-newmuseum":{"ok":true,"minutes":29,"transfers":2,"mode":"transit","modes":["BUS:M11","SUBWAY:L","BUS:M103"]},"nyc-cpark|nyc-elmuseo":{"ok":true,"minutes":24,"transfers":0,"mode":"transit","modes":["BUS:M2"]},"nyc-elmuseo|nyc-frick":{"ok":true,"minutes":26,"transfers":1,"mode":"transit","modes":["BUS:M98","BUS:M72"]},"nyc-highline|nyc-printedmatter":{"ok":true,"minutes":4,"transfers":0,"mode":"walk-estimate","modes":["WALK"]},"nyc-highline|nyc-shed":{"ok":true,"minutes":7,"transfers":0,"mode":"walk-estimate","modes":["WALK"]},"nyc-chelseamarket|nyc-highline":{"ok":true,"minutes":12,"transfers":0,"mode":"transit","modes":["BUS:M11"]},"nyc-highline|nyc-littleisland":{"ok":true,"minutes":22,"transfers":0,"mode":"transit","modes":["BUS:M11"]},"nyc-printedmatter|nyc-shed":{"ok":true,"minutes":7,"transfers":0,"mode":"walk-estimate","modes":["WALK"]},"nyc-chelseamarket|nyc-shed":{"ok":true,"minutes":17,"transfers":0,"mode":"transit","modes":["BUS:M11"]},"nyc-littleisland|nyc-shed":{"ok":true,"minutes":21,"transfers":0,"mode":"transit","modes":["BUS:M11"]},"nyc-shed|nyc-whitney":{"ok":true,"minutes":22,"transfers":0,"mode":"transit","modes":["BUS:M11"]},"nyc-chelseamarket|nyc-printedmatter":{"ok":true,"minutes":13,"transfers":0,"mode":"transit","modes":["BUS:M12"]},"nyc-littleisland|nyc-printedmatter":{"ok":true,"minutes":14,"transfers":0,"mode":"transit","modes":["BUS:M12"]},"nyc-brooklynbridge|nyc-wsquare":{"ok":true,"minutes":36,"transfers":2,"mode":"transit","modes":["BUS:B25","SUBWAY:F","BUS:M8"]},"nyc-brooklynbridge|nyc-whitney":{"ok":true,"minutes":39,"transfers":2,"mode":"transit","modes":["BUS:B25","SUBWAY:A","BUS:M11"]},"nyc-brooklynbridge|nyc-chelseamarket":{"ok":true,"minutes":37,"transfers":2,"mode":"transit","modes":["BUS:B25","SUBWAY:A","BUS:M14D-SBS"]},"nyc-brooklynbridge|nyc-littleisland":{"ok":true,"minutes":43,"transfers":2,"mode":"transit","modes":["BUS:B25","SUBWAY:A","BUS:M14D-SBS"]},"nyc-chelseamarket|nyc-wsquare":{"ok":true,"minutes":17,"transfers":1,"mode":"transit","modes":["BUS:M14D-SBS","BUS:M8"]},"nyc-littleisland|nyc-wsquare":{"ok":true,"minutes":24,"transfers":2,"mode":"transit","modes":["BUS:M14D-SBS","SUBWAY:C","BUS:M8"]},"nyc-highline|nyc-wsquare":{"ok":true,"minutes":26,"transfers":2,"mode":"transit","modes":["BUS:M11","SUBWAY:C","BUS:Downtown Local"]},"nyc-grandcentral|nyc-nypl":{"ok":true,"minutes":7,"transfers":0,"mode":"transit","modes":["BUS:M42"]},"nyc-grandcentral|nyc-shed":{"ok":true,"minutes":21,"transfers":2,"mode":"transit","modes":["BUS:M42","SUBWAY:7","BUS:M12"]},"nyc-grandcentral|nyc-highline":{"ok":true,"minutes":23,"transfers":2,"mode":"transit","modes":["BUS:M42","SUBWAY:7","BUS:M12"]},"nyc-nypl|nyc-shed":{"ok":true,"minutes":18,"transfers":1,"mode":"transit","modes":["SUBWAY:7","BUS:M12"]},"nyc-highline|nyc-nypl":{"ok":true,"minutes":20,"transfers":1,"mode":"transit","modes":["BUS:M12","SUBWAY:7"]},"nyc-chelseamarket|nyc-littleisland":{"ok":true,"minutes":10,"transfers":0,"mode":"transit","modes":["BUS:M14D-SBS"]},"nyc-flushingmain|nyc-queensmuseum":{"ok":true,"minutes":26,"transfers":1,"mode":"transit","modes":["BUS:Q20","REGIONAL_RAIL:303"]},"nyc-flushingmain|nyc-noguchi":{"ok":true,"minutes":52,"transfers":3,"mode":"transit","modes":["BUS:Q44-SBS","SUBWAY:7","SUBWAY:E","BUS:B62"]},"nyc-flushingmain|nyc-ps1":{"ok":true,"minutes":40,"transfers":3,"mode":"transit","modes":["BUS:Q44-SBS","SUBWAY:7","SUBWAY:E","BUS:Q101"]},"nyc-elmuseo|nyc-flushingmain":{"ok":true,"minutes":70,"transfers":4,"mode":"transit","modes":["BUS:M103","SUBWAY:6X","SUBWAY:F","BUS:Q64","BUS:Q20"]},"nyc-noguchi|nyc-queensmuseum":{"ok":true,"minutes":58,"transfers":1,"mode":"transit","modes":["BUS:Q18","REGIONAL_RAIL:300"]},"nyc-ps1|nyc-queensmuseum":{"ok":true,"minutes":47,"transfers":2,"mode":"transit","modes":["BUS:B62","SUBWAY:7","REGIONAL_RAIL:300"]},"nyc-elmuseo|nyc-queensmuseum":{"ok":true,"minutes":59,"transfers":2,"mode":"transit","modes":["BUS:M101","SUBWAY:6","REGIONAL_RAIL:400"]},"nyc-met|nyc-whitney":{"ok":true,"minutes":36,"transfers":2,"mode":"transit","modes":["BUS:M79-SBS","SUBWAY:C","BUS:M14A-SBS"]},"nyc-met|nyc-morgan":{"ok":true,"minutes":27,"transfers":2,"mode":"transit","modes":["BUS:M1","SUBWAY:6","BUS:M4"]},"nyc-brooklynmuseum|nyc-met":{"ok":true,"minutes":58,"transfers":2,"mode":"transit","modes":["BUS:B48","SUBWAY:5","BUS:M1"]},"nyc-met|nyc-ps1":{"ok":true,"minutes":31,"transfers":3,"mode":"transit","modes":["BUS:M86-SBS","SUBWAY:4","SUBWAY:E","BUS:B32"]},"nyc-met|nyc-newmuseum":{"ok":true,"minutes":36,"transfers":2,"mode":"transit","modes":["BUS:M86-SBS","SUBWAY:6","BUS:M103"]},"nyc-highline|nyc-met":{"ok":true,"minutes":37,"transfers":2,"mode":"transit","modes":["BUS:M23-SBS","SUBWAY:C","BUS:M86-SBS"]},"nyc-met|nyc-shed":{"ok":true,"minutes":36,"transfers":3,"mode":"transit","modes":["BUS:M79-SBS","SUBWAY:C","BUS:M42","BUS:M12"]},"nyc-met|nyc-printedmatter":{"ok":true,"minutes":35,"transfers":2,"mode":"transit","modes":["BUS:M79-SBS","SUBWAY:C","BUS:M23-SBS"]},"nyc-brooklynbridge|nyc-met":{"ok":true,"minutes":52,"transfers":3,"mode":"transit","modes":["BUS:B25","SUBWAY:C","SUBWAY:5","BUS:M86-SBS"]},"nyc-met|nyc-wsquare":{"ok":true,"minutes":33,"transfers":2,"mode":"transit","modes":["BUS:M86-SBS","SUBWAY:4","BUS:M3"]},"nyc-grandcentral|nyc-met":{"ok":true,"minutes":24,"transfers":2,"mode":"transit","modes":["BUS:M42","SUBWAY:5","BUS:M4"]},"nyc-met|nyc-nypl":{"ok":true,"minutes":25,"transfers":2,"mode":"transit","modes":["BUS:M86-SBS","SUBWAY:4","BUS:42nd St"]},"nyc-chelseamarket|nyc-met":{"ok":true,"minutes":33,"transfers":2,"mode":"transit","modes":["BUS:M14D-SBS","SUBWAY:C","BUS:M86-SBS"]},"nyc-littleisland|nyc-met":{"ok":true,"minutes":42,"transfers":3,"mode":"transit","modes":["BUS:M11","SUBWAY:L","SUBWAY:4","BUS:M86-SBS"]},"nyc-flushingmain|nyc-met":{"ok":true,"minutes":56,"transfers":4,"mode":"transit","modes":["BUS:Q44-SBS","SUBWAY:7","SUBWAY:F","SUBWAY:6","BUS:M79-SBS"]},"nyc-met|nyc-queensmuseum":{"ok":true,"minutes":59,"transfers":2,"mode":"transit","modes":["BUS:M1","SUBWAY:6","REGIONAL_RAIL:400"]},"nyc-flushingmeadows|nyc-queensmuseum":{"ok":true,"minutes":32,"transfers":1,"mode":"transit","modes":["SUBWAY:7","REGIONAL_RAIL:305"]},"nyc-flushingmain|nyc-flushingmeadows":{"ok":true,"minutes":22,"transfers":1,"mode":"transit","modes":["BUS:Q44-SBS","SUBWAY:7"]},"nyc-flushingmeadows|nyc-noguchi":{"ok":true,"minutes":46,"transfers":2,"mode":"transit","modes":["SUBWAY:7","SUBWAY:M","BUS:Q104"]},"nyc-flushingmeadows|nyc-ps1":{"ok":true,"minutes":34,"transfers":2,"mode":"transit","modes":["SUBWAY:7","SUBWAY:E","BUS:Q67"]},"nyc-elmuseo|nyc-flushingmeadows":{"ok":true,"minutes":59,"transfers":3,"mode":"transit","modes":["BUS:M106","SUBWAY:6","SUBWAY:E","SUBWAY:7"]},"nyc-flushingmeadows|nyc-met":{"ok":true,"minutes":52,"transfers":3,"mode":"transit","modes":["SUBWAY:7","SUBWAY:E","SUBWAY:5","BUS:M86-SBS"]}}},"answers":null,"anchor":{"placeId":"nyc-met","time":"10:30","durationMin":150,"labelZh":"大都会艺术博物馆（定时入场）","labelEn":"The Met (timed entry)"},"i18n":{"zh":{"p0Title":"P0 · 已预约（不可更改）","p0Desc":"锚点是你已经订好的定时入场：那天从它开始，其余安排绕开它。","lblConcertDay":"预约在第几天","concertDayBadge":"已预约日","restNote":"🎫 这一天以预约入场开始；之后的安排从它结束的时间往后排。","alertNoFan":"请至少选择一个「艺术与文化」地点。","legendFan":"艺术与文化","poolFanLabel":"P1 · 艺术与文化（候选）","poolFanSub":"纽约的美术馆、画廊与艺术空间；点卡片可以看来源，再标「必去 / 顺路」。","poolSightLabel":"P2 · 纽约观光（可选）","poolSightSub":"中央公园、布鲁克林大桥、中央车站、法拉盛一带等地标；时间够就顺手加上，行程不至于变成连着看展。","p1Title":"P1 · 艺术与文化地点","p1Desc":"从开放地图数据里策展出来的美术馆与艺术空间，每条都带地图来源；点卡片看简介和出处。","p2Title":"P2 · 纽约观光","p2Desc":"普通观光点用来调剂，别让旅行变成纯看展。","drawerFan":"艺术与文化","visitseoul":"OpenStreetMap 数据","noArtist":"不属于某个兴趣点，用于平衡行程。","planTitle":"你的纽约艺术之旅","planSub":"路线默认显示全部行程总览（深色连贯线）；可切换「按天分开」看每天不同颜色。紫色图钉是可选酒店，红点是艺术与文化地点、蓝点是普通观光。","planTagFandom":"艺术 + 旅行","planTagEvidence":"带来源链接","stayNearby":"每晚就近换（含预约日就近）","stayConcert":"预约地点周边优先","stayReasonNearby":"每晚就近换：按当天路线总通勤最短，优先多线地铁；预约日与前一晚会优先住锚点附近（强约束）。","note":"路线由确定性排程引擎生成：地理聚类分天 + 最近邻排序 + 2-opt 优化，同一区域尽量放在同一天。<b>「定时入场」是锚点</b>：那天从它开始排，其余安排绕开它。住宿评分 = 当天路线总通勤 + 地铁线路数 + 换酒店打车距离；<b>「多久到」来自 Transitous 的真实公共交通路线</b>；地点与开放时间来自 OpenStreetMap（候选数据，待人工核验）；酒店为真实名称与坐标，<b>不含价格</b>。","footer":"© 2026 InterestTrip · 「纽约 · 艺术与文化」的地点与酒店数据来自 <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noreferrer\">OpenStreetMap</a> contributors（ODbL）；站点间耗时来自 <a href=\"https://transitous.org/sources/\" target=\"_blank\" rel=\"noreferrer\">Transitous</a> 的真实公共交通路线；开放时间为候选数据，出行前请以官网为准。<br/>CORTIS × Seoul 线：P1 粉丝地点来自用户整理的真实资料；P2 观光点来自 VisitSeoul 官方 API；酒店为演示数据。","aiReply":"收到！我先按优先级处理：\n① P0 定时入场已锁定，那天从它开始排，其余安排绕开它\n② P1 收集纽约的艺术与文化地点（来自 OpenStreetMap，每条带来源）\n③ P2 补充普通观光点\n\n请先选择想去的地点：给地点标「必去」或「顺路」。","intentDefault":"我对艺术与文化感兴趣。想去纽约逛美术馆和画廊，也想顺路看看这座城市。","intentPlaceholder":"你想为什么去纽约？","hint":"直接说想法，例如：“我喜欢逛美术馆，想以艺术为主题安排几天纽约行程。”","catNote":"演示数据目前有 CORTIS × Seoul 与 纽约艺术与文化 两条垂直线；其他兴趣会走同一套流程。","stayReasonConcert":"预约优先：锚点当天优先住附近。","noEvidenceNote":"这一条来自公开地图数据，不带粉丝证据链。","heroBadgeTitle":"纽约 · 艺术与文化 · 第二条垂直线","heroBadgeText":"定时入场 + 美术馆与画廊 + 普通纽约观光，排进同一份可行行程","onsiteGo":"Please take me here","onsiteGoSub":"请带我去这里","phrasesTitle":"常用语（给对方看）"},"en":{"p0Title":"P0 · Booked (fixed)","p0Desc":"The anchor is a timed entry you've already booked: that day starts with it, and everything else works around it.","lblConcertDay":"Which day is the booking","concertDayBadge":"Booked","restNote":"🎫 This day starts with your timed entry; the rest of the day follows after it.","alertNoFan":"Pick at least one Art & Culture place.","legendFan":"Art & culture","poolFanLabel":"P1 · Art & culture (candidates)","poolFanSub":"New York's museums, galleries and art spaces. Open a card for its source, then mark it must-go or on-the-way.","poolSightLabel":"P2 · New York sightseeing (optional)","poolSightSub":"Central Park, Brooklyn Bridge, Grand Central, Flushing and other landmarks — add them when there's room, so the trip isn't back-to-back museums.","p1Title":"P1 · Art & culture places","p1Desc":"Museums and art spaces curated from open map data; every entry links back to its map source. Open a card for the summary and provenance.","p2Title":"P2 · New York sightseeing","p2Desc":"Ordinary sightseeing keeps the trip balanced, so it doesn't turn into a museum marathon.","drawerFan":"Art & culture","visitseoul":"OpenStreetMap data","noArtist":"Not tied to an interest; used to balance the day.","planTitle":"Your New York art trip","planSub":"The map shows the whole trip as one line by default; switch to “By day” for daily colours. Purple pins are optional hotels, red dots are art & culture places, blue dots are ordinary sightseeing.","planTagFandom":"Art + travel","planTagEvidence":"With source links","stayNearby":"Move nightly (closest to each day, incl. the booking)","stayConcert":"Prioritise hotels near the booking","stayReasonNearby":"Move nightly: shortest total travel for that day's route, preferring multi-line stations; the booking day and the night before stay near the anchor (hard constraint).","note":"The route comes from a deterministic scheduling engine: geographic clustering by day + nearest-neighbour ordering + 2-opt optimisation, keeping each area together. <b>The timed entry is the anchor</b>: that day starts with it, and everything else works around it. Lodging score = that day's total travel + number of subway lines + taxi distance when changing hotels; <b>travel times come from real public-transit routing via Transitous</b>; places and opening hours come from OpenStreetMap (candidate data, pending manual verification); hotels use real names and coordinates, <b>no prices</b>.","footer":"© 2026 InterestTrip · “New York · Art & Culture” places and hotels come from <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noreferrer\">OpenStreetMap</a> contributors (ODbL); travel times come from real public-transit routing via <a href=\"https://transitous.org/sources/\" target=\"_blank\" rel=\"noreferrer\">Transitous</a>; opening hours are candidate data — check the official site before you go.<br/>CORTIS × Seoul vertical: P1 fan places come from collected public sources; P2 sightseeing from the official VisitSeoul API; hotels are sample data.","aiReply":"Got it. Here's how I'll handle it:\n① P0 — your timed entry is locked; that day starts with it\n② P1 — collect New York's art & culture places (from OpenStreetMap, each with its source)\n③ P2 — add ordinary sightseeing\n\nFirst, pick the places you want: mark them “must-go” or “nice-to-have”.","intentDefault":"I'm into art and culture. I want to see New York's museums and galleries, and still see a bit of the city.","intentPlaceholder":"Why are you going to New York?","hint":"Say it in your own words — e.g. “I love museums and want a few days in New York built around art.”","catNote":"The demo covers two verticals: CORTIS × Seoul and New York · Art & Culture. Other interests run the same flow.","stayReasonConcert":"Booking-first: on the anchor day, stay near the venue.","noEvidenceNote":"This one comes from open map data and has no fan evidence chain.","heroBadgeTitle":"New York · Art & Culture · second vertical","heroBadgeText":"A timed entry + museums and galleries + ordinary NYC sightseeing, in one feasible itinerary","onsiteGo":"Please take me here","onsiteGoSub":"请带我去这里","phrasesTitle":"Essential phrases (show this screen)"}},"onsite":{"nameField":"en","phrases":[{"big":"Please take me to this address.","zh":"请带我去这个地址","en":"Taxi / rideshare driver"},{"big":"Could you stop here, please?","zh":"请在这里停车","en":"Taxi / driver"},{"big":"How much will it cost?","zh":"大概多少钱？","en":"Taxi / driver"},{"big":"One ticket, please.","zh":"一张票，谢谢","en":"Museum or venue ticket desk"},{"big":"What time do you close?","zh":"你们几点关门？","en":"Museum / shop"},{"big":"Do you have a table for two?","zh":"有两人桌吗？","en":"Restaurant"},{"big":"Can I pay by card?","zh":"可以刷卡吗？","en":"Shops / restaurants"},{"big":"Where is the nearest subway station?","zh":"最近的地铁站在哪里？","en":"Street / hotel desk"},{"big":"Excuse me, could you help me?","zh":"打扰一下，可以帮我一下吗？","en":"Anywhere"},{"big":"Sorry, I don't speak much English.","zh":"抱歉，我的英语不太好","en":"Anywhere"},{"big":"Please write it down for me.","zh":"请帮我写下来","en":"Anywhere"},{"big":"Thank you very much.","zh":"非常感谢","en":"Anywhere"}]}};
+// <<< VERTICAL_NYC
+function currentVertical(){return VERTICALS[state.vertical]||VERTICALS.cortis;}
+function verticalIds(){return Object.keys(VERTICALS);}
+function vlabel(v){const x=v||currentVertical();return (x.label&&(x.label[LANG]||x.label.zh))||x.id;}
+function setVertical(id){
+  const v=VERTICALS[id]||VERTICALS.cortis;
+  state.vertical=v.id;
+  PLACES=v.places;STAYS=v.stays;
+  EN_PLACES=v.enPlaces||{};EN_DETAILS=v.enDetails||{};EN_STAYS=v.enStays||{};
+  PLACE_IMAGES=v.images||{};
+  if(typeof window!=="undefined"){window.TRANSIT_MATRIX=v.transit||null;window.PLACE_ANSWERS=v.answers||null;}
+  state.fan=new Set();state.must=new Set();state.sight=new Set();
+  state.hotel={};state.lastPlan=null;state.onsite=false;state.dayFilter=null;
+  resetFlow();
+  if(typeof renderPools==="function"){try{renderPools();}catch(_){}}
+  if(typeof applyStatic==="function"){try{applyStatic();}catch(_){}}
+  const planEl=document.getElementById("plan");if(planEl)planEl.style.display="none";
+  if(typeof updateConstraintSummary==="function"){try{updateConstraintSummary();}catch(_){}}
+}
+/** 换垂直线 = 重新开一次对话：清空上一次的气泡、解锁发送按钮、收起面板与地图图层 */
+function resetFlow(){
+  try{if(Array.isArray(bubbleLog))bubbleLog.length=0;if(typeof renderBubbles==="function")renderBubbles();}catch(_){}
+  const sb=document.getElementById("send-btn");if(sb)sb.disabled=false;
+  state.flowStarted=false;
+  ["reasoning","pools","questions"].forEach(function(k){const el=document.getElementById(k);if(el)el.style.display="none";});
+  const pc=document.getElementById("place-card");if(pc)pc.classList.remove("show");
+  const pd=document.getElementById("plan-days");if(pd)pd.innerHTML="";
+  const dt=document.getElementById("day-tabs");if(dt)dt.innerHTML="";
+  const cs=document.getElementById("constraint-summary");if(cs)cs.textContent="";
+  const ob=document.getElementById("plan-onsite");if(ob){ob.classList.remove("on");ob.textContent=t("onsiteBtn");}
+  try{if(layerGroup)layerGroup.clearLayers();}catch(_){}
+  if(typeof closeDrawer==="function"){try{closeDrawer();}catch(_){}}
+}
+/** 首页右上角的 Hero 图/徽标跟着垂直线走；没有授权图的城市用渐变占位 */
+function syncHero(){
+  const v=currentVertical(),box=document.querySelector(".hero-media"),img=document.getElementById("hero-img"),art=document.getElementById("hero-art");
+  if(img){
+    if(v.heroImg){img.style.display="";img.setAttribute("src",v.heroImg);}
+  }
+  if(box)box.classList.toggle("placeholder",!v.heroImg);
+  if(art&&v.heroEmoji)art.textContent=v.heroEmoji;
+}
+
 const TYPE_EMOJI={venue:"🎤",cafe:"☕",restaurant:"🍴",shop:"🛍",company:"🏢",ad_spot:"✨",filming_location:"🎬",photo_spot:"📸",sightseeing:"🏛"};
-function t(k,...a){const s=(I18N[LANG]&&I18N[LANG][k]!==undefined)?I18N[LANG][k]:I18N.zh[k];return typeof s==="function"?s(...a):(s!==undefined?s:k);}
+function t(k,...a){
+  const v=VERTICALS[state.vertical];
+  const ov=v&&v.i18n?(v.i18n[LANG]||v.i18n.zh):null;
+  const s=(ov&&ov[k]!==undefined)?ov[k]:(I18N[LANG]&&I18N[LANG][k]!==undefined)?I18N[LANG][k]:I18N.zh[k];
+  return typeof s==="function"?s(...a):(s!==undefined?s:k);
+}
+function vanchor(){return currentVertical().anchor||null;}
 function pname(p){return LANG==="en"?(EN_PLACES[p.id]||p.name):p.name;}
 function dname(d){return LANG==="en"?(EN_DISTRICTS[d]||d):d;}
 function stayField(s,field){if(LANG!=="en")return field==="lines"?(s.lines||[]):s[field];const e=EN_STAYS[s.id];return e?(field==="lines"?(e.lines||[]):e[field]):(field==="lines"?(s.lines||[]):s[field]);}
@@ -1391,6 +1487,15 @@ $("days-select").addEventListener("change",syncConcertOptions);
 syncConcertOptions();
 
 function esc(s){return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+/** i18n 字符串里的 {占位符} 替换（函数式模板没法写进 JSON，所以改成字符串 + 占位符） */
+function fill(s,map){return String(s==null?"":s).replace(/\{(\w+)\}/g,(m,k)=>map[k]===undefined?m:map[k]);}
+/** 锚点在界面上的名字（"演唱会"/"大都会艺术博物馆（定时入场）"），跟着语言走 */
+function anchorLabel(){
+  const AC=vanchor()||{},p=AC.placeId?PLACES.find(x=>x.id===AC.placeId):null;
+  const name=p?pname(p):"";
+  return LANG==="en"?(AC.labelEn||name||"Booked entry"):(AC.labelZh||name||"已预约");
+}
+function anchorTime(){return (vanchor()||{}).time||"19:00";}
 function confLabel(c){return (!c||c==="plain")?t("plainSight"):t("conf"+String(c).charAt(0).toUpperCase()+String(c).slice(1));}
 function confBadge(p){return p.conf?`<span class="badge ${(CONF[p.conf]||{cls:"plain"}).cls}">${confLabel(p.conf)}</span>`:`<span class="badge plain">${t("plainSight")}</span>`;}
 function typeName(p){const m={venue:"typeVenue",cafe:"typeCafe",restaurant:"typeRestaurant",shop:"typeShop",company:"typeCompany",ad_spot:"typeAdSpot",filming_location:"typeFilming",photo_spot:"typePhoto",sightseeing:"typeSight"};return t(m[p.type]||"typeDefault");}
@@ -1407,6 +1512,9 @@ function startFlow(){
     renderPools();
     showQuestions(false);
     $("pools").scrollIntoView({behavior:"smooth",block:"start"});
+    // 这一轮已经开跑；按钮解锁，用户可以改个说法再来一次（自动触发则不再重复）
+    state.flowStarted=true;
+    $("send-btn").disabled=false;
   },500);
 }
 
@@ -1487,7 +1595,12 @@ function buildPlan(){
   const fanSelected=PLACES.filter(p=>p.pool==="fan"&&state.fan.has(p.id)&&(!state.hideLow||p.conf!=="low"));
   const sightSelected=PLACES.filter(p=>p.pool==="sight"&&state.sight.has(p.id));
   if(!fanSelected.length){alert(t("alertNoFan"));return;}
-  const concert=fanSelected.find(p=>p.type==="venue")||fanSelected[0];
+  // 锚点＝垂直线配置里「已预约、改不了」的那个时间点（CORTIS 是演唱会，纽约是定时入场）
+  const AC=vanchor()||{};
+  const anchorPlace=AC.placeId?PLACES.find(p=>p.id===AC.placeId):null;
+  const concert=anchorPlace||fanSelected.find(p=>p.type==="venue")||fanSelected[0];
+  const anchorTime=AC.time||"19:00";
+  const anchorPos=AC.position||"last";
   const otherFan=fanSelected.filter(p=>p.id!==concert.id);
   const otherSight=sightSelected.slice();
   const mustFan=otherFan.filter(p=>state.must.has(p.id));
@@ -1511,11 +1624,19 @@ function buildPlan(){
     const isNightBefore=d+1===concertDay;
     const hotel=(stayMode==="same"&&hotels[0])?hotels[0]:chooseHotel(places,{prevHotel,isConcertDay,isNightBefore,concertPoint:concert,mode:stayMode});
     hotels[d]=hotel;
-    const ordered=RouteAlgo.orderRoute(places,hotel,d===concertDay?concert:null);
-    const scheduled=RouteAlgo.scheduleDay(ordered,{startPoint:hotel,startMinutes:d===0?firstStart:9*60+30,pace:paceValue,isConcertDay:d===concertDay,concertPoint:concert});
+    const isAnchorDay=d===concertDay;
+    let ordered;
+    if(isAnchorDay&&anchorPos==="first"){
+      // 定时入场的锚点：当天从它开始，其余点以它为起点就近排序
+      const rest=places.filter(p=>p.id!==concert.id);
+      ordered=[concert,...RouteAlgo.orderRoute(rest,concert,null)];
+    }else{
+      ordered=RouteAlgo.orderRoute(places,hotel,isAnchorDay?concert:null);
+    }
+    const scheduled=RouteAlgo.scheduleDay(ordered,{startPoint:hotel,startMinutes:d===0?firstStart:9*60+30,pace:paceValue,isConcertDay:isAnchorDay,concertPoint:concert,anchor:isAnchorDay?{placeId:concert.id,time:anchorTime,position:anchorPos}:null});
     buckets[d]=scheduled.items;
     scheduled.overflow.forEach(p=>{overflow.push(p);});
-    if(d===concertDay&&!buckets[d].some(x=>x.locked))buckets[d].push({place:concert,time:"19:00",locked:true});
+    if(d===concertDay&&!buckets[d].some(x=>x.locked))buckets[d].push({place:concert,time:anchorTime,locked:true});
   });
   buckets.forEach(b=>b.sort((a,c)=>(a.time||"").localeCompare(c.time||"")));
   state.hotel={};hotels.forEach((h,d)=>{state.hotel[d]=h.id;});
@@ -1532,7 +1653,7 @@ function updateConstraintSummary(){
   const cap1=s=>String(s).charAt(0).toUpperCase()+String(s).slice(1);
   const pace=$("pace-select").value==="busy"?t("paceShortBusy"):$("pace-select").value==="relaxed"?t("paceShortRelaxed"):t("paceShortNormal");
   const budgetKey={budget:"budgetLow",comfort:"budgetMid",premium:"budgetHigh"}[$("budget-select").value]||"budgetMid";
-  $("constraint-summary").textContent=t("constraint",{concertDay:p.concertDay+1,days:p.days,pace,budget:t(budgetKey),arrival:t("arr"+cap1($("arrival-select").value)),departure:t("dep"+cap1($("departure-select").value))});
+  $("constraint-summary").textContent=fill(t("constraint"),{anchor:anchorLabel(),time:anchorTime(),day:p.concertDay+1,days:p.days,pace,budget:t(budgetKey),arrival:t("arr"+cap1($("arrival-select").value)),departure:t("dep"+cap1($("departure-select").value))});
 }
 
 function hotelScore(stay,points){return points.reduce((s,x)=>s+distKm(stay,x),0);}
@@ -1675,7 +1796,7 @@ const ONSITE_PHRASES=[
   {kr:"도와주세요",rom:"dowajuseyo",zh:"请帮帮我",en:"Help me, please"}
 ];
 function onsiteCard(p){
-  const kr=String(p.nameLocal||"").trim();
+  const kr=onsiteBig(p);
   const en=EN_PLACES[p.id];
   const alt=[p.name,en&&en!==p.name?en:""].filter(Boolean).join(" · ");
   const addr=LANG==="en"?(EN_DETAILS[p.id]?.address||p.address):p.address;
@@ -1689,9 +1810,23 @@ function onsiteCard(p){
     +`</div>`;
 }
 function onsitePhrases(){
+  const list=onsiteConf().phrases||[];
   return `<div class="phrase-block"><h3>${esc(t("phrasesTitle"))}</h3><div class="phrase-grid">`
-    +ONSITE_PHRASES.map(x=>`<div class="phrase"><b>${esc(x.kr)}</b><span class="rom">${esc(x.rom)}</span><i>${esc(LANG==="en"?x.en:x.zh)}</i></div>`).join("")
+    +list.map(x=>{
+      const big=x.big||x.kr||"",rom=x.rom||"",note=LANG==="en"?x.en:x.zh;
+      return `<div class="phrase"><b>${esc(big)}</b>${rom?`<span class="rom">${esc(rom)}</span>`:""}${note?`<i>${esc(note)}</i>`:""}</div>`;
+    }).join("")
     +`</div></div>`;
+}
+/** 现场模式要"给当地人看"：大字用当地语言写。默认（CORTIS × Seoul）用地点数据里的韩文名 */
+function onsiteConf(){
+  const v=currentVertical();
+  return (v&&v.onsite)||{nameField:"local",phrases:ONSITE_PHRASES};
+}
+function onsiteBig(p){
+  const f=(onsiteConf().nameField)||"local";
+  if(f==="en")return String(EN_PLACES[p.id]||p.nameLocal||p.name||"").trim();
+  return String(p.nameLocal||"").trim();
 }
 function renderPlan(resetHotels){
   const {days,buckets,concertDay,overflow}=state.lastPlan;
@@ -1726,7 +1861,7 @@ function renderPlan(resetHotels){
       <select data-hotel="${d}">${hotelOptions.map(s=>`<option value="${s.id}" ${s.id===chosen.id?"selected":""}>${esc(stayField(s,"name"))}（${dname(stayField(s,"district")||s.district)}${stayField(s,"station")?" · "+stayField(s,"station"):""}）</option>`).join("")}</select></div><div class="items">`;
     items.forEach((x,i)=>{
       const p=x.place;if(!p)return;
-      const tag=p.pool==="fan"?`<span class="badge ${CONF[p.conf].cls}">${t("legendFan")}·${confLabel(p.conf)}</span>`:`<span class="badge plain">${t("legendSight")}</span>`;
+      const tag=p.pool==="fan"?`<span class="badge ${(CONF[p.conf]||{cls:"plain"}).cls}">${t("legendFan")}·${confLabel(p.conf)}</span>`:`<span class="badge plain">${t("legendSight")}</span>`;
       const lowRisk=p.pool==="fan"&&p.conf==="low"?`<div class="risk-note">${t("riskLow")}</div>`:"";
       const img=PLACE_IMAGES[p.id];
       const thumb=`<span class="thumb">${img?`<img src="${img}" alt="" loading="lazy" onerror="this.style.display='none';this.parentNode.textContent='${TYPE_EMOJI[p.type]||"📍"}'">`:(TYPE_EMOJI[p.type]||"📍")}</span>`;
@@ -1836,6 +1971,8 @@ function applyStatic(){
   syncConcertOptions();
   $("filter-low").textContent=t(state.hideLow?"hideLowOn":"hideLowOff");
   const lg=$("lang-toggle");if(lg)lg.textContent=LANG==="en"?"中文":"EN";
+  const pv=document.getElementById("plan-tag-vertical");if(pv)pv.textContent=vlabel();
+  syncHero();
 }
 function setLang(l){
   LANG=l;try{localStorage.setItem("lang",l);}catch(e){}
@@ -1899,16 +2036,7 @@ document.querySelectorAll("#cat-row .cat").forEach(btn=>{
     $("intent-input").value=t(key);
     $("intent-input").focus();
     $("create").scrollIntoView({behavior:"smooth",block:"start"});
-    if(btn.dataset.cat==="fandom"&&!$("send-btn").disabled){startFlow();}
-  });
-});
-// Featured trips 的第一张卡：直接跑通流程
-document.querySelectorAll(".trip-card").forEach(card=>{
-  card.addEventListener("click",()=>{
-    if(card.dataset.trip!=="cortis")return;
-    $("intent-input").value=t("chipTextFandom");
-    $("create").scrollIntoView({behavior:"smooth",block:"start"});
-    if(!$("send-btn").disabled)startFlow();
+    if(btn.dataset.cat==="fandom"&&!state.flowStarted){startFlow();}
   });
 });
 // 行程工具条
@@ -1916,6 +2044,7 @@ $("plan-edit").addEventListener("click",()=>{$("create").scrollIntoView({behavio
 $("plan-save").addEventListener("click",()=>{
   try{
     localStorage.setItem("itp:last",JSON.stringify({
+      vertical:state.vertical,
       fan:[...state.fan],must:[...state.must],sight:[...state.sight],
       days:$("days-select").value,concertDay:$("concert-select").value,
       pace:$("pace-select").value,budget:$("budget-select").value,
@@ -1923,6 +2052,18 @@ $("plan-save").addEventListener("click",()=>{
     }));
     toast(t("toastSaved"));
   }catch(e){toast("localStorage unavailable");}
+});
+/* 首页 Featured Trips：点卡片 = 切到那条垂直线，并直接从这一轮对话开始
+   （卡片上的 data-trip 必须能在 VERTICALS 里找到；没有数据的卡片只提示一下） */
+document.querySelectorAll(".trip-card[data-trip]").forEach(function(el){
+  var id=el.dataset.trip;
+  el.addEventListener("click",function(){
+    if(!VERTICALS[id]){toast(t("verticalSoon"));return;}
+    setVertical(id);
+    var ta=document.getElementById("intent-input");if(ta)ta.value=t("intentDefault");
+    var sec=document.getElementById("create");if(sec)sec.scrollIntoView({behavior:"smooth",block:"start"});
+    startFlow();
+  });
 });
 $("plan-onsite").addEventListener("click",()=>{state.onsite=!state.onsite;$("plan-onsite").classList.toggle("on",state.onsite);$("plan-onsite").textContent=state.onsite?t("onsiteExit"):t("onsiteBtn");renderPlan(false);});
 $("plan-share").addEventListener("click",async()=>{
@@ -1934,6 +2075,7 @@ function offerRestore(){
   let saved=null;
   try{const raw=localStorage.getItem("itp:last");if(raw)saved=JSON.parse(raw);}catch(e){}
   if(!saved)return;
+  if(saved.vertical&&saved.vertical!==state.vertical)return; // 换过垂直线就别恢复另一座城市的选择
   const n=(saved.fan||[]).length+(saved.sight||[]).length;
   if(!n)return;
   const box=$("restore-bar");
@@ -1950,9 +2092,9 @@ function offerRestore(){
       set("days-select",saved.days);syncConcertOptions();set("concert-select",saved.concertDay);
       set("pace-select",saved.pace);set("budget-select",saved.budget);
       set("arrival-select",saved.arrival);set("departure-select",saved.departure);set("stay-mode",saved.stay);
-      $("intent-input").value=t("chipTextFandom");
+      $("intent-input").value=t("intentDefault");
       $("create").scrollIntoView({behavior:"smooth",block:"start"});
-      if(!$("send-btn").disabled)startFlow();
+      if(!state.flowStarted)startFlow();
       box.style.display="none";
     }catch(e){}
   });
